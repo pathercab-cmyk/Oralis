@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LingoMind - Tutor & Exámenes</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f2f5; display: flex; flex-direction: column; height: 100vh; }
+        header { background: #1e293b; color: white; padding: 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.5rem; margin-bottom: 8px; }
+        .controls { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; align-items: center; }
+        select, button.btn-top { padding: 6px 12px; border-radius: 6px; border: 1px solid #475569; background: #334155; color: white; font-size: 0.85rem; outline: none; cursor: pointer; }
+        button.btn-top:hover { background: #475569; }
+        
+        .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
+        .chat { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.4; }
+        .bot { background: white; align-self: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .user { background: #2563eb; color: white; align-self: flex-end; }
+        
+        .input-box { padding: 15px; background: white; display: flex; gap: 10px; border-top: 1px solid #e2e8f0; align-items: center; }
+        input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 0.95rem; }
+        button.btn-send { padding: 10px 20px; border-radius: 20px; border: none; background: #2563eb; color: white; font-weight: bold; cursor: pointer; }
+        .btn-audio { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; margin-top: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-mic { background: #f1f5f9; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2rem; }
+        .feedback { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 8px 12px; margin-top: 8px; font-size: 0.85rem; color: #78350f; border-radius: 4px; }
+
+        /* Panel lateral de Biblioteca */
+        .sidebar { width: 320px; background: #ffffff; border-left: 1px solid #e2e8f0; display: none; flex-direction: column; padding: 15px; overflow-y: auto; box-shadow: -2px 0 5px rgba(0,0,0,0.05); }
+        .sidebar.active { display: flex; }
+        .sidebar h2 { font-size: 1.1rem; color: #1e293b; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .history-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 0.85rem; }
+        .history-item .date { font-size: 0.75rem; color: #64748b; margin-bottom: 4px; }
+        .history-item .user-txt { font-weight: bold; color: #1e293b; }
+        .btn-clear { background: #ef4444; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; margin-top: auto; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🗣️ LingoMind</h1>
+        <div class="controls">
+            <select id="idiomaSelect">
+                <option value="en">🇬🇧 Inglés</option>
+                <option value="de">🇩🇪 Alemán</option>
+            </select>
+            <select id="nivelSelect">
+                <option value="A1">A1 - Principiante</option>
+                <option value="A2">A2 - Elemental</option>
+                <option value="B1" selected>B1 - Intermedio</option>
+                <option value="B2">B2 - Intermedio Alto</option>
+                <option value="C1">C1 - Avanzado</option>
+            </select>
+            <select id="modoSelect">
+                <option value="conversacion">💬 Conversación Libre</option>
+                <option value="examen">🎓 Preparación Examen Oficial</option>
+            </select>
+            <button class="btn-top" onclick="toggleBiblioteca()">📚 Biblioteca</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="chat" id="chat">
+            <div class="msg bot">
+                Hello! I am LingoMind. Choose your preferred practice mode and let's start!
+                <br>
+                <button class="btn-audio" onclick="hablar('Hello! I am LingoMind. Choose your preferred practice mode and let us start!')">🔊</button>
+            </div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <h2>📚 Tu Progreso <button onclick="toggleBiblioteca()" style="background:none; border:none; cursor:pointer;">❌</button></h2>
+            <div id="historyList"></div>
+            <button class="btn-clear" onclick="borrarHistorial()">Borrar Historial</button>
+        </div>
+    </div>
+
+    <div class="input-box">
+        <button class="btn-mic" id="micBtn" onclick="usarMic()">🎙️</button>
+        <input type="text" id="txtMsg" placeholder="Escribe o habla en tu idioma objetivo..." onkeypress="if(event.key==='Enter') enviar()">
+        <button class="btn-send" onclick="enviar()">Enviar</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', cargarHistorial);
+
+        function hablar(texto) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(texto);
+                u.lang = document.getElementById('idiomaSelect').value === 'en' ? 'en-US' : 'de-DE';
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        function usarMic() {
+            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                alert('Tu navegador no soporta micrófono. Usa Chrome o Edge.');
+                return;
+            }
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const rec = new SR();
+            rec.lang = document.getElementById('idiomaSelect').value === 'en' ? 'en-US' : 'de-DE';
+            rec.onresult = (e) => { document.getElementById('txtMsg').value = e.results[0][0].transcript; };
+            rec.start();
+        }
+
+        function toggleBiblioteca() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function guardarEnHistorial(mensajeUser, correccion, explicacion) {
+            const historial = JSON.parse(localStorage.getItem('lingomind_historial') || '[]');
+            const nuevoRegistro = {
+                fecha: new Date().toLocaleString(),
+                idioma: document.getElementById('idiomaSelect').value.toUpperCase(),
+                modo: document.getElementById('modoSelect').value,
+                usuario: mensajeUser,
+                correccion: correccion,
+                explicacion: explicacion
+            };
+            historial.unshift(nuevoRegistro);
+            localStorage.setItem('lingomind_historial', JSON.stringify(historial));
+            cargarHistorial();
+        }
+
+        function cargarHistorial() {
+            const list = document.getElementById('historyList');
+            const historial = JSON.parse(localStorage.getItem('lingomind_historial') || '[]');
+            if (historial.length === 0) {
+                list.innerHTML = '<p style="font-size:0.85rem; color:#64748b; margin-top:10px;">Aún no tienes registros guardados.</p>';
+                return;
+            }
+            list.innerHTML = historial.map(item => `
+                <div class="history-item">
+                    <div class="date">${item.fecha} | [${item.idioma}] (${item.modo})</div>
+                    <div class="user-txt">👤: "${item.usuario}"</div>
+                    ${item.correccion ? `<div style="color:#d97706; margin-top:4px;">💡 ${item.correccion}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function borrarHistorial() {
+            if (confirm('¿Quieres borrar todo tu historial de práctica?')) {
+                localStorage.removeItem('lingomind_historial');
+                cargarHistorial();
+            }
+        }
+
+        async function enviar() {
+            const txt = document.getElementById('txtMsg');
+            const mensaje = txt.value.trim();
+            if (!mensaje) return;
+
+            const chat = document.getElementById('chat');
+            chat.innerHTML += `<div class="msg user">${mensaje}</div>`;
+            txt.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        mensaje,
+                        idioma: document.getElementById('idiomaSelect').value,
+                        nivel: document.getElementById('nivelSelect').value,
+                        modo: document.getElementById('modoSelect').value
+                    })
+                });
+                const data = await res.json();
+                
+                let htmlBot = `<div class="msg bot">${data.respuesta}<br><button class="btn-audio" onclick="hablar('${data.respuesta.replace(/'/g, "\\'")}')">🔊</button>`;
+                if (data.correccion || data.explicacion) {
+                    htmlBot += `<div class="feedback"><strong>Feedback & Evaluación:</strong><br>${data.correccion}<br><br>${data.explicacion}</div>`;
+                }
+                htmlBot += `</div>`;
+
+                chat.innerHTML += htmlBot;
+                chat.scrollTop = chat.scrollHeight;
+                hablar(data.respuesta);
+
+                // Guardar en la biblioteca
+                guardarEnHistorial(mensaje, data.correccion, data.explicacion);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
