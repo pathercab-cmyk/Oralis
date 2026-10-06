@@ -241,6 +241,7 @@ def feedback():
 
 
 @app.route("/admin/feedback", methods=["GET"])
+@app.route("/admin/feedbacks", methods=["GET"])
 def admin_feedback():
     feedbacks = []
     if os.path.exists(FEEDBACK_FILE):
