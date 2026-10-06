@@ -4,463 +4,636 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oralis - Tutor Inteligente de Idiomas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tipografía Plus Jakarta Sans y FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
-            --bg-main: #F5F7F5;
+            --bg-main: #F8F9FA;
+            --primary-color: #2E6B52; /* Verde salvia profundo */
+            --accent-color: #E07A5F;  /* Terracota / Coral suave */
             --card-bg: #FFFFFF;
-            --accent-green: #2E6B52;
-            --accent-green-hover: #23533F;
-            --accent-coral: #E07A5F;
-            --accent-coral-hover: #D0694E;
-            --text-dark: #2C3E35;
             --border-color: #E2E8E0;
-            --chat-user-bg: #EAF2ED;
-            --chat-ai-bg: #FFFFFF;
+            --text-dark: #2B2D42;
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-main);
             color: var(--text-dark);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            min-height: 100vh;
+            line-height: 1.6;
         }
 
-        .navbar-custom {
-            background-color: var(--card-bg);
+        /* BARRA DE NAVEGACIÓN SUPERIOR */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #FFFFFF;
+            padding: 12px 28px;
             border-bottom: 1px solid var(--border-color);
-            padding: 0.8rem 1.5rem;
         }
 
-        .brand-logo {
-            font-weight: 700;
-            color: var(--accent-green);
+        .logo {
             font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 10px;
         }
 
-        .card-custom {
-            background-color: var(--card-bg);
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            color: #6C757D;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            background-color: #EBF2EE;
+            color: var(--primary-color);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .btn-admin {
+            background: #E8F5E9;
+            color: #2E7D32;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid #A5D6A7;
+        }
+
+        .btn-logout {
+            color: #DC3545;
+            font-size: 1.1rem;
+            text-decoration: none;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        .main-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-content.hidden {
+            display: none !important;
+        }
+
+        /* LAYOUT TUTOR (COLUMNA IZQUIERDA + CHAT) */
+        .tutor-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+
+        .sidebar-config {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.02);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .sidebar-config h3 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid #EBF2EE;
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.93rem;
+            font-family: inherit;
+            background: #FAFAFA;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: #FFF;
+        }
+
+        .modo-extra {
+            background: #F4F7F5;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+            margin-top: 5px;
+        }
+
+        /* CHAT WRAPPER Y BORDES */
+        .chat-wrapper {
+            display: flex;
+            flex-direction: column;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
         }
 
         .chat-box {
-            height: 480px;
+            flex: 1;
+            padding: 20px;
             overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 1rem;
-            background-color: #FAFCFA;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 16px;
         }
 
-        .msg-bubble {
-            max-width: 80%;
-            padding: 0.85rem 1.1rem;
-            border-radius: 16px;
-            font-size: 0.95rem;
+        .message {
+            max-width: 82%;
+            padding: 16px;
+            border-radius: 12px;
             line-height: 1.5;
-            white-space: pre-wrap;
         }
 
-        .msg-user {
+        .user-message {
             align-self: flex-end;
-            background-color: var(--chat-user-bg);
-            color: var(--text-dark);
-            border-bottom-right-radius: 4px;
+            background: var(--primary-color);
+            color: #FFFFFF;
         }
 
-        .msg-ai {
+        .bot-message {
             align-self: flex-start;
-            background-color: var(--chat-ai-bg);
+            background: #FFFFFF;
             border: 1px solid var(--border-color);
-            color: var(--text-dark);
-            border-bottom-left-radius: 4px;
+            box-shadow: var(--shadow-soft);
         }
 
-        .btn-green {
-            background-color: var(--accent-green);
-            color: #FFFFFF;
+        /* BLOQUES ESTRUCTURADOS DE RESPUESTA */
+        .block-translation {
+            margin-top: 12px;
+            background: #FFFBF0;
+            border-left: 4px solid #E0A96D;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .block-correction {
+            margin-top: 12px;
+            background: #EBF3EF;
+            border-left: 4px solid var(--primary-color);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* INPUT INFERIOR Y BOTONES */
+        .chat-input-container {
+            display: flex;
+            padding: 15px;
+            gap: 10px;
+            border-top: 1px solid var(--border-color);
+            background: #FFFFFF;
+            align-items: center;
+        }
+
+        .chat-input-container textarea {
+            resize: none;
+            background: #FFF;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #FFF;
             border: none;
-            border-radius: 10px;
+            padding: 10px 20px;
+            border-radius: 8px;
             font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .btn-green:hover {
-            background-color: var(--accent-green-hover);
-            color: #FFFFFF;
-        }
-
-        .btn-coral {
-            background-color: var(--accent-coral);
-            color: #FFFFFF;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .btn-coral:hover {
-            background-color: var(--accent-coral-hover);
-            color: #FFFFFF;
-        }
-
-        .nav-tabs .nav-link {
-            color: #6C7A72;
-            font-weight: 600;
-            border: none;
-            border-bottom: 2px solid transparent;
-        }
-
-        .nav-tabs .nav-link.active {
-            color: var(--accent-green);
-            border-bottom: 2px solid var(--accent-green);
-            background: transparent;
-        }
-
-        .resource-badge {
             cursor: pointer;
-            transition: all 0.15s ease;
         }
 
-        .resource-badge:hover {
-            transform: translateY(-2px);
-            background-color: var(--chat-user-bg) !important;
+        .btn-accent {
+            background: var(--accent-color);
+            color: #FFF;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-icon {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* GRILLAS Y TARJETAS PARA PESTAÑAS */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .card-item {
+            background: #FFF;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: var(--shadow-soft);
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-custom d-flex justify-content-between align-items-center">
-    <div class="brand-logo">
-        <i class="bi bi-chat-quote-fill"></i> Oralis
-    </div>
-    <div class="d-flex align-items-center gap-3">
-        <span class="small text-muted"><i class="bi bi-person-circle me-1"></i>{{ user_email }}</span>
-        {% if user_email == 'p75886777@gmail.com' %}
-            <a href="/admin/feedbacks" class="btn btn-outline-success btn-sm"><i class="bi bi-shield-lock me-1"></i>Admin Panel</a>
-        {% endif %}
-        <a href="/logout" class="btn btn-outline-danger btn-sm" title="Cerrar Sesión"><i class="bi bi-box-arrow-right"></i></a>
-    </div>
-</nav>
-
-<div class="container py-4">
-    <ul class="nav nav-tabs mb-4" id="mainTabs">
-        <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-tutor"><i class="bi bi-robot me-1"></i>Tutor de Idiomas</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-recursos"><i class="bi bi-journal-bookmark me-1"></i>Banco Recomendado</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-feedback"><i class="bi bi-star me-1"></i>Feedback</button>
-        </li>
-    </ul>
-
-    <div class="tab-content">
-        <!-- SECCIÓN TUTOR Y CHAT -->
-        <div class="tab-pane fade show active" id="tab-tutor">
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card-custom">
-                        <h6 class="fw-bold mb-3"><i class="bi bi-sliders me-2 text-success"></i>Configuración de Práctica</h6>
-                        
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Idioma Objetivo</label>
-                            <select id="targetLang" class="form-select">
-                                <option value="Inglés" selected>Inglés 🇬🇧</option>
-                                <option value="Francés">Francés 🇫🇷</option>
-                                <option value="Alemán">Alemán 🇩🇪</option>
-                                <option value="Italiano">Italiano 🇮🇹</option>
-                                <option value="Portugués">Portugués 🇵🇹</option>
-                                <option value="Chino Mandarín">Chino Mandarín 🇨🇳</option>
-                                <option value="Japonés">Japonés 🇯🇵</option>
-                                <option value="Ruso">Ruso 🇷🇺</option>
-                                <option value="Árabe">Árabe 🇸🇦</option>
-                                <option value="Holandés">Holandés 🇳🇱</option>
-                                <option value="Polaco">Polaco 🇵🇱</option>
-                                <option value="Sueco">Sueco 🇸🇪</option>
-                                <option value="Español">Español 🇪🇸</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Nivel CEFR Deseado</label>
-                            <select id="cefrLevel" class="form-select">
-                                <option value="A1">A1 - Principiante</option>
-                                <option value="A2">A2 - Básico</option>
-                                <option value="B1" selected>B1 - Intermedio</option>
-                                <option value="B2">B2 - Intermedio Alto</option>
-                                <option value="C1">C1 - Avanzado</option>
-                                <option value="C2">C2 - Experto Nativo</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">Modo de Aprendizaje</label>
-                            <select id="modeSelect" class="form-select">
-                                <option value="conversation" selected>💬 Conversación Libre</option>
-                                <option value="grammar">✍️ Corrección Gramatical y Writing</option>
-                                <option value="translation">🌐 Traducción Inteligente (Auto-detecta)</option>
-                                <option value="pronunciation">🗣️ Feedback de Pronunciación / Audio</option>
-                            </select>
-                        </div>
-
-                        <div class="p-3 bg-light border rounded-3 small text-muted">
-                            <i class="bi bi-info-circle me-1 text-success"></i> <strong>Detección Automática:</strong> Puedes escribir o hablar en cualquier idioma, Oralis detectará tu entrada y responderá ajustándose a la meta seleccionada.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-8">
-                    <div class="card-custom">
-                        <div class="chat-box mb-3" id="chatBox">
-                            <div class="msg-bubble msg-ai">
-                                ¡Hola! Soy Oralis, tu tutor inteligente de idiomas. Puedes escribir o presionar el botón del micrófono para comenzar a practicar. ¿De qué te gustaría hablar hoy?
-                            </div>
-                        </div>
-
-                        <div class="input-group gap-2">
-                            <button class="btn btn-coral" id="btnMic" type="button" title="Hablar por micrófono">
-                                <i class="bi bi-mic-fill"></i>
-                            </button>
-                            <input type="text" id="userInput" class="form-control rounded-3" placeholder="Escribe un mensaje o frase aquí...">
-                            <button class="btn btn-green px-4" id="btnSend" type="button">
-                                Enviar <i class="bi bi-send-fill ms-1"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- NAV BAR SUPERIOR -->
+    <header class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-comments"></i> <span>Oralis</span>
         </div>
-
-        <!-- SECCIÓN BANCO DE RECURSOS AMPLIADO -->
-        <div class="tab-pane fade" id="tab-recursos">
-            <div class="card-custom">
-                <h5 class="fw-bold mb-2"><i class="bi bi-journal-bookmark-fill text-success me-2"></i>Banco Recomendado de Expresiones y Recursos</h5>
-                <p class="text-muted small mb-4">Haz clic sobre cualquiera de las frases para cargarla automáticamente en el chat con Oralis.</p>
-
-                <div class="row g-4">
-                    <!-- Conectores Avanzados -->
-                    <div class="col-md-6">
-                        <div class="p-3 border rounded-3 bg-light">
-                            <h6 class="fw-bold text-success mb-3"><i class="bi bi-link-45deg me-1"></i>Conectores y Fluidez (B2 - C1)</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('On the one hand... on the other hand...')">On the one hand... on the other hand...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('Furthermore, it is important to notice that...')">Furthermore, it is important...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('In spite of the circumstances...')">In spite of the circumstances...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('D\'un côté... d\'un autre côté...')">D'un côté... d'un autre côté...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('Néanmoins, il faut considerar...')">Néanmoins, il faut considerar...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('Einerseits... andererseits...')">Einerseits... andererseits...</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Debates y Opinión -->
-                    <div class="col-md-6">
-                        <div class="p-3 border rounded-3 bg-light">
-                            <h6 class="fw-bold text-success mb-3"><i class="bi bi-chat-left-quote me-1"></i>Expresar Opinión y Argumentación</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('From my perspective, the key aspect is...')">From my perspective, the key aspect is...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('I am strongly convinced that...')">I am strongly convinced that...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('À mon avis, esta es la mejor opción...')">À mon avis...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('Meiner Meinung nach ist das sehr wichtig...')">Meiner Meinung nach...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('Dal mio punto di vista...')">Dal mio punto di vista...</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Entorno Profesional y Trabajo -->
-                    <div class="col-md-6">
-                        <div class="p-3 border rounded-3 bg-light">
-                            <h6 class="fw-bold text-success mb-3"><i class="bi bi-briefcase me-1"></i>Negocios, Emails y Trabajo</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('I am writing to follow up on our previous discussion regarding...')">I am writing to follow up on...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('Could you please clarify your point about...?')">Could you please clarify your point about...?</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('I look forward to hearing from you soon.')">I look forward to hearing from you...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('Je reste à votre disposition pour toda información.')">Je reste à votre disposition...</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Modismos y Conversación Real -->
-                    <div class="col-md-6">
-                        <div class="p-3 border rounded-3 bg-light">
-                            <h6 class="fw-bold text-success mb-3"><i class="bi bi-lightbulb me-1"></i>Modismos e Idioms Nativos</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('To hit the nail on the head')">To hit the nail on the head</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('To play it by ear')">To play it by ear</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('C\'est la goutte d\'eau qui fait déborder le vase')">C'est la goutte d'eau...</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('Übung macht den Meister')">Übung macht den Meister</span>
-                                <span class="badge bg-white text-dark border p-2 resource-badge" onclick="insertPhrase('In bocca al lupo!')">In bocca al lupo!</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <nav class="nav-links">
+            <button class="nav-btn active" onclick="switchTab('tutor', event)"><i class="fa-solid fa-robot"></i> Tutor de Idiomas</button>
+            <button class="nav-btn" onclick="switchTab('cuaderno', event)"><i class="fa-solid fa-book-bookmark"></i> Mi Cuaderno</button>
+            <button class="nav-btn" onclick="switchTab('banco', event)"><i class="fa-solid fa-book-open"></i> Banco Recomendado</button>
+            <button class="nav-btn" onclick="switchTab('historial', event)"><i class="fa-solid fa-clock-rotate-left"></i> Historial</button>
+            <button class="nav-btn" onclick="switchTab('feedback', event)"><i class="fa-solid fa-star"></i> Feedback</button>
+        </nav>
+        <div class="user-profile">
+            <span><i class="fa-solid fa-circle-user"></i> {{ user_email }}</span>
+            {% if user_email == 'p75886777@gmail.com' %}
+                <a href="/admin/feedbacks" class="btn-admin"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
+            {% endif %}
+            <a href="/logout" class="btn-logout" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></a>
         </div>
+    </header>
 
-        <!-- SECCIÓN FEEDBACK -->
-        <div class="tab-pane fade" id="tab-feedback">
-            <div class="card-custom" style="max-width: 600px; margin: 0 auto;">
-                <h5 class="fw-bold mb-3"><i class="bi bi-heart me-2 text-danger"></i>Déjanos tus Comentarios</h5>
-                <p class="text-muted small mb-4">¿Cómo ha sido tu experiencia aprendiendo con Oralis? Tu feedback nos ayuda a seguir optimizando las herramientas.</p>
+    <main class="main-container">
 
-                <form id="feedbackForm">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Puntuación</label>
-                        <select id="fbScore" class="form-select">
-                            <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
-                            <option value="4">⭐⭐⭐⭐ (Muy Bueno)</option>
-                            <option value="3">⭐⭐⭐ (Aceptable)</option>
-                            <option value="2">⭐⭐ (Mejorable)</option>
-                            <option value="1">⭐ (Incompleto)</option>
+        <!-- PESTAÑA 1: TUTOR DE IDIOMAS Y CONFIGURACIÓN -->
+        <section id="tab-tutor" class="tab-content">
+            <div class="tutor-layout">
+                
+                <aside class="sidebar-config">
+                    <h3><i class="fa-solid fa-sliders"></i> Configuración</h3>
+
+                    <!-- SELECTOR DE 13 IDIOMAS -->
+                    <div class="form-group">
+                        <label for="select-idioma">Idioma Objetivo:</label>
+                        <select id="select-idioma" onchange="actualizarExamenesDisponibles()">
+                            <option value="Inglés">🇬🇧 Inglés</option>
+                            <option value="Alemán">🇩🇪 Alemán</option>
+                            <option value="Italiano">🇮🇹 Italiano</option>
+                            <option value="Francés">🇫🇷 Francés</option>
+                            <option value="Neerlandés">🇳🇱 Neerlandés</option>
+                            <option value="Portugués">🇵🇹 Portugués</option>
+                            <option value="Japonés">🇯🇵 Japonés</option>
+                            <option value="Chino Mandarín">🇨🇳 Chino Mandarín</option>
+                            <option value="Ruso">🇷🇺 Ruso</option>
+                            <option value="Rumano">🇷🇴 Rumano</option>
+                            <option value="Español ELE">🇪🇸 Español (ELE)</option>
+                            <option value="Latín">🏛️ Latín</option>
+                            <option value="Griego Antiguo">🏛️ Griego Antiguo</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tu Comentario o Sugerencia</label>
-                        <textarea id="fbComment" class="form-control" rows="4" placeholder="Escribe tu opinión o qué otras funciones te gustaría ver..." required></textarea>
+
+                    <!-- NIVEL CEFR -->
+                    <div class="form-group">
+                        <label for="select-cefr">Nivel CEFR Deseado:</label>
+                        <select id="select-cefr">
+                            <option value="A1">A1 - Principiante</option>
+                            <option value="A2">A2 - Elemental</option>
+                            <option value="B1" selected>B1 - Intermedio</option>
+                            <option value="B2">B2 - Intermedio Alto</option>
+                            <option value="C1">C1 - Avanzado</option>
+                            <option value="C2">C2 - Maestría / Nativo</option>
+                        </select>
                     </div>
-                    <button type="submit" class="btn btn-green w-100">Enviar Opinión</button>
-                </form>
+
+                    <!-- 4 MODOS PRINCIPALES -->
+                    <div class="form-group">
+                        <label for="select-modo">Modo de Aprendizaje:</label>
+                        <select id="select-modo" onchange="cambiarModoInterfaz()">
+                            <option value="tutor_general">💬 Modo 1: Tutor General</option>
+                            <option value="practica_oral">🎙️ Modo 2: Práctica Oral (Listening & Speaking)</option>
+                            <option value="examenes">🎓 Modo 3: Exámenes Oficiales / Universitarios</option>
+                            <option value="writing">📝 Modo 4: Práctica de Writing</option>
+                        </select>
+                    </div>
+
+                    <!-- OPCIONES DINÁMICAS POR MODO -->
+                    <div id="opciones-modo-2" class="modo-extra hidden">
+                        <label for="select-rol">Rol de Oralis:</label>
+                        <select id="select-rol">
+                            <option value="Entrevistador de Trabajo">Entrevistador de Trabajo</option>
+                            <option value="Médico en Consulta">Médico en Consulta</option>
+                            <option value="Recepcionista de Hotel">Recepcionista de Hotel</option>
+                            <option value="Guía Turístico">Guía Turístico</option>
+                            <option value="Cliente en Restaurante">Cliente en Restaurante</option>
+                            <option value="Colega de Oficina">Colega de Oficina</option>
+                        </select>
+                    </div>
+
+                    <div id="opciones-modo-3" class="modo-extra hidden">
+                        <label for="select-examen">Certificación / Examen:</label>
+                        <select id="select-examen"></select>
+
+                        <label for="rubrica-text" style="margin-top:8px; display:block;">Rúbrica o Criterios:</label>
+                        <textarea id="rubrica-text" rows="2" placeholder="Pega aquí los criterios específicos del examen..."></textarea>
+                    </div>
+
+                    <div id="opciones-modo-4" class="modo-extra hidden">
+                        <label for="modo-correccion-writing">Sistema de Corrección:</label>
+                        <select id="modo-correccion-writing">
+                            <option value="normal">Modo Normal (Muestra solución)</option>
+                            <option value="desafio">Modo Desafío (Guiado con pistas)</option>
+                        </select>
+                    </div>
+
+                </aside>
+
+                <!-- ÁREA DE CONVERSACIÓN -->
+                <div class="chat-wrapper">
+                    <div id="chat-box" class="chat-box">
+                        <div class="message bot-message">
+                            <div class="msg-content">
+                                <p>¡Hola! Soy Oralis, tu tutor inteligente de idiomas. Selecciona tus preferencias en el panel lateral y comencemos a practicar.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-container">
+                        <button id="btn-mic" class="btn-icon" onclick="toggleSTT()" title="Grabar Voz"><i class="fa-solid fa-microphone"></i></button>
+                        <textarea id="user-input" rows="1" placeholder="Escribe un mensaje aquí..."></textarea>
+                        <button class="btn-primary" onclick="enviarMensaje()"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
+                    </div>
+                </div>
+
             </div>
-        </div>
-    </div>
-</div>
+        </section>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const chatBox = document.getElementById('chatBox');
-    const userInput = document.getElementById('userInput');
-    const btnSend = document.getElementById('btnSend');
-    const btnMic = document.getElementById('btnMic');
+        <!-- PESTAÑA 2: MI CUADERNO -->
+        <section id="tab-cuaderno" class="tab-content hidden">
+            <h2><i class="fa-solid fa-book-bookmark"></i> Mi Cuaderno (Repaso Inteligente)</h2>
+            <div id="cuaderno-grid" class="cards-grid"></div>
+        </section>
 
-    function appendMessage(text, isUser) {
-        const msg = document.createElement('div');
-        msg.className = `msg-bubble ${isUser ? 'msg-user' : 'msg-ai'}`;
-        msg.innerText = text;
-        chatBox.appendChild(msg);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        return msg;
-    }
+        <!-- PESTAÑA 3: BANCO RECOMENDADO -->
+        <section id="tab-banco" class="tab-content hidden">
+            <h2><i class="fa-solid fa-book-open"></i> Banco Recomendado de Recursos</h2>
+            <div class="cards-grid">
+                <div class="card-item" onclick="cargarEnChat('Quiero practicar conectores avanzados')">
+                    <h4>🔗 Conectores Avanzados</h4>
+                    <p>Mejora la cohesión y fluidez de tus textos y conversaciones.</p>
+                </div>
+                <div class="card-item" onclick="cargarEnChat('Iniciar práctica de expresiones idiomáticas')">
+                    <h4>💡 Idioms y Expresiones</h4>
+                    <p>Habla como un nativo utilizando modismos habituales.</p>
+                </div>
+            </div>
+        </section>
 
-    async function sendMessage() {
-        const text = userInput.value.trim();
-        if (!text) return;
+        <!-- PESTAÑA 4: HISTORIAL DE CHATS -->
+        <section id="tab-historial" class="tab-content hidden">
+            <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de Chats</h2>
+            <div id="historial-list" class="cards-grid"></div>
+        </section>
 
-        appendMessage(text, true);
-        userInput.value = '';
+        <!-- PESTAÑA 5: FEEDBACK -->
+        <section id="tab-feedback" class="tab-content hidden">
+            <h2><i class="fa-solid fa-star"></i> Enviar Feedback al Administrador</h2>
+            <div style="max-width: 500px; margin-top:15px;" class="form-group">
+                <label>Puntuación:</label>
+                <select id="fb-score">
+                    <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                    <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
+                    <option value="3">⭐⭐⭐ Aceptable</option>
+                </select>
+                <label style="margin-top:10px;">Comentario:</label>
+                <textarea id="fb-comment" rows="4" placeholder="Escribe tu opinión..."></textarea>
+                <button class="btn-accent" style="margin-top:10px;" onclick="enviarFeedback()">Enviar Opinión</button>
+            </div>
+        </section>
 
-        const targetLang = document.getElementById('targetLang').value;
-        const cefrLevel = document.getElementById('cefrLevel').value;
-        const mode = document.getElementById('modeSelect').value;
+    </main>
 
-        const aiMsgElement = appendMessage('Oralis está escribiendo...', false);
+    <!-- SCRIPTS UNIFICADOS DE INTERACTIVIDAD -->
+    <script>
+        const examenesPorIdioma = {
+            "Inglés": ["Cambridge (KET, PET, FCE, CAE, CPE)", "IELTS", "TOEFL", "Aptis"],
+            "Alemán": ["Goethe-Zertifikat (A1-C2)", "TestDaF", "DSH"],
+            "Italiano": ["CILS", "CELI", "PLIDA"],
+            "Francés": ["DELF", "DALF", "TCF", "TEF"],
+            "Neerlandés": ["CNaVT", "NT2"],
+            "Portugués": ["CAPLE (PLE)", "Celpe-Bras"],
+            "Japonés": ["JLPT (N5 a N1)"],
+            "Chino Mandarín": ["HSK (HSK 1 a HSK 6)"],
+            "Ruso": ["TORFL / TRKI"],
+            "Rumano": ["RLS (Institutul Limbii Române)"],
+            "Español ELE": ["DELE", "SIELE"],
+            "Latín": ["Exámenes de Lenguas Clásicas / EvAU"],
+            "Griego Antiguo": ["Exámenes de Lenguas Clásicas / Accreditation"]
+        };
 
-        try {
-            const res = await fetch('/chat_stream', {
+        function switchTab(tabName, evt) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            if(evt) evt.currentTarget.classList.add('active');
+
+            if(tabName === 'cuaderno') cargarCuaderno();
+            if(tabName === 'historial') cargarHistorial();
+        }
+
+        function actualizarExamenesDisponibles() {
+            const idioma = document.getElementById('select-idioma').value;
+            const selectExamen = document.getElementById('select-examen');
+            selectExamen.innerHTML = '';
+
+            const lista = examenesPorIdioma[idioma] || ["Examen General"];
+            lista.forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex;
+                opt.textContent = ex;
+                selectExamen.appendChild(opt);
+            });
+        }
+
+        function cambiarModoInterfaz() {
+            const modo = document.getElementById('select-modo').value;
+            document.querySelectorAll('.modo-extra').forEach(el => el.classList.add('hidden'));
+
+            if (modo === 'practica_oral') document.getElementById('opciones-modo-2').classList.remove('hidden');
+            if (modo === 'examenes') document.getElementById('opciones-modo-3').classList.remove('hidden');
+            if (modo === 'writing') document.getElementById('opciones-modo-4').classList.remove('hidden');
+        }
+
+        async function enviarMensaje() {
+            const input = document.getElementById('user-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            appendMessage('user', msg);
+            input.value = '';
+
+            const payload = {
+                message: msg,
+                target_lang: document.getElementById('select-idioma').value,
+                cefr_level: document.getElementById('select-cefr').value,
+                mode: document.getElementById('select-modo').value,
+                rol_practica: document.getElementById('select-rol').value,
+                examen_oficial: document.getElementById('select-examen').value,
+                rubrica: document.getElementById('rubrica-text').value
+            };
+
+            const response = await fetch('/chat_stream', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    message: text, 
-                    target_lang: targetLang, 
-                    cefr_level: cefrLevel, 
-                    mode: mode 
-                })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
             });
 
-            const reader = res.body.getReader();
+            const reader = response.body.getReader();
             const decoder = new TextDecoder();
-            aiMsgElement.innerText = '';
+            let fullText = '';
+            const botMsgDiv = appendMessage('bot', 'Procesando respuesta...');
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                aiMsgElement.innerText += decoder.decode(value);
-                chatBox.scrollTop = chatBox.scrollHeight;
+                fullText += decoder.decode(value, { stream: true });
+                renderizarRespuesta(botMsgDiv, fullText);
+            }
+        }
+
+        function renderizarRespuesta(element, rawText) {
+            let html = '';
+            const pResp = rawText.split('[TRADUCCION_INTEGRADA]')[0].replace('[RESPUESTA_PRINCIPAL]', '');
+            const rest1 = rawText.split('[TRADUCCION_INTEGRADA]')[1] || '';
+            const pTrad = rest1.split('[CORRECCION_Y_MEJORA]')[0];
+            const pCorr = rest1.split('[CORRECCION_Y_MEJORA]')[1] || '';
+
+            html += `<p>${pResp}</p>`;
+            html += `<button class="btn-accent" style="margin-top:8px; font-size:0.8rem;" onclick="reproducirTTS('${encodeURIComponent(pResp)}')">🔊 Escuchar Audio Nativo</button>`;
+
+            if(pTrad) {
+                html += `<div class="block-translation"><strong>🌐 Traducción Integrada:</strong><br>${pTrad}</div>`;
+            }
+            if(pCorr) {
+                html += `<div class="block-correction"><strong>💡 Corrección y Análisis Pedagógico:</strong><br>${pCorr}</div>`;
             }
 
-            // Reproducción automática de voz opcional (TTS)
-            if ('speechSynthesis' in window && aiMsgElement.innerText) {
-                const utterance = new SpeechSynthesisUtterance(aiMsgElement.innerText);
-                window.speechSynthesis.speak(utterance);
-            }
-
-        } catch (err) {
-            aiMsgElement.innerText = "Error de conexión con el servidor de Oralis.";
+            element.querySelector('.msg-content').innerHTML = html;
         }
-    }
 
-    btnSend.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-    // Reconocimiento de Voz Web Speech API (STT)
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-
-        btnMic.addEventListener('click', () => {
-            recognition.start();
-            btnMic.classList.replace('btn-coral', 'btn-warning');
-        });
-
-        recognition.onresult = (e) => {
-            userInput.value = e.results[0][0].transcript;
-            btnMic.classList.replace('btn-warning', 'btn-coral');
-            sendMessage();
-        };
-
-        recognition.onerror = () => {
-            btnMic.classList.replace('btn-warning', 'btn-coral');
-        };
-
-        recognition.onend = () => {
-            btnMic.classList.replace('btn-warning', 'btn-coral');
-        };
-    } else {
-        btnMic.style.display = 'none';
-    }
-
-    function insertPhrase(phrase) {
-        userInput.value = phrase;
-        const tutorTab = new bootstrap.Tab(document.querySelector('#mainTabs button[data-bs-target="#tab-tutor"]'));
-        tutorTab.show();
-        userInput.focus();
-    }
-
-    // Enviar Feedback
-    document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const score = document.getElementById('fbScore').value;
-        const comment = document.getElementById('fbComment').value;
-
-        const res = await fetch('/feedback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ score, comment })
-        });
-
-        const data = await res.json();
-        if (data.status === 'ok') {
-            alert('¡Muchas gracias por tus comentarios!');
-            document.getElementById('fbComment').value = '';
-        } else {
-            alert('Hubo un inconveniente al enviar tu comentario.');
+        function appendMessage(sender, text) {
+            const chatBox = document.getElementById('chat-box');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}-message`;
+            msgDiv.innerHTML = `<div class="msg-content">${text}</div>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return msgDiv;
         }
-    });
-</script>
+
+        function reproducirTTS(texto) {
+            const utterance = new SpeechSynthesisUtterance(decodeURIComponent(texto));
+            speechSynthesis.speak(utterance);
+        }
+
+        function cargarEnChat(texto) {
+            switchTab('tutor');
+            document.getElementById('user-input').value = texto;
+        }
+
+        async function cargarCuaderno() {
+            const res = await fetch('/cuaderno/listar');
+            const data = await res.json();
+            const grid = document.getElementById('cuaderno-grid');
+            grid.innerHTML = data.map(item => `
+                <div class="card-item">
+                    <span style="font-size:0.8rem; font-weight:bold; color:var(--primary-color)">${item.idioma} - ${item.nivel}</span>
+                    <h4>${item.termino}</h4>
+                    <p>${item.explicacion}</p>
+                </div>
+            `).join('');
+        }
+
+        async function cargarHistorial() {
+            const res = await fetch('/historial/listar');
+            const data = await res.json();
+            const list = document.getElementById('historial-list');
+            list.innerHTML = data.map(c => `
+                <div class="card-item">
+                    <h4>${c.titulo}</h4>
+                    <p>Modo: ${c.modo} | Fecha: ${c.fecha}</p>
+                </div>
+            `).join('');
+        }
+
+        async function enviarFeedback() {
+            const score = document.getElementById('fb-score').value;
+            const comment = document.getElementById('fb-comment').value;
+            await fetch('/feedback', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ score, comment })
+            });
+            alert('¡Feedback enviado exitosamente!');
+            document.getElementById('fb-comment').value = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarExamenesDisponibles();
+        });
+    </script>
 </body>
 </html>
