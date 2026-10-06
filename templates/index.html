@@ -3,213 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oralis - Tu Tutor Personal de Idiomas</title>
+    <title>Oralis - Tutor Virtual de Idiomas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { background-color: #1e293b; color: #fff; min-height: 100vh; }
-        .sidebar .nav-link { color: #cbd5e1; margin-bottom: 5px; border-radius: 8px; }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #334155; color: #fff; }
-        .chat-box { background-color: #ffffff; border-radius: 12px; height: 68vh; overflow-y: auto; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .msg-user { background-color: #e0e7ff; color: #1e1b4b; align-self: flex-end; border-radius: 15px 15px 0 15px; margin-left: auto; max-width: 80%; }
-        .msg-tutor { background-color: #f1f5f9; color: #0f172a; align-self: flex-start; border-radius: 15px 15px 15px 0; margin-right: auto; max-width: 85%; }
-        .section-badge { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        .custom-card { border: none; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .nav-tabs-sm .nav-link { font-size: 0.78rem; padding: 0.35rem 0.5rem; color: #cbd5e1; }
-        .nav-tabs-sm .nav-link.active { background-color: #334155; color: #fff; border-color: #475569; }
-        ul, ol { margin-bottom: 0; padding-left: 1.2rem; }
-        li { margin-bottom: 4px; }
+        body { background-color: #f4f6f9; }
+        .chat-box { height: 60vh; overflow-y: auto; background: #ffffff; border-radius: 8px; padding: 20px; border: 1px solid #dee2e6; }
+        .msg-user { background-color: #e3f2fd; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+        .msg-tutor { background-color: #f8f9fa; border-left: 4px solid #0d6efd; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+        .tag-box { background-color: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-top: 8px; }
+        .pulse-recording { animation: pulse-animation 1.5s infinite; }
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0px rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(220, 53, 69, 0); }
+        }
     </style>
 </head>
 <body>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- BARRA LATERAL / CONFIGURACIÓN -->
-        <div class="col-md-3 col-lg-2 sidebar p-3 d-flex flex-column">
-            <h3 class="text-primary fw-bold mb-4"><i class="bi bi-chat-left-dots-fill"></i> Oralis</h3>
-            
-            <p class="text-muted small mb-1">Hola, <strong>{{ user_name }}</strong></p>
-            <hr class="border-secondary mb-3">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#"><i class="bi bi-translate"></i> Oralis</a>
+        <div class="d-flex align-items-center text-white">
+            <span class="me-3">Hola, <strong>{{ user_name }}</strong></span>
+            <button class="btn btn-sm btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#notebookModal" onclick="loadNotebook()"><i class="bi bi-journal-bookmark"></i> Mi Cuaderno</button>
+            <button class="btn btn-sm btn-light text-primary" onclick="clearChat()"><i class="bi bi-trash"></i> Limpiar Chat</button>
+        </div>
+    </div>
+</nav>
 
-            <!-- IDIOMA OBJETIVO -->
-            <div class="mb-3">
-                <label class="form-label text-light small"><i class="bi bi-translate"></i> Idioma Objetivo</label>
-                <select id="target_lang" class="form-select form-select-sm bg-dark text-light border-secondary" onchange="updateExamsList()">
-                    <optgroup label="Idiomas Principales">
-                        <option value="Inglés" selected>Inglés</option>
-                        <option value="Español (ELE)">Español como Idioma Extranjero (ELE)</option>
-                        <option value="Francés">Francés</option>
-                        <option value="Alemán">Alemán</option>
-                        <option value="Italiano">Italiano</option>
-                        <option value="Portugués">Portugués</option>
-                    </optgroup>
-                    <optgroup label="Lenguas Antiguas y Clásicas">
-                        <option value="Latín">Latín</option>
-                        <option value="Griego Antiguo">Griego Antiguo / Clásico</option>
-                    </optgroup>
-                    <optgroup label="Idiomas Europeos">
-                        <option value="Neerlandés">Neerlandés / Holandés</option>
-                        <option value="Ruso">Ruso</option>
-                        <option value="Polaco">Polaco</option>
-                        <option value="Sueco">Sueco</option>
-                        <option value="Noruego">Noruego</option>
-                        <option value="Danés">Danés</option>
-                        <option value="Finés">Finés</option>
-                        <option value="Griego">Griego Moderno</option>
-                        <option value="Turco">Turco</option>
-                        <option value="Checo">Checo</option>
-                        <option value="Rumano">Rumano</option>
-                        <option value="Húngaro">Húngaro</option>
-                    </optgroup>
-                    <optgroup label="Idiomas Asiáticos">
-                        <option value="Chino Mandarín">Chino Mandarín</option>
-                        <option value="Japonés">Japonés</option>
-                        <option value="Coreano">Coreano</option>
-                        <option value="Hindi">Hindi</option>
-                        <option value="Vietnamita">Vietnamita</option>
-                    </optgroup>
-                    <optgroup label="Otros Idiomas">
-                        <option value="Árabe">Árabe</option>
-                        <option value="Hebreo">Hebreo</option>
-                        <option value="Catalán">Catalán</option>
-                        <option value="Euskera">Euskera</option>
-                        <option value="Gallego">Gallego</option>
-                    </optgroup>
-                </select>
-            </div>
-
-            <!-- NIVEL CEFR -->
-            <div class="mb-3">
-                <label class="form-label text-light small"><i class="bi bi-bar-chart-steps"></i> Nivel CEFR</label>
-                <select id="cefr_level" class="form-select form-select-sm bg-dark text-light border-secondary">
-                    <option value="A1">A1 - Principiante</option>
-                    <option value="A2">A2 - Elemental</option>
-                    <option value="B1" selected>B1 - Intermedio</option>
-                    <option value="B2">B2 - Intermedio Alto</option>
-                    <option value="C1">C1 - Avanzado</option>
-                    <option value="C2">C2 - Maestría / Experto</option>
-                </select>
-            </div>
-
-            <!-- MODO DE TRABAJO -->
-            <div class="mb-3">
-                <label class="form-label text-light small"><i class="bi bi-gear-fill"></i> Modo de Trabajo</label>
-                <select id="mode_select" class="form-select form-select-sm bg-dark text-light border-secondary" onchange="toggleModeOptions()">
-                    <option value="tutor_general" selected>Tutor General (Dudas / Gramática)</option>
-                    <option value="practica_oral">Práctica Oral (Simulación)</option>
-                    <option value="examenes">Exámenes Oficiales / Pruebas</option>
-                    <option value="writing">Práctica de Writing</option>
-                </select>
-            </div>
-
-            <!-- OPCIONES SECUNDARIAS DINÁMICAS: PRÁCTICA ORAL -->
-            <div id="opts_practica_oral" class="mb-3 d-none">
-                <label class="form-label text-light small">Rol de Simulación</label>
-                <input type="text" id="rol_practica" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Ej: Entrevistador de trabajo, Médico">
-            </div>
-
-            <!-- OPCIONES CON PESTAÑAS PARA MODO EXÁMENES -->
-            <div id="opts_examenes" class="mb-3 d-none">
-                <ul class="nav nav-tabs nav-tabs-sm border-secondary mb-2" id="examTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="tab-oficial-btn" data-bs-toggle="tab" data-bs-target="#tab-oficial" type="button" role="tab">Oficiales</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="tab-custom-btn" data-bs-toggle="tab" data-bs-target="#tab-custom" type="button" role="tab">Personalizar Examen</button>
-                    </li>
-                </ul>
-
-                <div class="tab-content" id="examTabsContent">
-                    <!-- PESTAÑA: EXÁMENES OFICIALES -->
-                    <div class="tab-pane fade show active" id="tab-oficial" role="tabpanel">
-                        <label class="form-label text-light small"><i class="bi bi-journal-check"></i> Elige un Examen</label>
-                        <select id="examen_oficial_select" class="form-select form-select-sm bg-dark text-light border-secondary mb-2">
-                            <!-- Se rellena dinámicamente según el idioma seleccionado -->
+<div class="container my-4">
+    <div class="row g-3">
+        <!-- Panel de Configuración -->
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-bold">Configuración</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Idioma Objetivo</label>
+                        <select id="target_lang" class="form-select">
+                            <optgroup label="Idiomas Principales">
+                                <option value="Inglés" selected>Inglés</option>
+                                <option value="Español (ELE)">Español como Idioma Extranjero (ELE)</option>
+                                <option value="Francés">Francés</option>
+                                <option value="Alemán">Alemán</option>
+                                <option value="Italiano">Italiano</option>
+                                <option value="Portugués">Portugués</option>
+                            </optgroup>
+                            <optgroup label="Lenguas Antiguas y Clásicas">
+                                <option value="Latín">Latín</option>
+                                <option value="Griego Antiguo">Griego Antiguo / Clásico</option>
+                            </optgroup>
+                            <optgroup label="Idiomas Europeos">
+                                <option value="Neerlandés">Neerlandés / Holandés</option>
+                                <option value="Ruso">Ruso</option>
+                                <option value="Polaco">Polaco</option>
+                                <option value="Sueco">Sueco</option>
+                                <option value="Noruego">Noruego</option>
+                                <option value="Danés">Danés</option>
+                                <option value="Finés">Finés</option>
+                                <option value="Griego">Griego Moderno</option>
+                                <option value="Turco">Turco</option>
+                                <option value="Checo">Checo</option>
+                                <option value="Rumano">Rumano</option>
+                                <option value="Húngaro">Húngaro</option>
+                            </optgroup>
                         </select>
                     </div>
 
-                    <!-- PESTAÑA: PERSONALIZAR EXAMEN -->
-                    <div class="tab-pane fade" id="tab-custom" role="tabpanel">
-                        <label class="form-label text-light small"><i class="bi bi-pencil-square"></i> Nombre del Examen / Prueba</label>
-                        <input type="text" id="custom_examen_name" class="form-control form-control-sm bg-dark text-light border-secondary mb-2" placeholder="Ej: OPIc, Examen Oposición, Parcial Univ...">
+                    <div class="mb-3">
+                        <label class="form-label">Nivel CEFR</label>
+                        <select id="cefr_level" class="form-select">
+                            <option value="A1">A1 - Principiante</option>
+                            <option value="A2">A2 - Elemental</option>
+                            <option value="B1" selected>B1 - Intermedio</option>
+                            <option value="B2">B2 - Intermedio Alto</option>
+                            <option value="C1">C1 - Avanzado</option>
+                            <option value="C2">C2 - Maestría</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Modo de Trabajo</label>
+                        <select id="mode" class="form-select" onchange="toggleModeFields()">
+                            <option value="tutor_general">Tutor General</option>
+                            <option value="practica_oral">Práctica Oral (Simulación)</option>
+                            <option value="examenes">Preparación de Exámenes</option>
+                            <option value="writing">Expresión Escrita</option>
+                        </select>
+                    </div>
+
+                    <div id="field_practica" class="mb-3 d-none">
+                        <label class="form-label">Rol para Simulación</label>
+                        <input type="text" id="rol_practica" class="form-control" placeholder="Ej: Entrevistador de trabajo">
+                    </div>
+
+                    <div id="field_examenes" class="mb-3 d-none">
+                        <label class="form-label">Examen / Rúbrica</label>
+                        <input type="text" id="examen_oficial" class="form-control mb-2" placeholder="Ej: Cambridge B2 First">
+                        <textarea id="rubrica" class="form-control" rows="2" placeholder="Criterios o rúbrica..."></textarea>
                     </div>
                 </div>
-
-                <!-- CRITERIOS Y RÚBRICA COMÚN -->
-                <div class="mt-2">
-                    <label class="form-label text-light small"><i class="bi bi-card-checklist"></i> Criterios / Rúbrica</label>
-                    <textarea id="rubrica" class="form-control form-control-sm bg-dark text-light border-secondary" rows="2" placeholder="Ej: Evaluar gramática estricta, vocabulario formal, límite de palabras..."></textarea>
-                </div>
-            </div>
-
-            <div class="mt-auto">
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm w-100 mb-2"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
             </div>
         </div>
 
-        <!-- ÁREA PRINCIPAL DE CHAT -->
-        <div class="col-md-9 col-lg-10 p-4 d-flex flex-column" style="height: 100vh;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0 text-dark fw-bold" id="mode_title">Tutor General</h4>
-                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#feedbackModal">
-                    <i class="bi bi-chat-heart"></i> Enviar Valoración
-                </button>
-            </div>
+        <!-- Chat Principal -->
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div id="chat_box" class="chat-box mb-3">
+                        <div class="msg-tutor">
+                            <strong><i class="bi bi-robot"></i> Oralis:</strong>
+                            <p class="mb-0 mt-1">¡Hola! Soy tu tutor de idiomas. ¿Qué te gustaría practicar hoy?</p>
+                        </div>
+                    </div>
 
-            <!-- Caja de Conversaciones -->
-            <div id="chat_box" class="chat-box mb-3 d-flex flex-column gap-3">
-                <div class="p-3 msg-tutor shadow-sm">
-                    <strong>Oralis:</strong>
-                    <p class="mb-0 mt-1">¡Hola {{ user_name }}! Soy tu tutor de idiomas. ¿En qué puedo ayudarte hoy o qué duda te gustaría resolver?</p>
+                    <div class="input-group">
+                        <textarea id="user_message" class="form-control" placeholder="Escribe o habla en tu idioma objetivo..." rows="2"></textarea>
+                        
+                        <!-- Micrófono -->
+                        <button type="button" id="mic_btn" class="btn btn-outline-secondary" onclick="toggleMic()" title="Hablar por micrófono">
+                            <i class="bi bi-mic-fill"></i>
+                        </button>
+                        
+                        <!-- Enviar -->
+                        <button type="button" class="btn btn-primary" onclick="sendMessage()">
+                            <i class="bi bi-send-fill"></i> Enviar
+                        </button>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Entrada de Texto y Adjuntos -->
-            <div class="input-group">
-                <input type="file" id="file_input" class="d-none" onchange="handleFileUpload(event)">
-                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('file_input').click()">
-                    <i class="bi bi-paperclip"></i>
-                </button>
-                <textarea id="user_input" class="form-control" rows="1" placeholder="Escribe tu mensaje o pregunta aquí..." onkeydown="checkEnter(event)"></textarea>
-                <button class="btn btn-primary px-4" id="btn_send" onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
-            </div>
-            <div id="file_indicator" class="form-text text-success d-none mt-1">
-                <i class="bi bi-file-earmark-check"></i> Archivo listo: <span id="file_name_disp"></span> 
-                <a href="#" onclick="clearFile()" class="text-danger ms-2">Eliminar</a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODAL DE FEEDBACK -->
-<div class="modal fade" id="feedbackModal" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Modal Mi Cuaderno -->
+<div class="modal fade" id="notebookModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Tu opinión nos ayuda a mejorar</h5>
+                <h5 class="modal-title"><i class="bi bi-journal-bookmark"></i> Mi Cuaderno</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Puntuación (1 a 5 estrellas)</label>
-                    <select id="fb_score" class="form-select">
-                        <option value="5" selected>⭐⭐⭐⭐⭐ (Excelente)</option>
-                        <option value="4">⭐⭐⭐⭐ (Muy Bueno)</option>
-                        <option value="3">⭐⭐⭐ (Aceptable)</option>
-                        <option value="2">⭐⭐ (Regular)</option>
-                        <option value="1">⭐ (Malas sugerencias)</option>
-                    </select>
+                <ul class="nav nav-tabs" id="notebookTab" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vocabTab">Vocabulario</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#grammarTab">Gramática</button></li>
+                </ul>
+                <div class="tab-content p-3">
+                    <div class="tab-pane fade show active" id="vocabTab"><ul id="vocab_list" class="list-group"></ul></div>
+                    <div class="tab-pane fade" id="grammarTab"><ul id="grammar_list" class="list-group"></ul></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Comentario</label>
-                    <textarea id="fb_comment" class="form-control" rows="3" placeholder="¿Qué podemos mejorar de Oralis?"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="submitFeedback()">Enviar Feedback</button>
             </div>
         </div>
     </div>
@@ -217,216 +162,178 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-let attachedFile = { name: '', content: '' };
-
-// Catálogo completo de exámenes oficiales por idioma
-const examenesPorIdioma = {
-    'Inglés': ['Cambridge B2 First (FCE)', 'Cambridge C1 Advanced (CAE)', 'Cambridge C2 Proficiency (CPE)', 'IELTS Academic', 'IELTS General Training', 'TOEFL iBT', 'TOEIC', 'Linguaskill', 'Aptis General / Advanced', 'EOI (Escuela Oficial de Idiomas)'],
-    'Español (ELE)': ['DELE A1', 'DELE A2', 'DELE B1', 'DELE B2', 'DELE C1', 'DELE C2', 'SIELE Global', 'CCSE (Nacionalidad Española)', 'EOI (Escuela Oficial de Idiomas)'],
-    'Francés': ['DELF A1', 'DELF A2', 'DELF B1', 'DELF B2', 'DALF C1', 'DALF C2', 'TCF (Test de Connaissance du Français)', 'TEF (Test d\'Évaluation de Français)', 'EOI (Escuela Oficial de Idiomas)'],
-    'Alemán': ['Goethe-Zertifikat A1-C2', 'TestDaF', 'DSH', 'telc Deutsch B1/B2/C1', 'ÖSD (Österreichisches Sprachdiplom)', 'EOI (Escuela Oficial de Idiomas)'],
-    'Italiano': ['CELI (Università di Perugia)', 'CILS (Università di Siena)', 'PLIDA (Dante Alighieri)', 'IT (Roma Tre)', 'EOI (Escuela Oficial de Idiomas)'],
-    'Portugués': ['CAPLE (Pleco, DIPLE, DAPLE, CIPLE)', 'CELPE-Bras (Brasil)', 'EOI (Escuela Oficial de Idiomas)'],
-    'Latín': ['Examen Universitario de Traducción Latina', 'Acreditación Sintáctica Clásica', 'Selectividad / AU Latina'],
-    'Griego Antiguo': ['Examen Universitario de Filología Clásica', 'Traducción de Textos Clásicos Griego', 'Selectividad / AU Griego'],
-    'Chino Mandarín': ['HSK 1', 'HSK 2', 'HSK 3', 'HSK 4', 'HSK 5', 'HSK 6', 'HSKK (Oral)', 'TOCFL (Taiwán)'],
-    'Japonés': ['JLPT N5', 'JLPT N4', 'JLPT N3', 'JLPT N2', 'JLPT N1', 'BJT (Business Japanese)'],
-    'Coreano': ['TOPIK I (Nivel 1-2)', 'TOPIK II (Nivel 3-6)'],
-    'Ruso': ['TORFL / TRKI 1 (B1)', 'TORFL / TRKI 2 (B2)', 'TORFL / TRKI 3 (C1)', 'EOI (Escuela Oficial de Idiomas)'],
-    'Árabe': ['ALPT (Arabic Language Proficiency Test)', 'EOI (Escuela Oficial de Idiomas)'],
-    'Neerlandés': ['CNaVT', 'NT2 (Staatsexamen NT2)'],
-    'Catalán': ['Certificats de la Llengua Catalana (A1-C2)', 'EOI'],
-    'Euskera': ['HABE / EGA (1-4)', 'EOI'],
-    'Gallego': ['CELGA (1-4)', 'EOI']
+// MAPEO DE IDIOMAS Y CÓDIGOS ISO/BCP47
+const langCodes = {
+    "Inglés": "en-US",
+    "Español (ELE)": "es-ES",
+    "Francés": "fr-FR",
+    "Alemán": "de-DE",
+    "Italiano": "it-IT",
+    "Portugués": "pt-PT",
+    "Latín": "la",
+    "Griego Antiguo": "el-GR",
+    "Neerlandés": "nl-NL",
+    "Ruso": "ru-RU",
+    "Polaco": "pl-PL",
+    "Sueco": "sv-SE",
+    "Noruego": "no-NO",
+    "Danés": "da-DK",
+    "Finés": "fi-FI",
+    "Griego": "el-GR",
+    "Turco": "tr-TR",
+    "Checo": "cs-CZ",
+    "Rumano": "ro-RO",
+    "Húngaro": "hu-HU"
 };
 
-function updateExamsList() {
-    const lang = document.getElementById('target_lang').value;
-    const selectExamen = document.getElementById('examen_oficial_select');
-    selectExamen.innerHTML = '';
-
-    const examenes = examenesPorIdioma[lang] || ['Examen de Certificación Estándar'];
-
-    examenes.forEach(ex => {
-        const opt = document.createElement('option');
-        opt.value = ex;
-        opt.innerText = ex;
-        selectExamen.appendChild(opt);
-    });
-}
-
-function toggleModeOptions() {
-    const mode = document.getElementById('mode_select').value;
-    document.getElementById('opts_practica_oral').classList.toggle('d-none', mode !== 'practica_oral');
-    document.getElementById('opts_examenes').classList.toggle('d-none', mode !== 'examenes');
-    
-    const titles = {
-        'tutor_general': 'Tutor General (Consultas y Gramática)',
-        'practica_oral': 'Práctica Oral (Simulación de Conversación)',
-        'examenes': 'Exámenes Oficiales y Pruebas',
-        'writing': 'Práctica de Writing (Redacción y Corrección)'
-    };
-    document.getElementById('mode_title').innerText = titles[mode] || 'Chat con Oralis';
-}
-
-function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        attachedFile.name = file.name;
-        attachedFile.content = e.target.result;
-        document.getElementById('file_name_disp').innerText = file.name;
-        document.getElementById('file_indicator').classList.remove('d-none');
-    };
-    reader.readAsText(file);
-}
-
-function clearFile() {
-    attachedFile = { name: '', content: '' };
-    document.getElementById('file_input').value = '';
-    document.getElementById('file_indicator').classList.add('d-none');
-}
-
-function checkEnter(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+// ALTAVOZ (TEXT-TO-SPEECH)
+function speakText(text) {
+    if (!('speechSynthesis' in window)) {
+        alert("Tu navegador no soporta reproducción de voz.");
+        return;
     }
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/\[.*?\]/g, '').trim();
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const selectedLang = document.getElementById("target_lang").value;
+    utterance.lang = langCodes[selectedLang] || "en-US";
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
 }
 
-function cleanFormatting(str) {
-    return str.replace(/[\*#]/g, '');
+// MICRÓFONO (SPEECH-TO-TEXT)
+let recognition = null;
+let isRecording = false;
+
+function toggleMic() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Tu navegador no soporta el reconocimiento de voz. Usa Chrome o Edge.");
+        return;
+    }
+
+    const micBtn = document.getElementById("mic_btn");
+    const messageInput = document.getElementById("user_message");
+
+    if (isRecording) {
+        if (recognition) recognition.stop();
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+    const selectedLang = document.getElementById("target_lang").value;
+    recognition.lang = langCodes[selectedLang] || "en-US";
+    recognition.interimResults = false;
+
+    recognition.onstart = function() {
+        isRecording = true;
+        micBtn.classList.remove("btn-outline-secondary");
+        micBtn.classList.add("btn-danger", "pulse-recording");
+        micBtn.innerHTML = '<i class="bi bi-mic-mute-fill"></i> Escuchando...';
+    };
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        messageInput.value = (messageInput.value ? messageInput.value + " " : "") + transcript;
+    };
+
+    recognition.onerror = stopRecordingState;
+    recognition.onend = stopRecordingState;
+    recognition.start();
+}
+
+function stopRecordingState() {
+    isRecording = false;
+    const micBtn = document.getElementById("mic_btn");
+    micBtn.classList.remove("btn-danger", "pulse-recording");
+    micBtn.classList.add("btn-outline-secondary");
+    micBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+}
+
+function toggleModeFields() {
+    const mode = document.getElementById("mode").value;
+    document.getElementById("field_practica").classList.toggle("d-none", mode !== "practica_oral");
+    document.getElementById("field_examenes").classList.toggle("d-none", mode !== "examenes");
 }
 
 async function sendMessage() {
-    const input = document.getElementById('user_input');
+    const input = document.getElementById("user_message");
     const message = input.value.trim();
-    if (!message && !attachedFile.content) return;
+    if (!message) return;
 
-    const chatBox = document.getElementById('chat_box');
-
-    // 1. Mostrar mensaje del usuario
-    const userDiv = document.createElement('div');
-    userDiv.className = 'p-3 msg-user shadow-sm';
-    userDiv.innerHTML = `<strong>Tú:</strong><p class="mb-0 mt-1">${cleanFormatting(message)}</p>${attachedFile.name ? `<small class="text-muted"><i class="bi bi-paperclip"></i> Adjunto: ${attachedFile.name}</small>` : ''}`;
-    chatBox.appendChild(userDiv);
-
-    input.value = '';
+    const chatBox = document.getElementById("chat_box");
     
-    // 2. Crear contenedor para la respuesta del tutor
-    const tutorDiv = document.createElement('div');
-    tutorDiv.className = 'p-3 msg-tutor shadow-sm';
-    tutorDiv.innerHTML = `<strong>Oralis:</strong> <div id="stream_target"><span class="spinner-border spinner-border-sm"></span> Pensando respuesta...</div>`;
-    chatBox.appendChild(tutorDiv);
+    // Añadir mensaje de usuario
+    chatBox.innerHTML += `<div class="msg-user"><strong>Tú:</strong><p class="mb-0 mt-1">${message}</p></div>`;
+    input.value = "";
+
+    // Contenedor respuesta tutor
+    const tutorMsgDiv = document.createElement("div");
+    tutorMsgDiv.className = "msg-tutor";
+    tutorMsgDiv.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <strong><i class="bi bi-robot"></i> Oralis:</strong>
+            <button class="btn btn-sm btn-link text-dark p-0" onclick="speakText(this.closest('.msg-tutor').innerText)" title="Escuchar">
+                <i class="bi bi-volume-up-fill fs-5"></i>
+            </button>
+        </div>
+        <div class="content">...</div>`;
+    chatBox.appendChild(tutorMsgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    const streamTarget = tutorDiv.querySelector('#stream_target');
+    const contentDiv = tutorMsgDiv.querySelector(".content");
 
-    // Comprobar qué pestaña de examen está activa
-    let selectedExam = "";
-    const activeTab = document.querySelector('#examTabs .nav-link.active').id;
-    if (activeTab === 'tab-custom-btn') {
-        const customName = document.getElementById('custom_examen_name').value.trim();
-        selectedExam = customName ? `Personalizado (${customName})` : 'Examen Personalizado';
-    } else {
-        selectedExam = document.getElementById('examen_oficial_select').value;
-    }
-
-    // Preparar carga útil
     const payload = {
         message: message,
-        target_lang: document.getElementById('target_lang').value,
-        cefr_level: document.getElementById('cefr_level').value,
-        mode: document.getElementById('mode_select').value,
-        rol_practica: document.getElementById('rol_practica').value,
-        examen_oficial: selectedExam,
-        rubrica: document.getElementById('rubrica').value,
-        file_name: attachedFile.name,
-        file_content: attachedFile.content
+        target_lang: document.getElementById("target_lang").value,
+        cefr_level: document.getElementById("cefr_level").value,
+        mode: document.getElementById("mode").value,
+        rol_practica: document.getElementById("rol_practica").value,
+        examen_oficial: document.getElementById("examen_oficial").value,
+        rubrica: document.getElementById("rubrica").value
     };
 
-    clearFile();
-
-    try {
-        const response = await fetch('/chat_stream', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let fullText = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            fullText += decoder.decode(value, { stream: true });
-            streamTarget.innerHTML = formatOralisResponse(fullText);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-    } catch (err) {
-        streamTarget.innerHTML = `<span class="text-danger">Error de comunicación con el servidor.</span>`;
-    }
-}
-
-function formatOralisResponse(raw) {
-    let clean = cleanFormatting(raw);
-
-    let principal = "";
-    let traduccion = "";
-    let correccion = "";
-
-    const pMatch = clean.match(/\[RESPUESTA_PRINCIPAL\]([\s\S]*?)(?=\[TRADUCCION_INTEGRADA\]|\[CORRECCION_Y_MEJORA\]|$)/);
-    const tMatch = clean.match(/\[TRADUCCION_INTEGRADA\]([\s\S]*?)(?=\[CORRECCION_Y_MEJORA\]|$)/);
-    const cMatch = clean.match(/\[CORRECCION_Y_MEJORA\]([\s\S]*?)$/);
-
-    if (pMatch) principal = pMatch[1].trim();
-    if (tMatch) traduccion = tMatch[1].trim();
-    if (cMatch) correccion = cMatch[1].trim();
-
-    if (!principal && !traduccion && !correccion) {
-        return `<p class="mt-1 mb-0">${clean}</p>`;
-    }
-
-    let html = '';
-    if (principal) {
-        html += `<div class="mb-2"><p class="mb-0 fw-semibold">${principal}</p></div>`;
-    }
-    if (traduccion) {
-        html += `<div class="mb-2 text-muted small border-start border-3 ps-2"><em>${traduccion}</em></div>`;
-    }
-    if (correccion) {
-        html += `<div class="mt-2 pt-2 border-top"><span class="badge bg-info text-dark section-badge mb-1">Feedback y Sugerencias</span><div>${correccion}</div></div>`;
-    }
-
-    return html;
-}
-
-async function submitFeedback() {
-    const score = document.getElementById('fb_score').value;
-    const comment = document.getElementById('fb_comment').value;
-
-    await fetch('/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ score, comment })
+    const response = await fetch("/chat_stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
     });
 
-    const modalEl = document.getElementById('feedbackModal');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    modal.hide();
-    alert('¡Gracias por tu opinión!');
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    contentDiv.innerHTML = "";
+
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        contentDiv.innerHTML += decoder.decode(value);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
 }
 
-window.onload = function() {
-    updateExamsList();
-};
+async function clearChat() {
+    await fetch("/clear_chat", { method: "POST" });
+    document.getElementById("chat_box").innerHTML = `
+        <div class="msg-tutor">
+            <strong><i class="bi bi-robot"></i> Oralis:</strong>
+            <p class="mb-0 mt-1">Historial borrado. ¿Qué quieres practicar ahora?</p>
+        </div>`;
+}
+
+async function loadNotebook() {
+    const res = await fetch("/get_notebook");
+    const data = await res.json();
+    const vocabList = document.getElementById("vocab_list");
+    const grammarList = document.getElementById("grammar_list");
+
+    vocabList.innerHTML = data.notebook.vocabulary.length ? 
+        data.notebook.vocabulary.map(item => `<li class="list-group-item">${item}</li>`).join("") : 
+        "<li class='list-group-item text-muted'>Sin vocabulario guardado.</li>";
+
+    grammarList.innerHTML = data.notebook.grammar.length ? 
+        data.notebook.grammar.map(item => `<li class="list-group-item">${item}</li>`).join("") : 
+        "<li class='list-group-item text-muted'>Sin reglas gramaticales guardadas.</li>";
+}
 </script>
 </body>
-</html>
 </html>
