@@ -1,273 +1,294 @@
 import os
 import json
-from datetime import timedelta
-from flask import Flask, render_template, request, jsonify, Response, stream_with_context, session, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
-from groq import Groq
+from flask import Flask, render_template, request, Response, redirect, url_for, session, jsonify
+from openai import OpenAI
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "oralis_secret_key_2026_persistente")
+# Clave secreta para la sesión de Flask
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "oralis_secret_key_change_in_production")
 
-# --- PERSISTENCIA DE SESIÓN ---
-# Mantiene la sesión abierta durante 30 días para no perder el login al recargar
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+# Inicialización del cliente de Groq utilizando la API compatible de OpenAI
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "tu-api-key-de-groq-aqui")
+client = OpenAI(
+    base_url="https://api.groq.com/openai/v1",
+    api_key=GROQ_API_KEY
+)
 
-# --- CONFIGURACIÓN BASE DE DATOS Y CLIENTE API ---
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///oralis.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Modelo predeterminado de Groq seleccionado
+MODEL_NAME = "qwen/qwen3.8-27b"
 
-db = SQLAlchemy(app)
+# Archivo de persistencia de valoraciones/feedback
+FEEDBACK_FILE = "feedback.json"
 
-GROQ_KEY = os.environ.get("GROQ_API_KEY", "TU_API_KEY_AQUI")
-groq_client = Groq(api_key=GROQ_KEY)
 
-# --- MODELOS DE BASE DE DATOS ---
-class Usuario(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(80), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
+def get_system_prompt(target_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica):
+    """
+    Construye el Prompt del Sistema completo adaptado a la configuración actual del usuario.
+    """
+    prompt = f"""Eres Oralis, un tutor virtual experto e interactivo en la enseñanza de idiomas.
 
-class Cuaderno(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    usuario_email = db.Column(db.String(120), nullable=False)
-    idioma = db.Column(db.String(50), nullable=False)
-    nivel = db.Column(db.String(10), nullable=False)
-    categoria = db.Column(db.String(50), nullable=False)
-    termino = db.Column(db.Text, nullable=False)
-    explicacion = db.Column(db.Text, nullable=False)
-    fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
-
-class HistorialChat(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    usuario_email = db.Column(db.String(120), nullable=False)
-    titulo = db.Column(db.String(150), default="Conversación")
-    modo = db.Column(db.String(50), nullable=False)
-    idioma = db.Column(db.String(50), nullable=False)
-    contenido_json = db.Column(db.Text, nullable=False)
-    fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
-
-class Feedback(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    usuario_email = db.Column(db.String(120), nullable=False)
-    puntuacion = db.Column(db.Integer, nullable=False)
-    comentario = db.Column(db.Text, nullable=False)
-    fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
-
-# Creación de tablas de forma segura
-with app.app_context():
-    db.create_all()
-
-# --- RUTAS DE NAVEGACIÓN Y AUTENTICACIÓN ---
-@app.route('/')
-def home():
-    if 'user_email' not in session:
-        return redirect(url_for('login_page'))
-    return render_template('index.html', user_email=session['user_email'], user_name=session.get('user_name', 'Estudiante'))
-
-@app.route('/login_page')
-def login_page():
-    if 'user_email' in session:
-        return redirect(url_for('home'))
-    return render_template('login.html')
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.get_json() or {}
-    action = data.get('action', 'login')  # 'login' o 'register'
-    email = data.get('email', '').strip().lower()
-    password = data.get('password', '').strip()
-
-    if not email or not password:
-        return jsonify({'status': 'error', 'message': 'Debes completar todos los campos.'}), 400
-
-    # 1. Verificar si el usuario ya existe en la base de datos
-    usuario_existente = Usuario.query.filter_by(email=email).first()
-
-    if usuario_existente:
-        # Si el usuario ya existe, validamos la contraseña e iniciamos sesión
-        if check_password_hash(usuario_existente.password_hash, password):
-            session.permanent = True
-            session['user_email'] = usuario_existente.email
-            session['user_name'] = usuario_existente.nombre
-            return jsonify({'status': 'ok', 'message': 'Inicio de sesión exitoso'})
-        else:
-            return jsonify({'status': 'error', 'message': 'El correo ya está registrado y la contraseña es incorrecta.'}), 401
-
-    # 2. Si NO existe y la acción es registrar, creamos el usuario
-    if action == 'register':
-        nombre = data.get('nombre', '').strip()
-        if not nombre:
-            nombre = email.split('@')[0].capitalize()
-
-        nuevo_usuario = Usuario(
-            nombre=nombre,
-            email=email,
-            password_hash=generate_password_hash(password)
-        )
-        db.session.add(nuevo_usuario)
-        db.session.commit()
-
-        session.permanent = True
-        session['user_email'] = email
-        session['user_name'] = nombre
-        return jsonify({'status': 'ok', 'message': 'Registro exitoso'})
-
-    return jsonify({'status': 'error', 'message': 'El correo no está registrado. Por favor, regístrate primero.'}), 404
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login_page'))
-
-# --- STREAM CHAT CON MODELO QWEN 3.8 27B ---
-@app.route('/chat_stream', methods=['POST'])
-def chat_stream():
-    if 'user_email' not in session:
-        return jsonify({'error': 'No autorizado'}), 401
-
-    data = request.get_json() or {}
-    user_message = data.get('message', '').strip()
-    target_lang = data.get('target_lang', 'Inglés')
-    cefr_level = data.get('cefr_level', 'B1')
-    mode = data.get('mode', 'tutor_general')
-    rol_practica = data.get('rol_practica', 'Interlocutor General')
-    examen_oficial = data.get('examen_oficial', '')
-    rubrica = data.get('rubrica', '')
-    
-    file_name = data.get('file_name', '')
-    file_content = data.get('file_content', '')
-
-    user_name = session.get('user_name', 'Estudiante')
-
-    prompt_contenido = user_message
-    if file_content:
-        prompt_contenido += f"\n\n--- ARCHIVO ADJUNTO ({file_name}) ---\n{file_content}\n--- FIN DEL ARCHIVO ---"
-
-    # Definición específica de conducta según el modo activo
-    instruccion_modo = ""
-    if mode == "tutor_general":
-        instruccion_modo = (
-            "ESTÁS EN MODO TUTOR GENERAL. Tu objetivo principal es resolver dudas, explicar temas gramaticales, "
-            "proporcionar vocabulario y responder preguntas del alumno. "
-            "NO incites, sugieras ni fuerces al usuario a realizar simulaciones de examen, ni dinámicas orales, ni "
-            "pruebas de nivel a menos que el usuario te lo solicite explícitamente."
-        )
-    elif mode == "practica_oral":
-        instruccion_modo = (
-            f"ESTÁS EN MODO PRÁCTICA ORAL. Asume el rol de: {rol_practica}. "
-            "Mantén un diálogo fluido simulando esta situación real y haz preguntas acordes al nivel para promover la conversación."
-        )
-    elif mode == "examenes":
-        instruccion_modo = (
-            f"ESTÁS EN MODO EXÁMENES OFICIALES. Simula un examen oficial del tipo: {examen_oficial}. "
-            f"Evalúa según la siguiente rúbrica: {rubrica}. Sé riguroso, haz preguntas del tipo de examen y evalúa el nivel {cefr_level}."
-        )
-    elif mode == "writing":
-        instruccion_modo = (
-            "ESTÁS EN MODO PRÁCTICA DE WRITING. Revisa la composición o archivo adjunto. Proporciona una corrección minuciosa "
-            "de estructura, coherencia, vocabulario y gramática adaptada al nivel CEFR objetivo."
-        )
-
-    system_prompt = f"""
-Eres Oralis, un tutor inteligente de idiomas. El estudiante con el que hablas se llama {user_name}.
-Refiérete a él por su nombre ({user_name}) de forma cercana y natural durante la conversación.
-
-CONFIGURACIÓN DE LA SESIÓN:
+Configuración del estudiante:
 - Idioma Objetivo: {target_lang}
-- Nivel CEFR Objetivo: {cefr_level}
-- Modo Activo: {mode}
+- Nivel CEFR: {cefr_level}
+- Modo de Trabajo: {mode}
+"""
 
-INSTRUCCIÓN DE MODO ESPECÍFICA:
-{instruccion_modo}
+    if mode == "practica_oral":
+        rol = rol_practica.strip() if rol_practica else "Hablante nativo en una conversación informal"
+        prompt += f"- Rol asignado para la simulación: {rol}\n"
+        prompt += "Debes mantener la conversación adoptando completamente ese rol, incentivando al usuario a responder en el idioma objetivo.\n"
 
-REGLAS DE FORMATO ESTRICTAS:
-1. NO utilices NUNCA asteriscos (* o **) ni almohadillas (#) en ninguna parte de tu respuesta.
-2. Si vas a proporcionar listas de vocabulario, ejemplos, correcciones o puntos clave, debes estructurarlos obligatoriamente usando etiquetas HTML explícitas como <ul> y <li>, o listas numeradas <ol> y <li>.
+    elif mode == "examenes":
+        examen = examen_oficial.strip() if examen_oficial else "Examen Oficial General"
+        prompt += f"- Examen / Prueba Específica: {examen}\n"
+        if rubrica and rubrica.strip():
+            prompt += f"- Criterios y Rúbrica de Evaluación: {rubrica.strip()}\n"
+        prompt += "Modela tus preguntas, ejercicios y correcciones según las exigencias y el formato real de dicho examen.\n"
 
-ESTRUCTURA DE SALIDA OBLIGATORIA:
+    elif mode == "writing":
+        prompt += "El usuario practicará la redacción escrita. Evalúa la corrección gramatical, riqueza de vocabulario, coherencia y adecuación formal.\n"
+
+    prompt += """
+ESTRUCTURA OBLIGATORIA DE TUS RESPUESTAS:
+Para mantener el formato limpio y estructurado en la interfaz web, organiza SIEMPRE tus respuestas utilizando exactamente las siguientes tres etiquetas separadoras:
+
 [RESPUESTA_PRINCIPAL]
-Escribe aquí tu respuesta directa en {target_lang} adecuada al modo actual y adaptada al nivel {cefr_level}.
+Escribe aquí tu respuesta, explicación, pregunta o intervención principal en el idioma objetivo.
 
 [TRADUCCION_INTEGRADA]
-Traduce aquí la respuesta principal al idioma español para ayudar al estudiante.
+Si el nivel es A1, A2 o B1, incluye aquí la traducción o aclaración en español de tu respuesta principal. Si el nivel es B2, C1 o C2, puedes dejar esta sección vacía o incluir notas aclaratorias breves.
 
 [CORRECCION_Y_MEJORA]
-Analiza los errores cometidos en el mensaje o texto del usuario (gramática, vocabulario, sintaxis) y proporciona sugerencias concretas de mejora usando listas HTML (<ul><li>...</li></ul>). Si el mensaje es correcto, indícalo felicitándolo.
+Analiza el último mensaje escrito por el usuario. Si cometió errores gramaticales, ortográficos o de vocabulario, corrígelos aquí de forma constructiva e indica cómo expresarlo de forma más natural. Si no hubo errores, indica brevemente que su mensaje fue correcto.
 """
+    return prompt
+
+
+@app.route("/")
+def index():
+    """Ruta principal que renderiza la interfaz."""
+    if "user_name" not in session:
+        session["user_name"] = "Estudiante"
+    
+    # Inicializa el historial de conversación en la sesión si no existe
+    if "chat_history" not in session:
+        session["chat_history"] = []
+        
+    return render_template("index.html", user_name=session["user_name"])
+
+
+@app.route("/set_name", methods=["POST"])
+def set_name():
+    """Actualiza el nombre del usuario en la sesión actual."""
+    name = request.form.get("user_name", "Estudiante").strip()
+    session["user_name"] = name if name else "Estudiante"
+    return redirect(url_for("index"))
+
+
+@app.route("/clear_chat", methods=["POST"])
+def clear_chat():
+    """Limpia el historial de la conversación en la sesión."""
+    session["chat_history"] = []
+    return jsonify({"status": "ok", "message": "Historial reiniciado"})
+
+
+@app.route("/logout")
+def logout():
+    """Cierra la sesión y limpia las variables."""
+    session.clear()
+    return redirect(url_for("index"))
+
+
+@app.route("/chat_stream", methods=["POST"])
+def chat_stream():
+    """
+    Endpoint principal de conversación con Groq (Streaming response).
+    Mantiene historial de conversación, adjuntos y parámetros de exámenes/rúbricas.
+    """
+    data = request.get_json() or {}
+
+    user_message = data.get("message", "").strip()
+    target_lang = data.get("target_lang", "Inglés")
+    cefr_level = data.get("cefr_level", "B1")
+    mode = data.get("mode", "tutor_general")
+    rol_practica = data.get("rol_practica", "")
+    examen_oficial = data.get("examen_oficial", "")
+    rubrica = data.get("rubrica", "")
+    file_name = data.get("file_name", "")
+    file_content = data.get("file_content", "")
+
+    # Construir prompt de sistema
+    system_prompt = get_system_prompt(target_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica)
+
+    # Preparar el contenido del mensaje del usuario
+    full_user_text = user_message
+    if file_content:
+        full_user_text += f"\n\n--- ARCHIVO ADJUNTO ({file_name}) ---\n{file_content}\n--- FIN ARCHIVO ---"
+
+    # Recuperar o inicializar el historial de la conversación en sesión
+    history = session.get("chat_history", [])
+
+    # Construir el listado final de mensajes para el modelo
+    messages = [{"role": "system", "content": system_prompt}]
+    
+    # Añadir historial previo
+    for msg in history:
+        messages.append({"role": msg["role"], "content": msg["content"]})
+        
+    # Añadir el mensaje actual del usuario
+    messages.append({"role": "user", "content": full_user_text})
+
+    def generate():
+        full_response_text = ""
+        try:
+            # Llamada con streaming usando el SDK v1.x de OpenAI con el servidor de Groq
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=messages,
+                stream=True,
+                temperature=0.7
+            )
+            for chunk in response:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    content = chunk.choices[0].delta.content
+                    full_response_text += content
+                    yield content
+
+            # Guardar la interacción en el historial de la sesión
+            history.append({"role": "user", "content": full_user_text})
+            history.append({"role": "assistant", "content": full_response_text})
+            session["chat_history"] = history
+            session.modified = True
+
+        except Exception as e:
+            yield f"[RESPUESTA_PRINCIPAL] Ocurrió un error al procesar la solicitud con Groq: {str(e)}"
+
+    return Response(generate(), mimetype="text/plain; charset=utf-8")
+
+
+@app.route("/feedback", methods=["POST"])
+def feedback():
+    """Registra las valoraciones del usuario en feedback.json."""
+    data = request.get_json() or {}
+    score = data.get("score")
+    comment = data.get("comment", "").strip()
+    user_name = session.get("user_name", "Anónimo")
+
+    feedback_entry = {
+        "user": user_name,
+        "score": score,
+        "comment": comment
+    }
+
+    feedbacks = []
+    if os.path.exists(FEEDBACK_FILE):
+        try:
+            with open(FEEDBACK_FILE, "r", encoding="utf-8") as f:
+                feedbacks = json.load(f)
+        except Exception:
+            feedbacks = []
+
+    feedbacks.append(feedback_entry)
+
+    try:
+        with open(FEEDBACK_FILE, "w", encoding="utf-8") as f:
+            json.dump(feedbacks, f, ensure_ascii=False, indent=4)
+        return jsonify({"status": "ok", "message": "Feedback recibido correctamente"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
+
+
+@app.route("/set_name", methods=["POST"])
+def set_name():
+    name = request.form.get("user_name", "Estudiante").strip()
+    session["user_name"] = name if name else "Estudiante"
+    return redirect(url_for("index"))
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("index"))
+
+
+@app.route("/chat_stream", methods=["POST"])
+def chat_stream():
+    data = request.get_json() or {}
+
+    user_message = data.get("message", "").strip()
+    target_lang = data.get("target_lang", "Inglés")
+    cefr_level = data.get("cefr_level", "B1")
+    mode = data.get("mode", "tutor_general")
+    rol_practica = data.get("rol_practica", "")
+    examen_oficial = data.get("examen_oficial", "")
+    rubrica = data.get("rubrica", "")
+    file_name = data.get("file_name", "")
+    file_content = data.get("file_content", "")
+
+    system_prompt = get_system_prompt(target_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica)
+
+    full_user_text = user_message
+    if file_content:
+        full_user_text += f"\n\n--- ARCHIVO ADJUNTO: {file_name} ---\n{file_content}\n--- FIN DEL ARCHIVO ---"
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": full_user_text}
+    ]
 
     def generate():
         try:
-            completion = groq_client.chat.completions.create(
+            # Llamada en streaming usando la API de Groq y el modelo Qwen
+            response = openai.ChatCompletion.create(
                 model="qwen/qwen3.8-27b",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": prompt_contenido}
-                ],
-                temperature=0.7,
-                max_tokens=1500,
-                stream=True
+                messages=messages,
+                stream=True,
+                temperature=0.7
             )
-            for chunk in completion:
-                content = chunk.choices[0].delta.content
+            for chunk in response:
+                content = chunk.choices[0].delta.get("content", "")
                 if content:
                     yield content
         except Exception as e:
-            yield f"[Error al conectar con Oralis: {str(e)}]"
+            yield f"[RESPUESTA_PRINCIPAL] Ocurrió un error al procesar tu respuesta con Groq: {str(e)}"
 
-    return Response(stream_with_context(generate()), content_type='text/plain; charset=utf-8')
+    return Response(generate(), mimetype="text/plain; charset=utf-8")
 
-# --- RUTAS DE DATOS ---
-@app.route('/cuaderno/listar')
-def listar_cuaderno():
-    if 'user_email' not in session:
-        return jsonify([])
-    items = Cuaderno.query.filter_by(usuario_email=session['user_email']).order_by(Cuaderno.fecha.desc()).all()
-    return jsonify([{
-        'id': item.id,
-        'idioma': item.idioma,
-        'nivel': item.nivel,
-        'categoria': item.categoria,
-        'termino': item.termino,
-        'explicacion': item.explicacion,
-        'fecha': item.fecha.strftime('%Y-%m-%d')
-    } for item in items])
 
-@app.route('/historial/listar')
-def listar_historial():
-    if 'user_email' not in session:
-        return jsonify([])
-    chats = HistorialChat.query.filter_by(usuario_email=session['user_email']).order_by(HistorialChat.fecha.desc()).all()
-    return jsonify([{
-        'id': c.id,
-        'titulo': c.titulo,
-        'modo': c.modo,
-        'idioma': c.idioma,
-        'fecha': c.fecha.strftime('%Y-%m-%d %H:%M')
-    } for c in chats])
-
-@app.route('/feedback', methods=['POST'])
-def save_feedback():
-    if 'user_email' not in session:
-        return jsonify({'error': 'No autorizado'}), 401
+@app.route("/feedback", methods=["POST"])
+def feedback():
     data = request.get_json() or {}
-    nuevo_fb = Feedback(
-        usuario_email=session['user_email'],
-        puntuacion=int(data.get('score', 5)),
-        comentario=data.get('comment', '').strip()
-    )
-    db.session.add(nuevo_fb)
-    db.session.commit()
-    return jsonify({'status': 'ok'})
+    score = data.get("score")
+    comment = data.get("comment", "").strip()
+    user_name = session.get("user_name", "Anónimo")
 
-@app.route('/admin/feedbacks')
-def admin_feedbacks():
-    if session.get('user_email') != 'p75886777@gmail.com':
-        return "Acceso denegado", 403
-    feedbacks = Feedback.query.order_by(Feedback.fecha_creacion.desc()).all()
-    total_usuarios = Usuario.query.count()
-    return render_template('admin_feedbacks.html', feedbacks=feedbacks, total_usuarios=total_usuarios)
+    feedback_entry = {
+        "user": user_name,
+        "score": score,
+        "comment": comment
+    }
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    feedbacks = []
+    if os.path.exists(FEEDBACK_FILE):
+        try:
+            with open(FEEDBACK_FILE, "r", encoding="utf-8") as f:
+                feedbacks = json.load(f)
+        except Exception:
+            feedbacks = []
+
+    feedbacks.append(feedback_entry)
+
+    try:
+        with open(FEEDBACK_FILE, "w", encoding="utf-8") as f:
+            json.dump(feedbacks, f, ensure_ascii=False, indent=4)
+        return jsonify({"status": "ok", "message": "Feedback registrado correctamente"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
