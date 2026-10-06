@@ -21,7 +21,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-dark); line-height: 1.6; }
 
-        /* NAVBAR CON ADAPTACIÓN MÓVIL Y SELECTOR DE IDIOMA UI */
+        /* NAVBAR CON ADAPTACIÓN MÓVIL */
         .navbar { display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 12px 20px; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 10px; }
         .logo { font-size: 1.4rem; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 8px; }
         .nav-links { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; max-width: 100%; }
@@ -30,18 +30,6 @@
         
         .user-profile { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
         .btn-admin { background: #E8F5E9; color: #2E7D32; padding: 4px 8px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #A5D6A7; font-size: 0.8rem; }
-
-        /* SELECTOR DE IDIOMA UI */
-        .ui-lang-select {
-            background: #F4F7F5;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 4px 8px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            cursor: pointer;
-        }
 
         .hidden { display: none !important; }
 
@@ -85,10 +73,12 @@
         .btn-audio-speak { background: transparent; border: none; color: var(--primary-color); cursor: pointer; font-size: 0.9rem; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
         .btn-audio-speak:hover { color: #1e4736; }
 
+        /* UPLOAD STYLES */
         .file-upload-box { border: 2px dashed var(--border-color); padding: 10px; border-radius: 8px; text-align: center; background: #FFFFFF; margin-top: 6px; cursor: pointer; transition: all 0.2s; }
         .file-upload-box:hover { border-color: var(--primary-color); background: #F4F7F5; }
         .file-badge { display: inline-flex; align-items: center; gap: 6px; background: #EBF2EE; color: var(--primary-color); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin-top: 6px; }
 
+        /* TARJETAS Y GRILLAS */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 16px; }
         .card-item { background: #FFF; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.2s; }
         .card-item:hover { transform: translateY(-2px); }
@@ -97,6 +87,7 @@
         .cuaderno-tab-btn { background: #EBF2EE; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary-color); font-size: 0.85rem; white-space: nowrap; }
         .cuaderno-tab-btn.active { background: var(--primary-color); color: white; }
 
+        /* ADAPTACIÓN MÓVIL Y TABLET MEDIANTE MEDIA QUERIES */
         @media (max-width: 850px) {
             .navbar { padding: 10px 14px; }
             .tutor-layout { grid-template-columns: 1fr; height: auto; display: flex; flex-direction: column; }
@@ -121,24 +112,13 @@
     <header class="navbar">
         <div class="logo"><i class="fa-solid fa-comments"></i> <span>Oralis</span></div>
         <nav class="nav-links">
-            <button class="nav-btn active" onclick="switchTab('tutor', event)"><i class="fa-solid fa-robot"></i> <span data-i18n="nav_tutor">Tutor</span></button>
-            <button class="nav-btn" onclick="switchTab('cuaderno', event)"><i class="fa-solid fa-book-bookmark"></i> <span data-i18n="nav_cuaderno">Cuaderno</span></button>
-            <button class="nav-btn" onclick="switchTab('banco', event)"><i class="fa-solid fa-book-open"></i> <span data-i18n="nav_banco">Banco</span></button>
-            <button class="nav-btn" onclick="switchTab('historial', event)"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="nav_historial">Historial</span></button>
-            <button class="nav-btn" onclick="switchTab('feedback', event)"><i class="fa-solid fa-star"></i> <span data-i18n="nav_feedback">Feedback</span></button>
+            <button class="nav-btn active" onclick="switchTab('tutor', event)"><i class="fa-solid fa-robot"></i> Tutor</button>
+            <button class="nav-btn" onclick="switchTab('cuaderno', event)"><i class="fa-solid fa-book-bookmark"></i> Cuaderno</button>
+            <button class="nav-btn" onclick="switchTab('banco', event)"><i class="fa-solid fa-book-open"></i> Banco</button>
+            <button class="nav-btn" onclick="switchTab('historial', event)"><i class="fa-solid fa-clock-rotate-left"></i> Historial</button>
+            <button class="nav-btn" onclick="switchTab('feedback', event)"><i class="fa-solid fa-star"></i> Feedback</button>
         </nav>
-
         <div class="user-profile">
-            <!-- SELECTOR DE IDIOMA DE INTERFAZ -->
-            <select id="ui-language-select" class="ui-lang-select" onchange="changeUILanguage(this.value)">
-                <option value="es">🌐 ES</option>
-                <option value="en">🌐 EN</option>
-                <option value="de">🌐 DE</option>
-                <option value="fr">🌐 FR</option>
-                <option value="it">🌐 IT</option>
-                <option value="pt">🌐 PT</option>
-            </select>
-
             <span><i class="fa-solid fa-circle-user"></i> {{ user_name }}</span>
             {% if user_email == 'p75886777@gmail.com' %}
                 <a href="/admin/feedbacks" class="btn-admin"><i class="fa-solid fa-shield-halved"></i> Admin</a>
@@ -154,10 +134,10 @@
             <div class="tutor-layout">
                 
                 <aside class="sidebar-config">
-                    <h3><i class="fa-solid fa-sliders"></i> <span data-i18n="config_title">Configuración</span></h3>
+                    <h3><i class="fa-solid fa-sliders"></i> Configuración</h3>
 
                     <div class="form-group">
-                        <label for="select-idioma" data-i18n="target_lang">Idioma Objetivo:</label>
+                        <label for="select-idioma">Idioma Objetivo:</label>
                         <select id="select-idioma" onchange="actualizarExamenesDisponibles()">
                             <option value="Inglés">🇬🇧 Inglés</option>
                             <option value="Alemán">🇩🇪 Alemán</option>
@@ -176,63 +156,63 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="select-cefr" data-i18n="cefr_level">Nivel CEFR Deseado:</label>
+                        <label for="select-cefr">Nivel CEFR Deseado:</label>
                         <select id="select-cefr">
-                            <option value="A1">A1</option>
-                            <option value="A2">A2</option>
-                            <option value="B1" selected>B1</option>
-                            <option value="B2">B2</option>
-                            <option value="C1">C1</option>
-                            <option value="C2">C2</option>
+                            <option value="A1">A1 - Principiante</option>
+                            <option value="A2">A2 - Elemental</option>
+                            <option value="B1" selected>B1 - Intermedio</option>
+                            <option value="B2">B2 - Intermedio Alto</option>
+                            <option value="C1">C1 - Avanzado</option>
+                            <option value="C2">C2 - Maestría / Nativo</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="select-modo" data-i18n="learning_mode">Modo de Aprendizaje:</label>
+                        <label for="select-modo">Modo de Aprendizaje:</label>
                         <select id="select-modo" onchange="cambiarModoInterfaz()">
-                            <option value="tutor_general" data-i18n="mode_1">💬 Modo 1: Tutor General</option>
-                            <option value="practica_oral" data-i18n="mode_2">🎙️ Modo 2: Práctica Oral</option>
-                            <option value="examenes" data-i18n="mode_3">🎓 Modo 3: Exámenes Oficiales</option>
-                            <option value="writing" data-i18n="mode_4">📝 Modo 4: Práctica de Writing</option>
+                            <option value="tutor_general">💬 Modo 1: Tutor General</option>
+                            <option value="practica_oral">🎙️ Modo 2: Práctica Oral</option>
+                            <option value="examenes">🎓 Modo 3: Exámenes Oficiales</option>
+                            <option value="writing">📝 Modo 4: Práctica de Writing</option>
                         </select>
                     </div>
 
                     <!-- MODO 2: ROL PERSONALIZABLE -->
                     <div id="opciones-modo-2" class="modo-extra hidden">
-                        <label for="select-rol" data-i18n="oralis_role">Rol de Oralis:</label>
+                        <label for="select-rol">Rol de Oralis:</label>
                         <select id="select-rol" onchange="evaluarRolPersonalizado()">
-                            <option value="Entrevistador de Trabajo" data-i18n="role_job">Entrevistador de Trabajo</option>
-                            <option value="Médico en Consulta" data-i18n="role_doctor">Médico en Consulta</option>
-                            <option value="Recepcionista de Hotel" data-i18n="role_hotel">Recepcionista de Hotel</option>
-                            <option value="Guía Turístico" data-i18n="role_guide">Guía Turístico</option>
-                            <option value="Cliente en Restaurante" data-i18n="role_restaurant">Cliente en Restaurante</option>
-                            <option value="Colega de Oficina" data-i18n="role_colleague">Colega de Oficina</option>
-                            <option value="otro" data-i18n="role_custom">Personalizado (Escribir abajo)...</option>
+                            <option value="Entrevistador de Trabajo">Entrevistador de Trabajo</option>
+                            <option value="Médico en Consulta">Médico en Consulta</option>
+                            <option value="Recepcionista de Hotel">Recepcionista de Hotel</option>
+                            <option value="Guía Turístico">Guía Turístico</option>
+                            <option value="Cliente en Restaurante">Cliente en Restaurante</option>
+                            <option value="Colega de Oficina">Colega de Oficina</option>
+                            <option value="otro">Personalizado (Escribir abajo)...</option>
                         </select>
-                        <input type="text" id="rol-custom" class="hidden" style="margin-top:6px;" data-i18n-ph="ph_custom_role" placeholder="Ej: Agente inmobiliario...">
+                        <input type="text" id="rol-custom" class="hidden" style="margin-top:6px;" placeholder="Ej: Agente inmobiliario...">
                     </div>
 
                     <!-- MODO 3: EXÁMENES -->
                     <div id="opciones-modo-3" class="modo-extra hidden">
-                        <label for="select-examen" data-i18n="exam_label">Certificación / Examen:</label>
+                        <label for="select-examen">Certificación / Examen:</label>
                         <select id="select-examen"></select>
 
-                        <label for="rubrica-text" style="margin-top:6px; display:block;" data-i18n="rubric_label">Rúbrica o Criterios:</label>
-                        <textarea id="rubrica-text" rows="2" data-i18n-ph="ph_rubric" placeholder="Pega los criterios específicos aquí..."></textarea>
+                        <label for="rubrica-text" style="margin-top:6px; display:block;">Rúbrica o Criterios:</label>
+                        <textarea id="rubrica-text" rows="2" placeholder="Pega los criterios específicos aquí..."></textarea>
                     </div>
 
                     <!-- MODO 4: WRITING -->
                     <div id="opciones-modo-4" class="modo-extra hidden">
-                        <label for="modo-correccion-writing" data-i18n="correction_system">Sistema de Corrección:</label>
+                        <label for="modo-correccion-writing">Sistema de Corrección:</label>
                         <select id="modo-correccion-writing">
-                            <option value="normal" data-i18n="corr_normal">Modo Normal (Muestra solución)</option>
-                            <option value="desafio" data-i18n="corr_challenge">Modo Desafío (Guiado con pistas)</option>
+                            <option value="normal">Modo Normal (Muestra solución)</option>
+                            <option value="desafio">Modo Desafío (Guiado con pistas)</option>
                         </select>
 
-                        <label style="margin-top: 8px; display:block;" data-i18n="attach_file">Adjuntar Composición (.txt, .md, .doc):</label>
+                        <label style="margin-top: 8px; display:block;">Adjuntar Composición (.txt, .md, .doc):</label>
                         <div class="file-upload-box" onclick="document.getElementById('writing-file-input').click()">
                             <i class="fa-solid fa-cloud-arrow-up" style="font-size:1.2rem; color:var(--primary-color);"></i>
-                            <p style="font-size:0.78rem; margin-top:2px;" data-i18n="click_upload">Haz clic aquí para subir archivo</p>
+                            <p style="font-size:0.78rem; margin-top:2px;">Haz clic aquí para subir archivo</p>
                         </div>
                         <input type="file" id="writing-file-input" class="hidden" accept=".txt,.md,.doc,.docx" onchange="procesarArchivoAdjunto(event)">
                         
@@ -249,18 +229,19 @@
                     <div id="chat-box" class="chat-box">
                         <div class="message bot-message">
                             <div class="msg-content">
-                                <p><span data-i18n="welcome_prefix">¡Hola</span> {{ user_name }}! <span data-i18n="welcome_suffix">Soy Oralis, tu tutor inteligente de idiomas. Selecciona tus preferencias e inicia la conversación.</span></p>
+                                <p>¡Hola {{ user_name }}! Soy Oralis, tu tutor inteligente de idiomas. Selecciona tus preferencias e inicia la conversación.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="chat-input-container">
+                        <!-- BOTÓN DE MICRÓFONO (SE OCULTA EN MODO WRITING) -->
                         <button id="btn-mic" class="btn-icon" onclick="toggleReconocimientoVoz()" title="Grabar audio con micrófono">
                             <i class="fa-solid fa-microphone"></i>
                         </button>
                         
-                        <textarea id="user-input" rows="1" data-i18n-ph="ph_input_msg" placeholder="Escribe o dicta tu mensaje aquí..."></textarea>
-                        <button class="btn-primary" onclick="enviarMensaje()"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="btn_send">Enviar</span></button>
+                        <textarea id="user-input" rows="1" placeholder="Escribe o dicta tu mensaje aquí..."></textarea>
+                        <button class="btn-primary" onclick="enviarMensaje()"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
                     </div>
                 </div>
 
@@ -269,460 +250,63 @@
 
         <!-- PESTAÑA 2: MI CUADERNO -->
         <section id="tab-cuaderno" class="tab-content hidden">
-            <h2><i class="fa-solid fa-book-bookmark"></i> <span data-i18n="title_notebook">Mi Cuaderno (Repaso Inteligente)</span></h2>
+            <h2><i class="fa-solid fa-book-bookmark"></i> Mi Cuaderno (Repaso Inteligente)</h2>
             <div class="cuaderno-tabs">
-                <button class="cuaderno-tab-btn active" onclick="filtrarCuaderno('todos', event)" data-i18n="tab_all">Ver Todos</button>
-                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Vocabulario', event)" data-i18n="tab_vocab">📘 Vocabulario</button>
-                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Gramática', event)" data-i18n="tab_grammar">📐 Gramática</button>
+                <button class="cuaderno-tab-btn active" onclick="filtrarCuaderno('todos', event)">Ver Todos</button>
+                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Vocabulario', event)">📘 Vocabulario</button>
+                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Gramática', event)">📐 Gramática</button>
             </div>
             <div id="cuaderno-grid" class="cards-grid"></div>
         </section>
 
         <!-- PESTAÑA 3: BANCO DE RECURSOS -->
         <section id="tab-banco" class="tab-content hidden">
-            <h2><i class="fa-solid fa-book-open"></i> <span data-i18n="title_bank">Banco Recomendado de Recursos</span></h2>
+            <h2><i class="fa-solid fa-book-open"></i> Banco Recomendado de Recursos</h2>
             <div class="cards-grid">
                 <div class="card-item" onclick="cargarEnChat('Quiero practicar conectores avanzados')">
-                    <h4 data-i18n="bank_connectors_title">🔗 Conectores Avanzados</h4>
-                    <p data-i18n="bank_connectors_desc">Mejora la cohesión y fluidez de tus textos y conversaciones.</p>
+                    <h4>🔗 Conectores Avanzados</h4>
+                    <p>Mejora la cohesión y fluidez de tus textos y conversaciones.</p>
                 </div>
                 <div class="card-item" onclick="cargarEnChat('Iniciar práctica de expresiones idiomáticas')">
-                    <h4 data-i18n="bank_idioms_title">💡 Idioms y Modismos</h4>
-                    <p data-i18n="bank_idioms_desc">Habla como un nativo utilizando modismos habituales.</p>
+                    <h4>💡 Idioms y Modismos</h4>
+                    <p>Habla como un nativo utilizando modismos habituales.</p>
                 </div>
                 <div class="card-item" onclick="cargarEnChat('Simular vocabulario para una entrevista de trabajo')">
-                    <h4 data-i18n="bank_interview_title">💼 Entrevistas de Trabajo</h4>
-                    <p data-i18n="bank_interview_desc">Vocabulario clave y respuestas recomendadas en entornos profesionales.</p>
+                    <h4>💼 Entrevistas de Trabajo</h4>
+                    <p>Vocabulario clave y respuestas recomendadas en entornos profesionales.</p>
                 </div>
                 <div class="card-item" onclick="cargarEnChat('Quiero repasar la conjugación de verbos en pasado')">
-                    <h4 data-i18n="bank_past_title">⌛ Conjugación en Pasado</h4>
-                    <p data-i18n="bank_past_desc">Ejercicios prácticos sobre tiempos verbales pasados.</p>
+                    <h4>⌛ Conjugación en Pasado</h4>
+                    <p>Ejercicios prácticos sobre tiempos verbales pasados.</p>
                 </div>
             </div>
         </section>
 
         <!-- PESTAÑA 4: HISTORIAL -->
         <section id="tab-historial" class="tab-content hidden">
-            <h2><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="title_history">Historial de Chats</span></h2>
+            <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de Chats</h2>
             <div id="historial-list" class="cards-grid"></div>
         </section>
 
         <!-- PESTAÑA 5: FEEDBACK -->
         <section id="tab-feedback" class="tab-content hidden">
-            <h2><i class="fa-solid fa-star"></i> <span data-i18n="title_feedback">Enviar Feedback al Administrador</span></h2>
+            <h2><i class="fa-solid fa-star"></i> Enviar Feedback al Administrador</h2>
             <div style="max-width: 500px; margin-top:15px;" class="form-group">
-                <label data-i18n="label_score">Puntuación:</label>
+                <label>Puntuación:</label>
                 <select id="fb-score">
-                    <option value="5" data-i18n="score_5">⭐⭐⭐⭐⭐ Excelente</option>
-                    <option value="4" data-i18n="score_4">⭐⭐⭐⭐ Muy Bueno</option>
-                    <option value="3" data-i18n="score_3">⭐⭐⭐ Aceptable</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                    <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
+                    <option value="3">⭐⭐⭐ Aceptable</option>
                 </select>
-                <label style="margin-top:10px;" data-i18n="label_comment">Comentario:</label>
-                <textarea id="fb-comment" rows="4" data-i18n-ph="ph_comment" placeholder="Escribe tu opinión o sugerencias..."></textarea>
-                <button class="btn-primary" style="margin-top:10px; width:100%;" onclick="enviarFeedback()"><span data-i18n="btn_send_fb">Enviar Opinión</span></button>
+                <label style="margin-top:10px;">Comentario:</label>
+                <textarea id="fb-comment" rows="4" placeholder="Escribe tu opinión o sugerencias..."></textarea>
+                <button class="btn-primary" style="margin-top:10px; width:100%;" onclick="enviarFeedback()">Enviar Opinión</button>
             </div>
         </section>
 
     </main>
 
     <script>
-        // --- DICCIONARIO DE TRADUCCIÓN DE INTERFAZ (UI I18N) ---
-        const uiTranslations = {
-            es: {
-                nav_tutor: "Tutor",
-                nav_cuaderno: "Cuaderno",
-                nav_banco: "Banco",
-                nav_historial: "Historial",
-                nav_feedback: "Feedback",
-                config_title: "Configuración",
-                target_lang: "Idioma Objetivo:",
-                cefr_level: "Nivel CEFR Deseado:",
-                learning_mode: "Modo de Aprendizaje:",
-                mode_1: "💬 Modo 1: Tutor General",
-                mode_2: "🎙️ Modo 2: Práctica Oral",
-                mode_3: "🎓 Modo 3: Exámenes Oficiales",
-                mode_4: "📝 Modo 4: Práctica de Writing",
-                oralis_role: "Rol de Oralis:",
-                role_job: "Entrevistador de Trabajo",
-                role_doctor: "Médico en Consulta",
-                role_hotel: "Recepcionista de Hotel",
-                role_guide: "Guía Turístico",
-                role_restaurant: "Cliente en Restaurante",
-                role_colleague: "Colega de Oficina",
-                role_custom: "Personalizado (Escribir abajo)...",
-                ph_custom_role: "Ej: Agente inmobiliario...",
-                exam_label: "Certificación / Examen:",
-                rubric_label: "Rúbrica o Criterios:",
-                ph_rubric: "Pega los criterios específicos aquí...",
-                correction_system: "Sistema de Corrección:",
-                corr_normal: "Modo Normal (Muestra solución)",
-                corr_challenge: "Modo Desafío (Guiado con pistas)",
-                attach_file: "Adjuntar Composición (.txt, .md, .doc):",
-                click_upload: "Haz clic aquí para subir archivo",
-                welcome_prefix: "¡Hola",
-                welcome_suffix: "Soy Oralis, tu tutor inteligente de idiomas. Selecciona tus preferencias e inicia la conversación.",
-                ph_input_msg: "Escribe o dicta tu mensaje aquí...",
-                btn_send: "Enviar",
-                title_notebook: "Mi Cuaderno (Repaso Inteligente)",
-                tab_all: "Ver Todos",
-                tab_vocab: "📘 Vocabulario",
-                tab_grammar: "📐 Gramática",
-                title_bank: "Banco Recomendado de Recursos",
-                bank_connectors_title: "🔗 Conectores Avanzados",
-                bank_connectors_desc: "Mejora la cohesión y fluidez de tus textos y conversaciones.",
-                bank_idioms_title: "💡 Idioms y Modismos",
-                bank_idioms_desc: "Habla como un nativo utilizando modismos habituales.",
-                bank_interview_title: "💼 Entrevistas de Trabajo",
-                bank_interview_desc: "Vocabulario clave y respuestas recomendadas en entornos profesionales.",
-                bank_past_title: "⌛ Conjugación en Pasado",
-                bank_past_desc: "Ejercicios prácticos sobre tiempos verbales pasados.",
-                title_history: "Historial de Chats",
-                title_feedback: "Enviar Feedback al Administrador",
-                label_score: "Puntuación:",
-                score_5: "⭐⭐⭐⭐⭐ Excelente",
-                score_4: "⭐⭐⭐⭐ Muy Bueno",
-                score_3: "⭐⭐⭐ Aceptable",
-                label_comment: "Comentario:",
-                ph_comment: "Escribe tu opinión o sugerencias...",
-                btn_send_fb: "Enviar Opinión",
-                listen_pron: "Escuchar pronunciación",
-                integrated_trans: "🌐 Traducción Integrada:",
-                pedagogical_corr: "💡 Análisis Pedagógico y Corrección:"
-            },
-            en: {
-                nav_tutor: "Tutor",
-                nav_cuaderno: "Notebook",
-                nav_banco: "Bank",
-                nav_historial: "History",
-                nav_feedback: "Feedback",
-                config_title: "Settings",
-                target_lang: "Target Language:",
-                cefr_level: "Target CEFR Level:",
-                learning_mode: "Learning Mode:",
-                mode_1: "💬 Mode 1: General Tutor",
-                mode_2: "🎙️ Mode 2: Speaking Practice",
-                mode_3: "🎓 Mode 3: Official Exams",
-                mode_4: "📝 Mode 4: Writing Practice",
-                oralis_role: "Oralis Role:",
-                role_job: "Job Interviewer",
-                role_doctor: "Doctor in Consultation",
-                role_hotel: "Hotel Receptionist",
-                role_guide: "Tour Guide",
-                role_restaurant: "Restaurant Customer",
-                role_colleague: "Office Colleague",
-                role_custom: "Custom (Type below)...",
-                ph_custom_role: "E.g., Real estate agent...",
-                exam_label: "Certification / Exam:",
-                rubric_label: "Rubric or Criteria:",
-                ph_rubric: "Paste specific criteria here...",
-                correction_system: "Correction System:",
-                corr_normal: "Normal Mode (Shows solution)",
-                corr_challenge: "Challenge Mode (Guided with hints)",
-                attach_file: "Attach Writing (.txt, .md, .doc):",
-                click_upload: "Click here to upload file",
-                welcome_prefix: "Hello",
-                welcome_suffix: "I am Oralis, your AI language tutor. Select your settings and start talking.",
-                ph_input_msg: "Type or dictate your message here...",
-                btn_send: "Send",
-                title_notebook: "My Notebook (Smart Review)",
-                tab_all: "View All",
-                tab_vocab: "📘 Vocabulary",
-                tab_grammar: "📐 Grammar",
-                title_bank: "Recommended Resource Bank",
-                bank_connectors_title: "🔗 Advanced Connectors",
-                bank_connectors_desc: "Improve text cohesion and conversational fluency.",
-                bank_idioms_title: "💡 Idioms & Phrases",
-                bank_idioms_desc: "Speak like a native using common expressions.",
-                bank_interview_title: "💼 Job Interviews",
-                bank_interview_desc: "Key vocabulary and answers for professional environments.",
-                bank_past_title: "⌛ Past Tense Conjugation",
-                bank_past_desc: "Practical exercises on past tenses.",
-                title_history: "Chat History",
-                title_feedback: "Send Feedback to Admin",
-                label_score: "Rating:",
-                score_5: "⭐⭐⭐⭐⭐ Excellent",
-                score_4: "⭐⭐⭐⭐ Very Good",
-                score_3: "⭐⭐⭐ Acceptable",
-                label_comment: "Comment:",
-                ph_comment: "Type your feedback or suggestions here...",
-                btn_send_fb: "Send Feedback",
-                listen_pron: "Listen to pronunciation",
-                integrated_trans: "🌐 Integrated Translation:",
-                pedagogical_corr: "💡 Pedagogical Analysis & Correction:"
-            },
-            de: {
-                nav_tutor: "Tutor",
-                nav_cuaderno: "Notizbuch",
-                nav_banco: "Ressourcen",
-                nav_historial: "Verlauf",
-                nav_feedback: "Feedback",
-                config_title: "Einstellungen",
-                target_lang: "Zielsprache:",
-                cefr_level: "Gewünschtes CEFR-Niveau:",
-                learning_mode: "Lernmodus:",
-                mode_1: "💬 Modus 1: Allgemeiner Tutor",
-                mode_2: "🎙️ Modus 2: Mündliche Praxis",
-                mode_3: "🎓 Modus 3: Offizielle Prüfungen",
-                mode_4: "📝 Modus 4: Schreibpraxis",
-                oralis_role: "Oralis Rolle:",
-                role_job: "Bewerbungsinterviewer",
-                role_doctor: "Arzt in der Praxis",
-                role_hotel: "Hotelrezeptionist",
-                role_guide: "Reiseleiter",
-                role_restaurant: "Kunde im Restaurant",
-                role_colleague: "Bürokollege",
-                role_custom: "Benutzerdefiniert (Unten eingeben)...",
-                ph_custom_role: "Z.B. Immobilienmakler...",
-                exam_label: "Zertifizierung / Prüfung:",
-                rubric_label: "Bewertungsraster / Kriterien:",
-                ph_rubric: "Fügen Sie spezifische Kriterien hier ein...",
-                correction_system: "Korrektursystem:",
-                corr_normal: "Normaler Modus (Zeigt Lösung)",
-                corr_challenge: "Herausforderungsmodus (Hinweise)",
-                attach_file: "Aufsatz anhängen (.txt, .md, .doc):",
-                click_upload: "Klicken Sie hier zum Hochladen",
-                welcome_prefix: "Hallo",
-                welcome_suffix: "Ich bin Oralis, dein intelligenter Sprachlehrer. Wähle deine Einstellungen und starte.",
-                ph_input_msg: "Schreibe oder diktiere deine Nachricht hier...",
-                btn_send: "Senden",
-                title_notebook: "Mein Notizbuch (Smarte Wiederholung)",
-                tab_all: "Alle anzeigen",
-                tab_vocab: "📘 Wortschatz",
-                tab_grammar: "📐 Grammatik",
-                title_bank: "Empfohlene Ressourcen",
-                bank_connectors_title: "🔗 Fortgeschrittene Konnektoren",
-                bank_connectors_desc: "Verbessern Sie Textkohäsion und Sprachfluss.",
-                bank_idioms_title: "💡 Redewendungen & Idiome",
-                bank_idioms_desc: "Sprechen Sie wie ein Muttersprachler.",
-                bank_interview_title: "💼 Vorstellungsgespräche",
-                bank_interview_desc: "Schlüsselwörter für berufliche Situationen.",
-                bank_past_title: "⌛ Vergangenheit konjugieren",
-                bank_past_desc: "Praktische Übungen zur Vergangenheit.",
-                title_history: "Chat-Verlauf",
-                title_feedback: "Feedback an den Admin senden",
-                label_score: "Bewertung:",
-                score_5: "⭐⭐⭐⭐⭐ Ausgezeichnet",
-                score_4: "⭐⭐⭐⭐ Sehr gut",
-                score_3: "⭐⭐⭐ Akzeptabel",
-                label_comment: "Kommentar:",
-                ph_comment: "Schreiben Sie Ihr Feedback hier...",
-                btn_send_fb: "Feedback senden",
-                listen_pron: "Aussprache anhören",
-                integrated_trans: "🌐 Integrierte Übersetzung:",
-                pedagogical_corr: "💡 Pädagogische Analyse & Korrektur:"
-            },
-            fr: {
-                nav_tutor: "Tuteur",
-                nav_cuaderno: "Cahier",
-                nav_banco: "Ressources",
-                nav_historial: "Historique",
-                nav_feedback: "Avis",
-                config_title: "Configuration",
-                target_lang: "Langue Cible:",
-                cefr_level: "Niveau CECRL Souhaité:",
-                learning_mode: "Mode d'Apprentissage:",
-                mode_1: "💬 Mode 1: Tuteur Général",
-                mode_2: "🎙️ Mode 2: Pratique Orale",
-                mode_3: "🎓 Mode 3: Examens Officiels",
-                mode_4: "📝 Mode 4: Pratique de l'Écrit",
-                oralis_role: "Rôle d'Oralis:",
-                role_job: "Recruteur",
-                role_doctor: "Médecin en Consultation",
-                role_hotel: "Réceptionniste d'Hôtel",
-                role_guide: "Guide Touristique",
-                role_restaurant: "Client au Restaurant",
-                role_colleague: "Collègue de Bureau",
-                role_custom: "Personnalisé (Écrire ci-dessous)...",
-                ph_custom_role: "Ex: Agent immobilier...",
-                exam_label: "Certification / Examen:",
-                rubric_label: "Barème ou Critères:",
-                ph_rubric: "Collez les critères spécifiques ici...",
-                correction_system: "Système de Correction:",
-                corr_normal: "Mode Normal (Affiche la solution)",
-                corr_challenge: "Mode Défi (Indices guidés)",
-                attach_file: "Joindre Rédaction (.txt, .md, .doc):",
-                click_upload: "Cliquez ici pour charger le fichier",
-                welcome_prefix: "Bonjour",
-                welcome_suffix: "Je suis Oralis, votre tuteur de langues intelligent. Choisissez vos paramètres et commencez.",
-                ph_input_msg: "Écrivez ou dictez votre message ici...",
-                btn_send: "Envoyer",
-                title_notebook: "Mon Cahier (Réviseur Intelligent)",
-                tab_all: "Voir Tout",
-                tab_vocab: "📘 Vocabulaire",
-                tab_grammar: "📐 Grammaire",
-                title_bank: "Banque de Ressources Recommandées",
-                bank_connectors_title: "🔗 Connecteurs Avancés",
-                bank_connectors_desc: "Améliorez la cohésion et la fluidité de vos textes.",
-                bank_idioms_title: "💡 Expressions Idiomatiques",
-                bank_idioms_desc: "Parlez comme un locuteur natif.",
-                bank_interview_title: "💼 Entretiens d'Emploi",
-                bank_interview_desc: "Vocabulaire clé pour le milieu professionnel.",
-                bank_past_title: "⌛ Conjugaison du Passé",
-                bank_past_desc: "Exercices pratiques sur les temps du passé.",
-                title_history: "Historique de Discussion",
-                title_feedback: "Envoyer un Avis à l'Admin",
-                label_score: "Note:",
-                score_5: "⭐⭐⭐⭐⭐ Excellent",
-                score_4: "⭐⭐⭐⭐ Très bon",
-                score_3: "⭐⭐⭐ Acceptable",
-                label_comment: "Commentaire:",
-                ph_comment: "Écrivez votre avis ou vos suggestions...",
-                btn_send_fb: "Envoyer l'Avis",
-                listen_pron: "Écouter la prononciation",
-                integrated_trans: "🌐 Traduction Intégrée:",
-                pedagogical_corr: "💡 Analyse Pédagogique et Correction:"
-            },
-            it: {
-                nav_tutor: "Tutor",
-                nav_cuaderno: "Quaderno",
-                nav_banco: "Risorse",
-                nav_historial: "Cronologia",
-                nav_feedback: "Feedback",
-                config_title: "Impostazioni",
-                target_lang: "Lingua Obiettivo:",
-                cefr_level: "Livello QCER Desiderato:",
-                learning_mode: "Modalità di Apprendimento:",
-                mode_1: "💬 Mod. 1: Tutor Generale",
-                mode_2: "🎙️ Mod. 2: Pratica Orale",
-                mode_3: "🎓 Mod. 3: Esami Ufficiali",
-                mode_4: "📝 Mod. 4: Pratica Scritta",
-                oralis_role: "Ruolo di Oralis:",
-                role_job: "Intervistatore di Lavoro",
-                role_doctor: "Medico in Visita",
-                role_hotel: "Receptionist d'Albergo",
-                role_guide: "Guida Turistica",
-                role_restaurant: "Cliente al Ristorante",
-                role_colleague: "Collega d'Ufficio",
-                role_custom: "Personalizzato (Scrivi sotto)...",
-                ph_custom_role: "Es: Agente immobiliare...",
-                exam_label: "Certificazione / Esame:",
-                rubric_label: "Rubrica o Criteri:",
-                ph_rubric: "Incolla qui i criteri specifici...",
-                correction_system: "Sistema di Correzione:",
-                corr_normal: "Modalità Normale (Mostra soluzione)",
-                corr_challenge: "Modalità Sfida (Con suggerimenti)",
-                attach_file: "Allega Composizione (.txt, .md, .doc):",
-                click_upload: "Clicca qui per caricare il file",
-                welcome_prefix: "Ciao",
-                welcome_suffix: "Sono Oralis, il tuo tutor di lingue intelligente. Scegli le impostazioni e inizia.",
-                ph_input_msg: "Scrivi o detta il tuo messaggio qui...",
-                btn_send: "Invia",
-                title_notebook: "Il Mio Quaderno (Ripasso Intelligente)",
-                tab_all: "Vedi Tutti",
-                tab_vocab: "📘 Vocabolario",
-                tab_grammar: "📐 Grammatica",
-                title_bank: "Banca Risorse Consigliate",
-                bank_connectors_title: "🔗 Connettori Avanzati",
-                bank_connectors_desc: "Migliora la coesione e la fluidità nei tuoi testi.",
-                bank_idioms_title: "💡 Modi di Dire",
-                bank_idioms_desc: "Parla come un madrelingua.",
-                bank_interview_title: "💼 Colloqui di Lavoro",
-                bank_interview_desc: "Vocabolario chiave per contesti professionali.",
-                bank_past_title: "⌛ Coniugazione al Passato",
-                bank_past_desc: "Esercizi pratici sui tempi passati.",
-                title_history: "Cronologia Chat",
-                title_feedback: "Invia Feedback all'Amministratore",
-                label_score: "Valutazione:",
-                score_5: "⭐⭐⭐⭐⭐ Eccellente",
-                score_4: "⭐⭐⭐⭐ Molto Buono",
-                score_3: "⭐⭐⭐ Accettabile",
-                label_comment: "Commento:",
-                ph_comment: "Scrivi la tua opinione o suggerimenti...",
-                btn_send_fb: "Invia Feedback",
-                listen_pron: "Ascolta pronuncia",
-                integrated_trans: "🌐 Traduzione Integrata:",
-                pedagogical_corr: "💡 Analisi Pedagogica e Correzione:"
-            },
-            pt: {
-                nav_tutor: "Tutor",
-                nav_cuaderno: "Caderno",
-                nav_banco: "Recursos",
-                nav_historial: "Histórico",
-                nav_feedback: "Feedback",
-                config_title: "Configurações",
-                target_lang: "Idioma Alvo:",
-                cefr_level: "Nível CEFR Desejado:",
-                learning_mode: "Modo de Aprendizagem:",
-                mode_1: "💬 Modo 1: Tutor Geral",
-                mode_2: "🎙️ Modo 2: Prática Oral",
-                mode_3: "🎓 Modo 3: Exames Oficiais",
-                mode_4: "📝 Modo 4: Prática de Escrita",
-                oralis_role: "Papel do Oralis:",
-                role_job: "Entrevistador de Emprego",
-                role_doctor: "Médico na Consulta",
-                role_hotel: "Recepcionista de Hotel",
-                role_guide: "Guia Turístico",
-                role_restaurant: "Cliente no Restaurante",
-                role_colleague: "Colega de Trabalho",
-                role_custom: "Personalizado (Escreva abaixo)...",
-                ph_custom_role: "Ex: Corretor de imóveis...",
-                exam_label: "Certificação / Exame:",
-                rubric_label: "Rubrica ou Critérios:",
-                ph_rubric: "Cole os critérios específicos aqui...",
-                correction_system: "Sistema de Correção:",
-                corr_normal: "Modo Normal (Mostra solução)",
-                corr_challenge: "Modo Desafio (Guiado por dicas)",
-                attach_file: "Anexar Redação (.txt, .md, .doc):",
-                click_upload: "Clique aqui para enviar o arquivo",
-                welcome_prefix: "Olá",
-                welcome_suffix: "Sou o Oralis, seu tutor inteligente de idiomas. Selecione suas preferências e comece.",
-                ph_input_msg: "Digite ou me dite sua mensagem aqui...",
-                btn_send: "Enviar",
-                title_notebook: "Meu Caderno (Revisão Inteligente)",
-                tab_all: "Ver Todos",
-                tab_vocab: "📘 Vocabulário",
-                tab_grammar: "📐 Gramática",
-                title_bank: "Banco Recomendado de Recursos",
-                bank_connectors_title: "🔗 Conectores Avançados",
-                bank_connectors_desc: "Melhore a coesão e fluidez dos seus textos.",
-                bank_idioms_title: "💡 Expressões Idiomáticas",
-                bank_idioms_desc: "Fale como um nativo usando expressões comuns.",
-                bank_interview_title: "💼 Entrevistas de Emprego",
-                bank_interview_desc: "Vocabulário chave para o ambiente profissional.",
-                bank_past_title: "⌛ Conjugação no Passado",
-                bank_past_desc: "Exercícios práticos de tempos passados.",
-                title_history: "Histórico de Conversas",
-                title_feedback: "Enviar Feedback ao Administrador",
-                label_score: "Avaliação:",
-                score_5: "⭐⭐⭐⭐⭐ Excelente",
-                score_4: "⭐⭐⭐⭐ Muito Bom",
-                score_3: "⭐⭐⭐ Aceitável",
-                label_comment: "Comentário:",
-                ph_comment: "Escreva sua opinião ou sugestões...",
-                btn_send_fb: "Enviar Feedback",
-                listen_pron: "Ouvir pronúncia",
-                integrated_trans: "🌐 Tradução Integrada:",
-                pedagogical_corr: "💡 Análise Pedagógica e Correção:"
-            }
-        };
-
-        let currentUILang = localStorage.getItem('oralis_ui_lang') || 'es';
-
-        function changeUILanguage(lang) {
-            if (!uiTranslations[lang]) return;
-            currentUILang = lang;
-            localStorage.setItem('oralis_ui_lang', lang);
-
-            // Actualizar elementos con data-i18n
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (uiTranslations[lang][key]) {
-                    el.innerText = uiTranslations[lang][key];
-                }
-            });
-
-            // Actualizar placeholders con data-i18n-ph
-            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-                const key = el.getAttribute('data-i18n-ph');
-                if (uiTranslations[lang][key]) {
-                    el.setAttribute('placeholder', uiTranslations[lang][key]);
-                }
-            });
-
-            const sel = document.getElementById('ui-language-select');
-            if(sel) sel.value = lang;
-        }
-
         const examenesPorIdioma = {
             "Inglés": ["Cambridge (KET, PET, FCE, CAE, CPE)", "IELTS", "TOEFL", "Aptis"],
             "Alemán": ["Goethe-Zertifikat (A1-C2)", "TestDaF", "DSH"],
@@ -940,7 +524,7 @@
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let fullText = '';
-            const botMsgDiv = appendMessage('bot', 'Oralis...');
+            const botMsgDiv = appendMessage('bot', 'Oralis pensando...');
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -960,19 +544,17 @@
             const modoActual = document.getElementById('select-modo').value;
             const ocultarAltavoz = (modoActual === 'writing') ? 'hidden' : '';
 
-            const langDict = uiTranslations[currentUILang] || uiTranslations['es'];
-
             html += `<p>${pResp}</p>`;
             
             html += `<button class="btn-audio-speak ${ocultarAltavoz}" onclick="reproducirAudioMensaje(\`${pResp.replace(/`/g, '\\`').replace(/"/g, '&quot;')}\`)">
-                        <i class="fa-solid fa-volume-high"></i> ${langDict.listen_pron}
+                        <i class="fa-solid fa-volume-high"></i> Escuchar pronunciación
                      </button>`;
 
             if(pTrad) {
-                html += `<div class="block-translation"><strong>${langDict.integrated_trans}</strong><br>${pTrad}</div>`;
+                html += `<div class="block-translation"><strong>🌐 Traducción Integrada:</strong><br>${pTrad}</div>`;
             }
             if(pCorr) {
-                html += `<div class="block-correction"><strong>${langDict.pedagogical_corr}</strong><br>${pCorr}</div>`;
+                html += `<div class="block-correction"><strong>💡 Análisis Pedagógico y Corrección:</strong><br>${pCorr}</div>`;
             }
 
             element.querySelector('.msg-content').innerHTML = html;
@@ -1053,7 +635,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             actualizarExamenesDisponibles();
             cambiarModoInterfaz();
-            changeUILanguage(currentUILang);
         });
     </script>
 </body>
