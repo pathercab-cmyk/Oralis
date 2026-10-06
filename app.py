@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -19,7 +20,7 @@ db = SQLAlchemy(app)
 GROQ_KEY = os.environ.get("GROQ_API_KEY", "TU_API_KEY_DE_GROQ")
 groq_client = Groq(api_key=GROQ_KEY)
 
-# --- MODELOS DE BASE DE DATOS (SISTEMA DE PERSISTENCIA POR USUARIO) ---
+# --- MODELOS DE BASE DE DATOS (PERSISTENCIA Y GESTIÓN) ---
 
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,7 +46,7 @@ class HistorialChat(db.Model):
     titulo = db.Column(db.String(150), default="Conversación sin título")
     modo = db.Column(db.String(50), nullable=False)
     idioma = db.Column(db.String(50), nullable=False)
-    contenido_json = db.Column(db.Text, nullable=False) # Historial estructurado
+    contenido_json = db.Column(db.Text, nullable=False) # Mensajes guardados en JSON
     fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 class WritingEvaluacion(db.Model):
@@ -84,6 +85,7 @@ def login_page():
 
 @app.route('/register', methods=['POST'])
 def register():
+    # Registro simplificado: Usuario, Correo y Contraseña
     data = request.get_json() or {}
     username = data.get('username', '').strip()
     email = data.get('email', '').strip().lower()
@@ -122,7 +124,7 @@ def logout():
     return redirect(url_for('login_page'))
 
 
-# --- MOTOR PRINCIPAL IA CON ESTRUCTURA DE RESPUESTA Y DETECCIÓN DE IDIOMA ---
+# --- MOTOR PRINCIPAL IA Y CHAT CON DETECCIÓN DE IDIOMA Y ESTRUCTURA TRIPLE ---
 
 @app.route('/chat_stream', methods=['POST'])
 def chat_stream():
@@ -135,35 +137,35 @@ def chat_stream():
     cefr_level = data.get('cefr_level', 'B1')
     mode = data.get('mode', 'tutor_general')
     
-    # Parámetros adicionales según el modo
-    rol_practica = data.get('rol_practica', 'Interlocutor general')
+    # Parámetros para Modos Especializados
+    rol_practica = data.get('rol_practica', 'Interlocutor General')
     examen_oficial = data.get('examen_oficial', '')
     rubrica = data.get('rubrica', '')
 
     system_prompt = f"""
-Eres Oralis, un tutor inteligente de idiomas.
-- Idioma Objetivo de práctica: {target_lang}.
+Eres Oralis, un tutor inteligente e interactivo de idiomas.
+- Idioma Objetivo de Práctica: {target_lang}.
 - Nivel CEFR Objetivo: {cefr_level}.
 - Modo Activo: {mode}.
-- Rol/Contexto Específico: {rol_practica}.
-- Examen Objetivo (si aplica): {examen_oficial}.
-- Rúbrica/Criterios adicionales: {rubrica}.
+- Rol/Simulación Activa: {rol_practica}.
+- Examen Seleccionado: {examen_oficial}.
+- Criterios/Rúbrica Específica: {rubrica}.
 
-INSTRUCCIONES OBLIGATORIAS DE ESTRUCTURA Y FORMATO DE RESPUESTA:
-Debes responder SIEMPRE estructurando tu salida en 3 bloques claramente delimitados por etiquetas Markdown exactas para que el sistema de interfaz pueda separarlas:
+REGLAS DE RESPUESTA OBLIGATORIAS:
+Debes formatear tu salida dividida estrictamente en tres secciones mediante estas etiquetas en mayúsculas:
 
-1. [RESPUESTA_PRINCIPAL]
-Responde directamente en el idioma objetivo ({target_lang}) adaptando la dificultad a nivel {cefr_level}. Actúa según el modo activo ({mode}).
+[RESPUESTA_PRINCIPAL]
+Escribe la respuesta principal en el idioma objetivo ({target_lang}) adaptada al nivel {cefr_level} y asumiendo el rol asignado si aplica.
 
-2. [TRADUCCION_INTEGRADA]
-Detecta automáticamente en qué idioma te habló el estudiante en su último mensaje y traduce tu [RESPUESTA_PRINCIPAL] exactamente a ese idioma nativo/de entrada del usuario.
+[TRADUCCION_INTEGRADA]
+Analiza el mensaje previo del estudiante, detecta automáticamente el idioma en el que te ha escrito (por ejemplo, español o inglés) y traduce AQUÍ tu [RESPUESTA_PRINCIPAL] a ese idioma detectado para facilitar su comprensión.
 
-3. [CORRECCION_Y_MEJORA]
-Analiza la gramática, vocabulario y fluidez del mensaje del usuario. Proporciona:
+[CORRECCION_Y_MEJORA]
+Analiza la intervención del usuario e incluye:
 - Evaluación del mensaje enviado por el usuario.
-- Correcciones de errores cometidos.
-- Sugerencia de palabras o frases más naturales para su nivel ({cefr_level}).
-- [CUADERNO_AUTO]: Si encuentras una palabra clave o regla relevante, indícala al final en este formato: "Término | Explicación corta" para que el usuario pueda guardarla en su cuaderno.
+- Explicación de errores gramaticales o de vocabulario cometidos.
+- Sugerencias de alternativas más naturales de nivel {cefr_level}.
+- Si identificas un término o regla clave para guardar, pon al final: "[CUADERNO_AUTO]: Término | Explicación breve".
 """
 
     def generate():
@@ -183,12 +185,12 @@ Analiza la gramática, vocabulario y fluidez del mensaje del usuario. Proporcion
                 if content:
                     yield content
         except Exception as e:
-            yield f"[Error de respuesta de Oralis: {str(e)}]"
+            yield f"[Error al conectar con Oralis: {str(e)}]"
 
     return Response(stream_with_context(generate()), content_type='text/plain; charset=utf-8')
 
 
-# --- MÓDULO 4: EVALUACIÓN DE WRITING (NORMAL Y DESAFÍO CON PISTAS) ---
+# --- MÓDULO 4: EVALUACIÓN DE WRITING (NORMAL, DESAFÍO Y PISTAS) ---
 
 @app.route('/evaluate_writing', methods=['POST'])
 def evaluate_writing():
@@ -199,29 +201,28 @@ def evaluate_writing():
     text_to_eval = data.get('text', '').strip()
     target_lang = data.get('target_lang', 'Inglés')
     cefr_level = data.get('cefr_level', 'B1')
-    modo_correccion = data.get('modo_correccion', 'normal') # 'normal' o 'desafio'
+    modo_correccion = data.get('modo_correccion', 'normal')
 
     if modo_correccion == 'desafio':
-        prompt_modo = f"""
-EVALUACIÓN EN MODO DESAFÍO (GUIADO):
-1. Resalta y señala las frases o zonas del texto donde hay errores gramaticales u ortográficos.
-2. NO des la solución directa ni reescribas el texto corregido.
-3. Proporciona una "Pista Inicial" por cada área señalada para orientar al alumno a corregirlo por sí mismo.
+        instrucciones_modo = """
+MODO DESAFÍO (GUIADO):
+- Resalta y señala las zonas o frases con errores en el texto.
+- NO des la solución corregida ni reescribas el texto.
+- Ofrece una pista orientativa para que el estudiante intente corregirlo por sí mismo.
 """
     else:
-        prompt_modo = f"""
-EVALUACIÓN EN MODO NORMAL:
-1. Puntuación global sobre 10.
-2. Desglose detallado de errores gramaticales y ortográficos.
-3. Explicación clara de las reglas aplicadas.
-4. Versión optimizada del escrito.
+        instrucciones_modo = """
+MODO NORMAL:
+- Muestra los errores detectados de forma explícita.
+- Entrega la explicación gramatical detallada.
+- Proporciona el texto completo en su versión corregida y optimizada.
 """
 
     prompt = f"""
-Evalúa la siguiente redacción escrita para nivel {cefr_level} en {target_lang}:
+Evalúa la siguiente redacción en {target_lang} (Nivel {cefr_level}):
 "{text_to_eval}"
 
-{prompt_modo}
+{instrucciones_modo}
 """
 
     try:
@@ -253,8 +254,8 @@ def request_writing_hint():
     texto = data.get('text', '')
     pista_num = data.get('hint_level', 1)
 
-    prompt = f"El alumno está intentando corregir este texto: '{texto}'. Ofrécele la Pista #{pista_num} adicional (más específica) sin revelarle la respuesta completa."
-    
+    prompt = f"El alumno está corrigiendo su texto en Modo Desafío: '{texto}'. Proporcióndale la Pista #{pista_num} de manera gradual, dándole un indicio más claro sin revelar la respuesta final."
+
     try:
         response = groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -267,7 +268,7 @@ def request_writing_hint():
         return jsonify({'error': str(e)}), 500
 
 
-# --- MÓDULO 7: MI CUADERNO (REPASO INTELIGENTE) ---
+# --- MÓDULO 7 Y 8: MI CUADERNO E HISTORIAL DE CHATS ---
 
 @app.route('/cuaderno/guardar', methods=['POST'])
 def guardar_cuaderno():
@@ -302,17 +303,49 @@ def listar_cuaderno():
         'explicacion': item.explicacion,
         'fecha': item.fecha.strftime('%Y-%m-%d')
     } for item in items]
-    
+
+    return jsonify(resultado)
+
+@app.route('/historial/guardar', methods=['POST'])
+def guardar_historial():
+    if 'user_email' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    data = request.get_json() or {}
+    nuevo_chat = HistorialChat(
+        usuario_email=session['user_email'],
+        titulo=data.get('titulo', 'Conversación Oralis'),
+        modo=data.get('modo', 'tutor_general'),
+        idioma=data.get('idioma', 'Inglés'),
+        contenido_json=json.dumps(data.get('mensajes', []))
+    )
+    db.session.add(nuevo_chat)
+    db.session.commit()
+    return jsonify({'status': 'ok', 'chat_id': nuevo_chat.id})
+
+@app.route('/historial/listar')
+def listar_historial():
+    if 'user_email' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+
+    chats = HistorialChat.query.filter_by(usuario_email=session['user_email']).order_by(HistorialChat.fecha.desc()).all()
+    resultado = [{
+        'id': c.id,
+        'titulo': c.titulo,
+        'modo': c.modo,
+        'idioma': c.idioma,
+        'fecha': c.fecha.strftime('%Y-%m-%d %H:%M')
+    } for c in chats]
     return jsonify(resultado)
 
 
-# --- MÓDULO 8: HISTORIAL Y PANEL ADMINISTRADOR ---
+# --- PANEL DE ADMINISTRACIÓN RESTRINGIDO Y FEEDBACKS ---
 
 @app.route('/admin/feedbacks')
 def admin_feedbacks():
     user_email = session.get('user_email')
     if user_email != 'p75886777@gmail.com':
-        return "Acceso denegado. Panel privado exclusivo para administración.", 403
+        return "Acceso denegado. Panel exclusivo para el administrador.", 403
 
     feedbacks = Feedback.query.order_by(Feedback.fecha_creacion.desc()).all()
     total_usuarios = Usuario.query.count()
@@ -333,7 +366,6 @@ def delete_feedback(fb_id):
     db.session.delete(fb)
     db.session.commit()
     return redirect(url_for('admin_feedbacks'))
-
 
 @app.route('/feedback', methods=['POST'])
 def save_feedback():
