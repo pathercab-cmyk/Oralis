@@ -3,190 +3,425 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LingoMind - Tutor & Exámenes</title>
+    <title>Oralis - Tutor Inteligente de Idiomas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f0f2f5; display: flex; flex-direction: column; height: 100vh; }
-        header { background: #1e293b; color: white; padding: 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        header h1 { font-size: 1.5rem; margin-bottom: 8px; }
-        .controls { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; align-items: center; }
-        select, button.btn-top { padding: 6px 12px; border-radius: 6px; border: 1px solid #475569; background: #334155; color: white; font-size: 0.85rem; outline: none; cursor: pointer; }
-        button.btn-top:hover { background: #475569; }
-        
-        .main-container { flex: 1; display: flex; overflow: hidden; position: relative; }
-        .chat { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .msg { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.4; }
-        .bot { background: white; align-self: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .user { background: #2563eb; color: white; align-self: flex-end; }
-        
-        .input-box { padding: 15px; background: white; display: flex; gap: 10px; border-top: 1px solid #e2e8f0; align-items: center; }
-        input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 0.95rem; }
-        button.btn-send { padding: 10px 20px; border-radius: 20px; border: none; background: #2563eb; color: white; font-weight: bold; cursor: pointer; }
-        .btn-audio { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; margin-top: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-        .btn-mic { background: #f1f5f9; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.2rem; }
-        .feedback { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 8px 12px; margin-top: 8px; font-size: 0.85rem; color: #78350f; border-radius: 4px; }
+        :root {
+            --bg-dark: #12181b;
+            --card-bg: #1e252b;
+            --input-bg: #151b20;
+            --accent-green: #10b981;
+            --accent-green-hover: #059669;
+            --accent-green-soft: rgba(16, 185, 129, 0.15);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #2e3740;
+        }
 
-        /* Panel lateral de Biblioteca */
-        .sidebar { width: 320px; background: #ffffff; border-left: 1px solid #e2e8f0; display: none; flex-direction: column; padding: 15px; overflow-y: auto; box-shadow: -2px 0 5px rgba(0,0,0,0.05); }
-        .sidebar.active { display: flex; }
-        .sidebar h2 { font-size: 1.1rem; color: #1e293b; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .history-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 0.85rem; }
-        .history-item .date { font-size: 0.75rem; color: #64748b; margin-bottom: 4px; }
-        .history-item .user-txt { font-weight: bold; color: #1e293b; }
-        .btn-clear { background: #ef4444; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; margin-top: auto; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar-custom {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.8rem 1.5rem;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .brand-title {
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--text-muted);
+            border: none;
+            padding: 0.8rem 1.2rem;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: var(--accent-green-soft);
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .card-custom {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .form-select, .form-control {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+        }
+
+        .form-select:focus, .form-control:focus {
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px var(--accent-green-soft);
+        }
+
+        .btn-green {
+            background-color: var(--accent-green);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-green:hover {
+            background-color: var(--accent-green-hover);
+            color: #fff;
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: var(--input-bg);
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background-color: var(--accent-green);
+            color: #fff;
+            padding: 0.8rem 1.2rem;
+            border-radius: 16px 16px 2px 16px;
+            max-width: 80%;
+        }
+
+        .msg-assistant {
+            align-self: flex-start;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 1.2rem;
+            border-radius: 16px 16px 16px 2px;
+            max-width: 80%;
+        }
+
+        .btn-mic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-mic.recording {
+            background-color: #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
     </style>
 </head>
 <body>
-    <header>
-        <h1>🗣️ LingoMind</h1>
-        <div class="controls">
-            <select id="idiomaSelect">
-                <option value="en">🇬🇧 Inglés</option>
-                <option value="de">🇩🇪 Alemán</option>
-            </select>
-            <select id="nivelSelect">
-                <option value="A1">A1 - Principiante</option>
-                <option value="A2">A2 - Elemental</option>
-                <option value="B1" selected>B1 - Intermedio</option>
-                <option value="B2">B2 - Intermedio Alto</option>
-                <option value="C1">C1 - Avanzado</option>
-            </select>
-            <select id="modoSelect">
-                <option value="conversacion">💬 Conversación Libre</option>
-                <option value="examen">🎓 Preparación Examen Oficial</option>
-            </select>
-            <button class="btn-top" onclick="toggleBiblioteca()">📚 Biblioteca</button>
-        </div>
-    </header>
 
-    <div class="main-container">
-        <div class="chat" id="chat">
-            <div class="msg bot">
-                Hello! I am LingoMind. Choose your preferred practice mode and let's start!
-                <br>
-                <button class="btn-audio" onclick="hablar('Hello! I am LingoMind. Choose your preferred practice mode and let us start!')">🔊</button>
+<nav class="navbar navbar-custom">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <a class="brand-logo" href="#">
+            <div class="brand-icon">O</div>
+            <span class="brand-title">Oralis</span>
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-muted d-none d-sm-inline" style="font-size: 0.9rem;">{{ current_user.email }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm rounded-3">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <!-- Selector de Idioma Global -->
+    <div class="card-custom mb-4 d-flex flex-row align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-translate text-success fs-4"></i>
+            <span class="fw-semibold">Idioma de Práctica:</span>
+        </div>
+        <select class="form-select w-auto" id="globalLanguage">
+            <option value="Inglés">🇬🇧 Inglés</option>
+            <option value="Francés">🇫🇷 Francés</option>
+            <option value="Alemán">🇩🇪 Alemán</option>
+            <option value="Italiano">🇮🇹 Italiano</option>
+            <option value="Portugués">🇵🇹 Portugués</option>
+            <option value="Japonés">🇯🇵 Japonés</option>
+            <option value="Chino Mandarín">🇨🇳 Chino Mandarín</option>
+        </select>
+    </div>
+
+    <!-- Pestañas de Navegación -->
+    <ul class="nav nav-tabs mb-4 border-0 gap-2" id="oralisTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat-pane"><i class="bi bi-chat-dots me-2"></i>Conversación</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="oral-tab" data-bs-toggle="tab" data-bs-target="#oral-pane"><i class="bi bi-mic me-2"></i>Práctica Oral</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="exams-tab" data-bs-toggle="tab" data-bs-target="#exams-pane"><i class="bi bi-journal-check me-2"></i>Exámenes Oficiales</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback-pane"><i class="bi bi-search me-2"></i>Análisis & Feedback</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank-pane"><i class="bi bi-bookmark-star me-2"></i>Banco Recomendado</button>
+        </li>
+    </ul>
+
+    <!-- Contenido de Pestañas -->
+    <div class="tab-content" id="oralisTabsContent">
+        
+        <!-- 1. CHAT DE CONVERSACIÓN -->
+        <div class="tab-pane fade show active" id="chat-pane">
+            <div class="card-custom">
+                <div class="chat-box mb-3" id="chatContainer">
+                    <div class="msg-assistant">¡Hola! Soy tu tutor de Oralis. ¿Qué tema te gustaría practicar hoy?</div>
+                </div>
+                <form id="chatForm" class="d-flex gap-2">
+                    <input type="text" id="chatInput" class="form-control" placeholder="Escribe un mensaje..." required>
+                    <button type="submit" class="btn btn-green"><i class="bi bi-send-fill"></i></button>
+                </form>
             </div>
         </div>
 
-        <div class="sidebar" id="sidebar">
-            <h2>📚 Tu Progreso <button onclick="toggleBiblioteca()" style="background:none; border:none; cursor:pointer;">❌</button></h2>
-            <div id="historyList"></div>
-            <button class="btn-clear" onclick="borrarHistorial()">Borrar Historial</button>
-        </div>
-    </div>
-
-    <div class="input-box">
-        <button class="btn-mic" id="micBtn" onclick="usarMic()">🎙️</button>
-        <input type="text" id="txtMsg" placeholder="Escribe o habla en tu idioma objetivo..." onkeypress="if(event.key==='Enter') enviar()">
-        <button class="btn-send" onclick="enviar()">Enviar</button>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', cargarHistorial);
-
-        function hablar(texto) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(texto);
-                u.lang = document.getElementById('idiomaSelect').value === 'en' ? 'en-US' : 'de-DE';
-                window.speechSynthesis.speak(u);
-            }
-        }
-
-        function usarMic() {
-            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-                alert('Tu navegador no soporta micrófono. Usa Chrome o Edge.');
-                return;
-            }
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const rec = new SR();
-            rec.lang = document.getElementById('idiomaSelect').value === 'en' ? 'en-US' : 'de-DE';
-            rec.onresult = (e) => { document.getElementById('txtMsg').value = e.results[0][0].transcript; };
-            rec.start();
-        }
-
-        function toggleBiblioteca() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
-
-        function guardarEnHistorial(mensajeUser, correccion, explicacion) {
-            const historial = JSON.parse(localStorage.getItem('lingomind_historial') || '[]');
-            const nuevoRegistro = {
-                fecha: new Date().toLocaleString(),
-                idioma: document.getElementById('idiomaSelect').value.toUpperCase(),
-                modo: document.getElementById('modoSelect').value,
-                usuario: mensajeUser,
-                correccion: correccion,
-                explicacion: explicacion
-            };
-            historial.unshift(nuevoRegistro);
-            localStorage.setItem('lingomind_historial', JSON.stringify(historial));
-            cargarHistorial();
-        }
-
-        function cargarHistorial() {
-            const list = document.getElementById('historyList');
-            const historial = JSON.parse(localStorage.getItem('lingomind_historial') || '[]');
-            if (historial.length === 0) {
-                list.innerHTML = '<p style="font-size:0.85rem; color:#64748b; margin-top:10px;">Aún no tienes registros guardados.</p>';
-                return;
-            }
-            list.innerHTML = historial.map(item => `
-                <div class="history-item">
-                    <div class="date">${item.fecha} | [${item.idioma}] (${item.modo})</div>
-                    <div class="user-txt">👤: "${item.usuario}"</div>
-                    ${item.correccion ? `<div style="color:#d97706; margin-top:4px;">💡 ${item.correccion}</div>` : ''}
-                </div>
-            `).join('');
-        }
-
-        function borrarHistorial() {
-            if (confirm('¿Quieres borrar todo tu historial de práctica?')) {
-                localStorage.removeItem('lingomind_historial');
-                cargarHistorial();
-            }
-        }
-
-        async function enviar() {
-            const txt = document.getElementById('txtMsg');
-            const mensaje = txt.value.trim();
-            if (!mensaje) return;
-
-            const chat = document.getElementById('chat');
-            chat.innerHTML += `<div class="msg user">${mensaje}</div>`;
-            txt.value = '';
-            chat.scrollTop = chat.scrollHeight;
-
-            try {
-                const res = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        mensaje,
-                        idioma: document.getElementById('idiomaSelect').value,
-                        nivel: document.getElementById('nivelSelect').value,
-                        modo: document.getElementById('modoSelect').value
-                    })
-                });
-                const data = await res.json();
+        <!-- 2. PRÁCTICA ORAL -->
+        <div class="tab-pane fade" id="oral-pane">
+            <div class="card-custom text-center py-5">
+                <h5 class="mb-3">Práctica de Pronunciación y Fluidez</h5>
+                <p class="text-muted mb-4">Haz clic en el micrófono, habla en el idioma seleccionado y recibe retroalimentación inmediata.</p>
                 
-                let htmlBot = `<div class="msg bot">${data.respuesta}<br><button class="btn-audio" onclick="hablar('${data.respuesta.replace(/'/g, "\\'")}')">🔊</button>`;
-                if (data.correccion || data.explicacion) {
-                    htmlBot += `<div class="feedback"><strong>Feedback & Evaluación:</strong><br>${data.correccion}<br><br>${data.explicacion}</div>`;
-                }
-                htmlBot += `</div>`;
+                <div class="d-flex justify-content-center mb-4">
+                    <button id="recordBtn" class="btn-mic"><i class="bi bi-mic-fill"></i></button>
+                </div>
+                <p id="recordStatus" class="text-muted small">Presiona para empezar a hablar</p>
 
-                chat.innerHTML += htmlBot;
-                chat.scrollTop = chat.scrollHeight;
-                hablar(data.respuesta);
+                <div class="card-custom mt-4 text-start d-none" id="transcriptResult">
+                    <h6 class="text-success mb-2">Transcripción:</h6>
+                    <p id="userSpeechText" class="mb-3"></p>
+                    <h6 class="text-success mb-2">Evaluación de Fluidez:</h6>
+                    <p id="speechFeedbackText" class="mb-0 text-muted"></p>
+                </div>
+            </div>
+        </div>
 
-                // Guardar en la biblioteca
-                guardarEnHistorial(mensaje, data.correccion, data.explicacion);
+        <!-- 3. EXÁMENES OFICIALES -->
+        <div class="tab-pane fade" id="exams-pane">
+            <div class="card-custom">
+                <h5 class="mb-3">Preparación para Exámenes Oficiales</h5>
+                <p class="text-muted">Selecciona tu examen objetivo para realizar simulacros estructurados de Speaking y Writing:</p>
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-3 bg-dark text-center">
+                            <h6 class="text-success fw-bold">IELTS / TOEFL</h6>
+                            <p class="small text-muted mb-3">Academic & General Training</p>
+                            <button class="btn btn-outline-success btn-sm w-100" onclick="startExam('IELTS/TOEFL')">Iniciar Simulacro</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-3 bg-dark text-center">
+                            <h6 class="text-success fw-bold">Cambridge (B2 / C1 / C2)</h6>
+                            <p class="small text-muted mb-3">First, Advanced, Proficiency</p>
+                            <button class="btn btn-outline-success btn-sm w-100" onclick="startExam('Cambridge')">Iniciar Simulacro</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border rounded-3 bg-dark text-center">
+                            <h6 class="text-success fw-bold">DELF / DALF / Goethe</h6>
+                            <p class="small text-muted mb-3">Exámenes oficiales de Europa</p>
+                            <button class="btn btn-outline-success btn-sm w-100" onclick="startExam('DELF/Goethe')">Iniciar Simulacro</button>
+                        </div>
+                    </div>
+                </div>
 
-            } catch (err) {
-                console.error(err);
-            }
-        }
-    </script>
+                <div id="examArea" class="mt-4 d-none">
+                    <hr class="border-secondary">
+                    <h6 id="examTitle" class="text-success"></h6>
+                    <div class="chat-box my-3" id="examChat"></div>
+                    <form id="examForm" class="d-flex gap-2">
+                        <input type="text" id="examInput" class="form-control" placeholder="Responde al examinador..." required>
+                        <button type="submit" class="btn btn-green">Responder</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ANÁLISIS & FEEDBACK -->
+        <div class="tab-pane fade" id="feedback-pane">
+            <div class="card-custom">
+                <h5 class="mb-3">CorrecciónGramatical y Sugerencias</h5>
+                <p class="text-muted">Pega cualquier texto o redacción para analizar errores, vocabulario y nivel de formalidad.</p>
+                <textarea id="textToAnalyze" class="form-control mb-3" rows="5" placeholder="Escribe o pega aquí tu texto en el idioma que estás aprendiendo..."></textarea>
+                <button class="btn btn-green" onclick="analyzeText()"><i class="bi bi-search me-2"></i>Analizar Texto</button>
+
+                <div id="feedbackResult" class="mt-4 d-none">
+                    <hr class="border-secondary">
+                    <h6 class="text-success mb-2">Informe de Corrección:</h6>
+                    <div id="feedbackContent" class="p-3 rounded-3 bg-dark border border-secondary"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. BANCO RECOMENDADO -->
+        <div class="tab-pane fade" id="bank-pane">
+            <div class="card-custom">
+                <h5 class="mb-3">Banco Recomendado de Recursos & Vocabulario</h5>
+                <p class="text-muted">Frases clave, expresiones idiomáticas y vocabulario esencial organizado por categorías.</p>
+
+                <div class="accordion" id="bankAccordion">
+                    <div class="accordion-item bg-dark border-secondary text-light">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-dark text-success collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#col1">
+                                Expresiones Útiles para Debates y Opinión
+                            </button>
+                        </h2>
+                        <div id="col1" class="accordion-collapse collapse" data-bs-parent="#bankAccordion">
+                            <div class="accordion-body">
+                                <ul>
+                                    <td><code>From my perspective...</code> - Desde mi perspectiva</td><br>
+                                    <td><code>In terms of...</code> - En términos de</td><br>
+                                    <td><code>On the other hand...</code> - Por otro lado</td>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-dark border-secondary text-light mt-2">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-dark text-success collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#col2">
+                                Vocabulario para Entrevistas de Trabajo
+                            </button>
+                        </h2>
+                        <div id="col2" class="accordion-collapse collapse" data-bs-parent="#bankAccordion">
+                            <div class="accordion-body">
+                                <ul>
+                                    <td><code>Track record</code> - Historial de logros</td><br>
+                                    <td><code>Problem-solving skills</code> - Habilidades de resolución de problemas</td><br>
+                                    <td><code>Team player</code> - Trabajo en equipo</td>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Configuración Conversación Chat
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const chatContainer = document.getElementById('chatContainer');
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msg = chatInput.value.trim();
+        if(!msg) return;
+
+        appendMsg(msg, 'user', chatContainer);
+        chatInput.value = '';
+
+        const lang = document.getElementById('globalLanguage').value;
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ message: `[Idioma: ${lang}] ${msg}` })
+        });
+        const data = await res.json();
+        appendMsg(data.reply || 'Sin respuesta', 'assistant', chatContainer);
+    });
+
+    function appendMsg(text, sender, container) {
+        const div = document.createElement('div');
+        div.className = sender === 'user' ? 'msg-user' : 'msg-assistant';
+        div.textContent = text;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // Análisis de Texto
+    async function analyzeText() {
+        const text = document.getElementById('textToAnalyze').value;
+        if(!text) return;
+        const lang = document.getElementById('globalLanguage').value;
+        
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ message: `Por favor analiza este texto en ${lang}, corrige errores gramaticales y sugiere mejoras:\n"${text}"` })
+        });
+        const data = await res.json();
+        document.getElementById('feedbackContent').innerText = data.reply;
+        document.getElementById('feedbackResult').classList.remove('d-none');
+    }
+
+    // Exámenes Oficiales
+    function startExam(type) {
+        document.getElementById('examArea').classList.remove('d-none');
+        document.getElementById('examTitle').innerText = `Simulacro de Examen: ${type}`;
+        const examChat = document.getElementById('examChat');
+        examChat.innerHTML = '';
+        appendMsg(`Bienvenido al simulacro de ${type}. Comenzaremos con la primera pregunta del Speaking. ¿Puedes presentarte brevemente y explicar tus objetivos?`, 'assistant', examChat);
+    }
+</script>
+
 </body>
 </html>
