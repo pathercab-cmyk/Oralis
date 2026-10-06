@@ -82,14 +82,24 @@ def login():
     if not email or not password:
         return jsonify({'status': 'error', 'message': 'Debes completar todos los campos.'}), 400
 
+    # 1. Verificar si el usuario ya existe en la base de datos
+    usuario_existente = Usuario.query.filter_by(email=email).first()
+
+    if usuario_existente:
+        # Si el usuario ya existe, validamos la contraseña e iniciamos sesión (sirve tanto para login como si intentan registrar un correo existente)
+        if check_password_hash(usuario_existente.password_hash, password):
+            session.permanent = True
+            session['user_email'] = usuario_existente.email
+            session['user_name'] = usuario_existente.nombre
+            return jsonify({'status': 'ok', 'message': 'Inicio de sesión exitoso'})
+        else:
+            return jsonify({'status': 'error', 'message': 'El correo ya está registrado y la contraseña es incorrecta.'}), 401
+
+    # 2. Si NO existe y la acción es registrar, creamos el usuario
     if action == 'register':
         nombre = data.get('nombre', '').strip()
         if not nombre:
-            return jsonify({'status': 'error', 'message': 'Por favor ingresa tu nombre.'}), 400
-
-        usuario_existente = Usuario.query.filter_by(email=email).first()
-        if usuario_existente:
-            return jsonify({'status': 'error', 'message': 'El correo electrónico ya está registrado. Haz clic en "Iniciar Sesión".'}), 400
+            nombre = email.split('@')[0].capitalize()  # Nombre por defecto si no se ingresa uno
 
         nuevo_usuario = Usuario(
             nombre=nombre,
@@ -102,17 +112,9 @@ def login():
         session.permanent = True
         session['user_email'] = email
         session['user_name'] = nombre
-        return jsonify({'status': 'ok'})
+        return jsonify({'status': 'ok', 'message': 'Registro exitoso'})
 
-    # ACCIÓN: INICIAR SESIÓN (LOG IN)
-    usuario = Usuario.query.filter_by(email=email).first()
-    if usuario and check_password_hash(usuario.password_hash, password):
-        session.permanent = True
-        session['user_email'] = usuario.email
-        session['user_name'] = usuario.nombre
-        return jsonify({'status': 'ok'})
-
-    return jsonify({'status': 'error', 'message': 'Correo o contraseña incorrectos.'}), 401
+    return jsonify({'status': 'error', 'message': 'El correo no está registrado. Por favor, regístrate primero.'}), 404
 
 @app.route('/logout')
 def logout():
