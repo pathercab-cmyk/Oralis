@@ -2,650 +2,431 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Oralis - Tutor Inteligente de Idiomas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oralis - Tu Tutor Personal de Idiomas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        :root {
-            --bg-main: #F8F9FA;
-            --primary-color: #2E6B52;
-            --accent-color: #E07A5F;
-            --card-bg: #FFFFFF;
-            --border-color: #E2E8E0;
-            --text-dark: #2B2D42;
-            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-dark); line-height: 1.6; }
-
-        /* NAVBAR CON ADAPTACIÓN MÓVIL */
-        .navbar { display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 12px 20px; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 10px; }
-        .logo { font-size: 1.4rem; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 8px; }
-        .nav-links { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; max-width: 100%; }
-        .nav-btn { background: transparent; border: none; padding: 8px 12px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 8px; color: #6C757D; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; }
-        .nav-btn.active, .nav-btn:hover { background-color: #EBF2EE; color: var(--primary-color); }
-        
-        .user-profile { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
-        .btn-admin { background: #E8F5E9; color: #2E7D32; padding: 4px 8px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #A5D6A7; font-size: 0.8rem; }
-
-        .hidden { display: none !important; }
-
-        .main-container { padding: 16px; max-width: 1400px; margin: 0 auto; }
-
-        /* LAYOUT CHAT Y CONFIGURACIÓN (RESPONSIVE) */
-        .tutor-layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; height: calc(100vh - 100px); }
-        .sidebar-config { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
-        .sidebar-config h3 { font-size: 1rem; color: var(--primary-color); border-bottom: 2px solid #EBF2EE; padding-bottom: 6px; }
-
-        .form-group { display: flex; flex-direction: column; gap: 4px; }
-        .form-group label { font-weight: 600; font-size: 0.85rem; }
-        select, input, textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; font-family: inherit; background: #FAFAFA; }
-        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--primary-color); background: #FFF; }
-
-        .modo-extra { background: #F4F7F5; padding: 10px; border-radius: 8px; border-left: 3px solid var(--primary-color); margin-top: 4px; }
-
-        /* CONTENEDOR CHAT */
-        .chat-wrapper { display: flex; flex-direction: column; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); overflow: hidden; height: 100%; }
-        .chat-box { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-        .message { max-width: 88%; padding: 12px 16px; border-radius: 12px; position: relative; font-size: 0.95rem; }
-        .user-message { align-self: flex-end; background: var(--primary-color); color: #FFFFFF; }
-        .bot-message { align-self: flex-start; background: #FFFFFF; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); }
-
-        .block-translation { margin-top: 10px; background: #FFFBF0; border-left: 4px solid #E0A96D; padding: 8px 12px; border-radius: 6px; font-size: 0.88rem; }
-        .block-correction { margin-top: 10px; background: #EBF3EF; border-left: 4px solid var(--primary-color); padding: 8px 12px; border-radius: 6px; font-size: 0.88rem; }
-
-        /* ESTILOS DE LISTAS HTML */
-        .msg-content ul, .msg-content ol { padding-left: 20px; margin: 8px 0; }
-        .msg-content li { margin-bottom: 4px; }
-
-        .chat-input-container { display: flex; padding: 12px; gap: 8px; border-top: 1px solid var(--border-color); background: #FFFFFF; align-items: center; }
-        .chat-input-container textarea { resize: none; }
-        .btn-primary { background: var(--primary-color); color: #FFF; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; font-size: 0.9rem; }
-        .btn-icon { background: #EBF2EE; color: var(--primary-color); border: none; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: background 0.2s; flex-shrink: 0; }
-        .btn-icon:hover { background: #D6E4DC; }
-        .btn-icon.recording { background: #DC3545; color: #FFF; animation: pulse 1.2s infinite; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .btn-audio-speak { background: transparent; border: none; color: var(--primary-color); cursor: pointer; font-size: 0.9rem; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
-        .btn-audio-speak:hover { color: #1e4736; }
-
-        /* UPLOAD STYLES */
-        .file-upload-box { border: 2px dashed var(--border-color); padding: 10px; border-radius: 8px; text-align: center; background: #FFFFFF; margin-top: 6px; cursor: pointer; transition: all 0.2s; }
-        .file-upload-box:hover { border-color: var(--primary-color); background: #F4F7F5; }
-        .file-badge { display: inline-flex; align-items: center; gap: 6px; background: #EBF2EE; color: var(--primary-color); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin-top: 6px; }
-
-        /* TARJETAS Y GRILLAS */
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 16px; }
-        .card-item { background: #FFF; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.2s; }
-        .card-item:hover { transform: translateY(-2px); }
-
-        .cuaderno-tabs { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-bottom: 4px; }
-        .cuaderno-tab-btn { background: #EBF2EE; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary-color); font-size: 0.85rem; white-space: nowrap; }
-        .cuaderno-tab-btn.active { background: var(--primary-color); color: white; }
-
-        /* ADAPTACIÓN MÓVIL Y TABLET MEDIANTE MEDIA QUERIES */
-        @media (max-width: 850px) {
-            .navbar { padding: 10px 14px; }
-            .tutor-layout { grid-template-columns: 1fr; height: auto; display: flex; flex-direction: column; }
-            .sidebar-config { max-height: 250px; overflow-y: auto; }
-            .chat-wrapper { height: 500px; }
-            .message { max-width: 92%; }
-            .user-profile span { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        }
-
-        @media (max-width: 480px) {
-            .main-container { padding: 10px; }
-            .chat-wrapper { height: 440px; }
-            .chat-input-container { padding: 8px; gap: 6px; }
-            .btn-primary { padding: 10px 12px; font-size: 0.85rem; }
-            .nav-btn { padding: 6px 10px; font-size: 0.8rem; }
-        }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { background-color: #1e293b; color: #fff; min-height: 100vh; }
+        .sidebar .nav-link { color: #cbd5e1; margin-bottom: 5px; border-radius: 8px; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #334155; color: #fff; }
+        .chat-box { background-color: #ffffff; border-radius: 12px; height: 68vh; overflow-y: auto; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .msg-user { background-color: #e0e7ff; color: #1e1b4b; align-self: flex-end; border-radius: 15px 15px 0 15px; margin-left: auto; max-width: 80%; }
+        .msg-tutor { background-color: #f1f5f9; color: #0f172a; align-self: flex-start; border-radius: 15px 15px 15px 0; margin-right: auto; max-width: 85%; }
+        .section-badge { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .custom-card { border: none; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .nav-tabs-sm .nav-link { font-size: 0.78rem; padding: 0.35rem 0.5rem; color: #cbd5e1; }
+        .nav-tabs-sm .nav-link.active { background-color: #334155; color: #fff; border-color: #475569; }
+        ul, ol { margin-bottom: 0; padding-left: 1.2rem; }
+        li { margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-    <!-- NAVBAR -->
-    <header class="navbar">
-        <div class="logo"><i class="fa-solid fa-comments"></i> <span>Oralis</span></div>
-        <nav class="nav-links">
-            <button class="nav-btn active" onclick="switchTab('tutor', event)"><i class="fa-solid fa-robot"></i> Tutor</button>
-            <button class="nav-btn" onclick="switchTab('cuaderno', event)"><i class="fa-solid fa-book-bookmark"></i> Cuaderno</button>
-            <button class="nav-btn" onclick="switchTab('banco', event)"><i class="fa-solid fa-book-open"></i> Banco</button>
-            <button class="nav-btn" onclick="switchTab('historial', event)"><i class="fa-solid fa-clock-rotate-left"></i> Historial</button>
-            <button class="nav-btn" onclick="switchTab('feedback', event)"><i class="fa-solid fa-star"></i> Feedback</button>
-        </nav>
-        <div class="user-profile">
-            <span><i class="fa-solid fa-circle-user"></i> {{ user_name }}</span>
-            {% if user_email == 'p75886777@gmail.com' %}
-                <a href="/admin/feedbacks" class="btn-admin"><i class="fa-solid fa-shield-halved"></i> Admin</a>
-            {% endif %}
-            <a href="/logout" style="color:#DC3545; text-decoration:none; margin-left:6px;" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></a>
-        </div>
-    </header>
-
-    <main class="main-container">
-
-        <!-- PESTAÑA 1: TUTOR -->
-        <section id="tab-tutor" class="tab-content">
-            <div class="tutor-layout">
-                
-                <aside class="sidebar-config">
-                    <h3><i class="fa-solid fa-sliders"></i> Configuración</h3>
-
-                    <div class="form-group">
-                        <label for="select-idioma">Idioma Objetivo:</label>
-                        <select id="select-idioma" onchange="actualizarExamenesDisponibles()">
-                            <option value="Inglés">🇬🇧 Inglés</option>
-                            <option value="Alemán">🇩🇪 Alemán</option>
-                            <option value="Italiano">🇮🇹 Italiano</option>
-                            <option value="Francés">🇫🇷 Francés</option>
-                            <option value="Neerlandés">🇳🇱 Neerlandés</option>
-                            <option value="Portugués">🇵🇹 Portugués</option>
-                            <option value="Japonés">🇯🇵 Japonés</option>
-                            <option value="Chino Mandarín">🇨🇳 Chino Mandarín</option>
-                            <option value="Ruso">🇷🇺 Ruso</option>
-                            <option value="Rumano">🇷🇴 Rumano</option>
-                            <option value="Español ELE">🇪🇸 Español (ELE)</option>
-                            <option value="Latín">🏛️ Latín</option>
-                            <option value="Griego Antiguo">🏛️ Griego Antiguo</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="select-cefr">Nivel CEFR Deseado:</label>
-                        <select id="select-cefr">
-                            <option value="A1">A1 - Principiante</option>
-                            <option value="A2">A2 - Elemental</option>
-                            <option value="B1" selected>B1 - Intermedio</option>
-                            <option value="B2">B2 - Intermedio Alto</option>
-                            <option value="C1">C1 - Avanzado</option>
-                            <option value="C2">C2 - Maestría / Nativo</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="select-modo">Modo de Aprendizaje:</label>
-                        <select id="select-modo" onchange="cambiarModoInterfaz()">
-                            <option value="tutor_general">💬 Modo 1: Tutor General</option>
-                            <option value="practica_oral">🎙️ Modo 2: Práctica Oral</option>
-                            <option value="examenes">🎓 Modo 3: Exámenes Oficiales</option>
-                            <option value="writing">📝 Modo 4: Práctica de Writing</option>
-                        </select>
-                    </div>
-
-                    <!-- MODO 2: ROL PERSONALIZABLE -->
-                    <div id="opciones-modo-2" class="modo-extra hidden">
-                        <label for="select-rol">Rol de Oralis:</label>
-                        <select id="select-rol" onchange="evaluarRolPersonalizado()">
-                            <option value="Entrevistador de Trabajo">Entrevistador de Trabajo</option>
-                            <option value="Médico en Consulta">Médico en Consulta</option>
-                            <option value="Recepcionista de Hotel">Recepcionista de Hotel</option>
-                            <option value="Guía Turístico">Guía Turístico</option>
-                            <option value="Cliente en Restaurante">Cliente en Restaurante</option>
-                            <option value="Colega de Oficina">Colega de Oficina</option>
-                            <option value="otro">Personalizado (Escribir abajo)...</option>
-                        </select>
-                        <input type="text" id="rol-custom" class="hidden" style="margin-top:6px;" placeholder="Ej: Agente inmobiliario...">
-                    </div>
-
-                    <!-- MODO 3: EXÁMENES -->
-                    <div id="opciones-modo-3" class="modo-extra hidden">
-                        <label for="select-examen">Certificación / Examen:</label>
-                        <select id="select-examen"></select>
-
-                        <label for="rubrica-text" style="margin-top:6px; display:block;">Rúbrica o Criterios:</label>
-                        <textarea id="rubrica-text" rows="2" placeholder="Pega los criterios específicos aquí..."></textarea>
-                    </div>
-
-                    <!-- MODO 4: WRITING -->
-                    <div id="opciones-modo-4" class="modo-extra hidden">
-                        <label for="modo-correccion-writing">Sistema de Corrección:</label>
-                        <select id="modo-correccion-writing">
-                            <option value="normal">Modo Normal (Muestra solución)</option>
-                            <option value="desafio">Modo Desafío (Guiado con pistas)</option>
-                        </select>
-
-                        <label style="margin-top: 8px; display:block;">Adjuntar Composición (.txt, .md, .doc):</label>
-                        <div class="file-upload-box" onclick="document.getElementById('writing-file-input').click()">
-                            <i class="fa-solid fa-cloud-arrow-up" style="font-size:1.2rem; color:var(--primary-color);"></i>
-                            <p style="font-size:0.78rem; margin-top:2px;">Haz clic aquí para subir archivo</p>
-                        </div>
-                        <input type="file" id="writing-file-input" class="hidden" accept=".txt,.md,.doc,.docx" onchange="procesarArchivoAdjunto(event)">
-                        
-                        <div id="file-info-badge" class="file-badge hidden">
-                            <i class="fa-solid fa-paperclip"></i>
-                            <span id="file-name-text">archivo.txt</span>
-                            <i class="fa-solid fa-xmark" style="cursor:pointer; margin-left:6px;" onclick="quitarArchivoAdjunto()" title="Quitar archivo"></i>
-                        </div>
-                    </div>
-
-                </aside>
-
-                <div class="chat-wrapper">
-                    <div id="chat-box" class="chat-box">
-                        <div class="message bot-message">
-                            <div class="msg-content">
-                                <p>¡Hola {{ user_name }}! Soy Oralis, tu tutor inteligente de idiomas. Selecciona tus preferencias e inicia la conversación.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="chat-input-container">
-                        <!-- BOTÓN DE MICRÓFONO (SE OCULTA EN MODO WRITING) -->
-                        <button id="btn-mic" class="btn-icon" onclick="toggleReconocimientoVoz()" title="Grabar audio con micrófono">
-                            <i class="fa-solid fa-microphone"></i>
-                        </button>
-                        
-                        <textarea id="user-input" rows="1" placeholder="Escribe o dicta tu mensaje aquí..."></textarea>
-                        <button class="btn-primary" onclick="enviarMensaje()"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- PESTAÑA 2: MI CUADERNO -->
-        <section id="tab-cuaderno" class="tab-content hidden">
-            <h2><i class="fa-solid fa-book-bookmark"></i> Mi Cuaderno (Repaso Inteligente)</h2>
-            <div class="cuaderno-tabs">
-                <button class="cuaderno-tab-btn active" onclick="filtrarCuaderno('todos', event)">Ver Todos</button>
-                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Vocabulario', event)">📘 Vocabulario</button>
-                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Gramática', event)">📐 Gramática</button>
-            </div>
-            <div id="cuaderno-grid" class="cards-grid"></div>
-        </section>
-
-        <!-- PESTAÑA 3: BANCO DE RECURSOS -->
-        <section id="tab-banco" class="tab-content hidden">
-            <h2><i class="fa-solid fa-book-open"></i> Banco Recomendado de Recursos</h2>
-            <div class="cards-grid">
-                <div class="card-item" onclick="cargarEnChat('Quiero practicar conectores avanzados')">
-                    <h4>🔗 Conectores Avanzados</h4>
-                    <p>Mejora la cohesión y fluidez de tus textos y conversaciones.</p>
-                </div>
-                <div class="card-item" onclick="cargarEnChat('Iniciar práctica de expresiones idiomáticas')">
-                    <h4>💡 Idioms y Modismos</h4>
-                    <p>Habla como un nativo utilizando modismos habituales.</p>
-                </div>
-                <div class="card-item" onclick="cargarEnChat('Simular vocabulario para una entrevista de trabajo')">
-                    <h4>💼 Entrevistas de Trabajo</h4>
-                    <p>Vocabulario clave y respuestas recomendadas en entornos profesionales.</p>
-                </div>
-                <div class="card-item" onclick="cargarEnChat('Quiero repasar la conjugación de verbos en pasado')">
-                    <h4>⌛ Conjugación en Pasado</h4>
-                    <p>Ejercicios prácticos sobre tiempos verbales pasados.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- PESTAÑA 4: HISTORIAL -->
-        <section id="tab-historial" class="tab-content hidden">
-            <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de Chats</h2>
-            <div id="historial-list" class="cards-grid"></div>
-        </section>
-
-        <!-- PESTAÑA 5: FEEDBACK -->
-        <section id="tab-feedback" class="tab-content hidden">
-            <h2><i class="fa-solid fa-star"></i> Enviar Feedback al Administrador</h2>
-            <div style="max-width: 500px; margin-top:15px;" class="form-group">
-                <label>Puntuación:</label>
-                <select id="fb-score">
-                    <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
-                    <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
-                    <option value="3">⭐⭐⭐ Aceptable</option>
-                </select>
-                <label style="margin-top:10px;">Comentario:</label>
-                <textarea id="fb-comment" rows="4" placeholder="Escribe tu opinión o sugerencias..."></textarea>
-                <button class="btn-primary" style="margin-top:10px; width:100%;" onclick="enviarFeedback()">Enviar Opinión</button>
-            </div>
-        </section>
-
-    </main>
-
-    <script>
-        const examenesPorIdioma = {
-            "Inglés": ["Cambridge (KET, PET, FCE, CAE, CPE)", "IELTS", "TOEFL", "Aptis"],
-            "Alemán": ["Goethe-Zertifikat (A1-C2)", "TestDaF", "DSH"],
-            "Italiano": ["CILS", "CELI", "PLIDA"],
-            "Francés": ["DELF", "DALF", "TCF", "TEF"],
-            "Neerlandés": ["CNaVT", "NT2"],
-            "Portugués": ["CAPLE (PLE)", "Celpe-Bras"],
-            "Japonés": ["JLPT (N5 a N1)"],
-            "Chino Mandarín": ["HSK (HSK 1 a HSK 6)"],
-            "Ruso": ["TORFL / TRKI"],
-            "Rumano": ["RLS (Institutul Limbii Române)"],
-            "Español ELE": ["DELE", "SIELE"],
-            "Latín": ["Exámenes de Lenguas Clásicas / EvAU"],
-            "Griego Antiguo": ["Exámenes de Lenguas Clásicas / Accreditation"]
-        };
-
-        const idiomaCodigosISO = {
-            "Inglés": "en-US",
-            "Alemán": "de-DE",
-            "Italiano": "it-IT",
-            "Francés": "fr-FR",
-            "Neerlandés": "nl-NL",
-            "Portugués": "pt-PT",
-            "Japonés": "ja-JP",
-            "Chino Mandarín": "zh-CN",
-            "Ruso": "ru-RU",
-            "Rumano": "ro-RO",
-            "Español ELE": "es-ES",
-            "Latín": "la",
-            "Griego Antiguo": "el-GR"
-        };
-
-        let itemsCuadernoGlobal = [];
-        let archivoAdjuntoContenido = '';
-        let archivoAdjuntoNombre = '';
-        
-        let recognition = null;
-        let isRecording = false;
-
-        function switchTab(tabName, evt) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            if(evt) evt.currentTarget.classList.add('active');
-
-            if(tabName === 'cuaderno') cargarCuaderno();
-            if(tabName === 'historial') cargarHistorial();
-        }
-
-        function cambiarModoInterfaz() {
-            const modo = document.getElementById('select-modo').value;
-            document.querySelectorAll('.modo-extra').forEach(el => el.classList.add('hidden'));
-
-            const btnMic = document.getElementById('btn-mic');
-
-            if (modo === 'practica_oral') document.getElementById('opciones-modo-2').classList.remove('hidden');
-            if (modo === 'examenes') document.getElementById('opciones-modo-3').classList.remove('hidden');
-            if (modo === 'writing') document.getElementById('opciones-modo-4').classList.remove('hidden');
-
-            if (modo === 'writing') {
-                btnMic.classList.add('hidden');
-                document.querySelectorAll('.btn-audio-speak').forEach(el => el.classList.add('hidden'));
-            } else {
-                btnMic.classList.remove('hidden');
-                document.querySelectorAll('.btn-audio-speak').forEach(el => el.classList.remove('hidden'));
-            }
-        }
-
-        function evaluarRolPersonalizado() {
-            const val = document.getElementById('select-rol').value;
-            const inputCustom = document.getElementById('rol-custom');
-            if(val === 'otro') {
-                inputCustom.classList.remove('hidden');
-            } else {
-                inputCustom.classList.add('hidden');
-            }
-        }
-
-        function actualizarExamenesDisponibles() {
-            const idioma = document.getElementById('select-idioma').value;
-            const selectExamen = document.getElementById('select-examen');
-            selectExamen.innerHTML = '';
-
-            const lista = examenesPorIdioma[idioma] || ["Examen General"];
-            lista.forEach(ex => {
-                const opt = document.createElement('option');
-                opt.value = ex;
-                opt.textContent = ex;
-                selectExamen.appendChild(opt);
-            });
-        }
-
-        function procesarArchivoAdjunto(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            archivoAdjuntoNombre = file.name;
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                archivoAdjuntoContenido = e.target.result;
-                document.getElementById('file-name-text').innerText = file.name;
-                document.getElementById('file-info-badge').classList.remove('hidden');
-            };
-
-            reader.readAsText(file);
-        }
-
-        function quitarArchivoAdjunto() {
-            archivoAdjuntoContenido = '';
-            archivoAdjuntoNombre = '';
-            document.getElementById('writing-file-input').value = '';
-            document.getElementById('file-info-badge').classList.add('hidden');
-        }
-
-        function toggleReconocimientoVoz() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("Tu navegador no soporta el reconocimiento de voz por micrófono.");
-                return;
-            }
-
-            const btnMic = document.getElementById('btn-mic');
-            const idioma = document.getElementById('select-idioma').value;
-            const isoCode = idiomaCodigosISO[idioma] || 'en-US';
-
-            if (isRecording) {
-                if (recognition) recognition.stop();
-                btnMic.classList.remove('recording');
-                isRecording = false;
-                return;
-            }
-
-            recognition = new SpeechRecognition();
-            recognition.lang = isoCode;
-            recognition.interimResults = false;
-
-            recognition.onstart = function() {
-                isRecording = true;
-                btnMic.classList.add('recording');
-            };
-
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                const userInput = document.getElementById('user-input');
-                userInput.value = (userInput.value ? userInput.value + ' ' : '') + transcript;
-            };
-
-            recognition.onerror = function(event) {
-                btnMic.classList.remove('recording');
-                isRecording = false;
-            };
-
-            recognition.onend = function() {
-                btnMic.classList.remove('recording');
-                isRecording = false;
-            };
-
-            recognition.start();
-        }
-
-        function reproducirAudioMensaje(texto) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(texto);
-                const idioma = document.getElementById('select-idioma').value;
-                utterance.lang = idiomaCodigosISO[idioma] || 'en-US';
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert("Tu navegador no soporta la reproducción de texto a voz.");
-            }
-        }
-
-        async function enviarMensaje() {
-            const input = document.getElementById('user-input');
-            const msg = input.value.trim();
-
-            if(!msg && !archivoAdjuntoContenido) return;
-
-            let displayMsg = msg;
-            if(archivoAdjuntoNombre) {
-                displayMsg += `\n📎 [Archivo adjunto: ${archivoAdjuntoNombre}]`;
-            }
-
-            appendMessage('user', displayMsg);
-            input.value = '';
-
-            let rolFinal = document.getElementById('select-rol').value;
-            if(rolFinal === 'otro') {
-                rolFinal = document.getElementById('rol-custom').value || 'Rol Personalizado';
-            }
-
-            const payload = {
-                message: msg,
-                target_lang: document.getElementById('select-idioma').value,
-                cefr_level: document.getElementById('select-cefr').value,
-                mode: document.getElementById('select-modo').value,
-                rol_practica: rolFinal,
-                examen_oficial: document.getElementById('select-examen').value,
-                rubrica: document.getElementById('rubrica-text').value,
-                file_name: archivoAdjuntoNombre,
-                file_content: archivoAdjuntoContenido
-            };
-
-            quitarArchivoAdjunto();
-
-            const response = await fetch('/chat_stream', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let fullText = '';
-            const botMsgDiv = appendMessage('bot', 'Oralis pensando...');
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                fullText += decoder.decode(value, { stream: true });
-                renderizarRespuesta(botMsgDiv, fullText);
-            }
-        }
-
-        function renderizarRespuesta(element, rawText) {
-            // Eliminar asteriscos y almohadillas del texto original
-            let cleanedText = rawText.replace(/[*#]/g, '');
-
-            let html = '';
-            const pResp = cleanedText.split('[TRADUCCION_INTEGRADA]')[0].replace('[RESPUESTA_PRINCIPAL]', '').trim();
-            const rest1 = cleanedText.split('[TRADUCCION_INTEGRADA]')[1] || '';
-            const pTrad = rest1.split('[CORRECCION_Y_MEJORA]')[0];
-            const pCorr = rest1.split('[CORRECCION_Y_MEJORA]')[1] || '';
-
-            const modoActual = document.getElementById('select-modo').value;
-            const ocultarAltavoz = (modoActual === 'writing') ? 'hidden' : '';
-
-            // Texto sin etiquetas HTML para la síntesis de voz
-            const textoLimpioVoz = pResp.replace(/<[^>]*>?/gm, '');
-
-            html += `<div>${pResp}</div>`;
+<div class="container-fluid">
+    <div class="row">
+        <!-- BARRA LATERAL / CONFIGURACIÓN -->
+        <div class="col-md-3 col-lg-2 sidebar p-3 d-flex flex-column">
+            <h3 class="text-primary fw-bold mb-4"><i class="bi bi-chat-left-dots-fill"></i> Oralis</h3>
             
-            html += `<button class="btn-audio-speak ${ocultarAltavoz}" onclick="reproducirAudioMensaje(\`${textoLimpioVoz.replace(/`/g, '\\`').replace(/"/g, '&quot;')}\`)">
-                        <i class="fa-solid fa-volume-high"></i> Escuchar pronunciación
-                     </button>`;
+            <p class="text-muted small mb-1">Hola, <strong>{{ user_name }}</strong></p>
+            <hr class="border-secondary mb-3">
 
-            if(pTrad) {
-                html += `<div class="block-translation"><strong>🌐 Traducción Integrada:</strong><br>${pTrad}</div>`;
-            }
-            if(pCorr) {
-                html += `<div class="block-correction"><strong>💡 Análisis Pedagógico y Corrección:</strong><br>${pCorr}</div>`;
-            }
+            <!-- IDIOMA OBJETIVO -->
+            <div class="mb-3">
+                <label class="form-label text-light small"><i class="bi bi-translate"></i> Idioma Objetivo</label>
+                <select id="target_lang" class="form-select form-select-sm bg-dark text-light border-secondary" onchange="updateExamsList()">
+                    <optgroup label="Idiomas Principales">
+                        <option value="Inglés" selected>Inglés</option>
+                        <option value="Español (ELE)">Español como Idioma Extranjero (ELE)</option>
+                        <option value="Francés">Francés</option>
+                        <option value="Alemán">Alemán</option>
+                        <option value="Italiano">Italiano</option>
+                        <option value="Portugués">Portugués</option>
+                    </optgroup>
+                    <optgroup label="Lenguas Antiguas y Clásicas">
+                        <option value="Latín">Latín</option>
+                        <option value="Griego Antiguo">Griego Antiguo / Clásico</option>
+                    </optgroup>
+                    <optgroup label="Idiomas Europeos">
+                        <option value="Neerlandés">Neerlandés / Holandés</option>
+                        <option value="Ruso">Ruso</option>
+                        <option value="Polaco">Polaco</option>
+                        <option value="Sueco">Sueco</option>
+                        <option value="Noruego">Noruego</option>
+                        <option value="Danés">Danés</option>
+                        <option value="Finés">Finés</option>
+                        <option value="Griego">Griego Moderno</option>
+                        <option value="Turco">Turco</option>
+                        <option value="Checo">Checo</option>
+                        <option value="Rumano">Rumano</option>
+                        <option value="Húngaro">Húngaro</option>
+                    </optgroup>
+                    <optgroup label="Idiomas Asiáticos">
+                        <option value="Chino Mandarín">Chino Mandarín</option>
+                        <option value="Japonés">Japonés</option>
+                        <option value="Coreano">Coreano</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Vietnamita">Vietnamita</option>
+                    </optgroup>
+                    <optgroup label="Otros Idiomas">
+                        <option value="Árabe">Árabe</option>
+                        <option value="Hebreo">Hebreo</option>
+                        <option value="Catalán">Catalán</option>
+                        <option value="Euskera">Euskera</option>
+                        <option value="Gallego">Gallego</option>
+                    </optgroup>
+                </select>
+            </div>
 
-            element.querySelector('.msg-content').innerHTML = html;
-        }
+            <!-- NIVEL CEFR -->
+            <div class="mb-3">
+                <label class="form-label text-light small"><i class="bi bi-bar-chart-steps"></i> Nivel CEFR</label>
+                <select id="cefr_level" class="form-select form-select-sm bg-dark text-light border-secondary">
+                    <option value="A1">A1 - Principiante</option>
+                    <option value="A2">A2 - Elemental</option>
+                    <option value="B1" selected>B1 - Intermedio</option>
+                    <option value="B2">B2 - Intermedio Alto</option>
+                    <option value="C1">C1 - Avanzado</option>
+                    <option value="C2">C2 - Maestría / Experto</option>
+                </select>
+            </div>
 
-        function appendMessage(sender, text) {
-            const chatBox = document.getElementById('chat-box');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${sender}-message`;
-            msgDiv.innerHTML = `<div class="msg-content">${text.replace(/\n/g, '<br>')}</div>`;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            return msgDiv;
-        }
+            <!-- MODO DE TRABAJO -->
+            <div class="mb-3">
+                <label class="form-label text-light small"><i class="bi bi-gear-fill"></i> Modo de Trabajo</label>
+                <select id="mode_select" class="form-select form-select-sm bg-dark text-light border-secondary" onchange="toggleModeOptions()">
+                    <option value="tutor_general" selected>Tutor General (Dudas / Gramática)</option>
+                    <option value="practica_oral">Práctica Oral (Simulación)</option>
+                    <option value="examenes">Exámenes Oficiales / Pruebas</option>
+                    <option value="writing">Práctica de Writing</option>
+                </select>
+            </div>
 
-        function cargarEnChat(texto) {
-            switchTab('tutor');
-            document.getElementById('user-input').value = texto;
-        }
+            <!-- OPCIONES SECUNDARIAS DINÁMICAS: PRÁCTICA ORAL -->
+            <div id="opts_practica_oral" class="mb-3 d-none">
+                <label class="form-label text-light small">Rol de Simulación</label>
+                <input type="text" id="rol_practica" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Ej: Entrevistador de trabajo, Médico">
+            </div>
 
-        async function cargarCuaderno() {
-            const res = await fetch('/cuaderno/listar');
-            itemsCuadernoGlobal = await res.json();
-            renderCuadernoGrid(itemsCuadernoGlobal);
-        }
+            <!-- OPCIONES CON PESTAÑAS PARA MODO EXÁMENES -->
+            <div id="opts_examenes" class="mb-3 d-none">
+                <ul class="nav nav-tabs nav-tabs-sm border-secondary mb-2" id="examTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tab-oficial-btn" data-bs-toggle="tab" data-bs-target="#tab-oficial" type="button" role="tab">Oficiales</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-custom-btn" data-bs-toggle="tab" data-bs-target="#tab-custom" type="button" role="tab">Personalizar Examen</button>
+                    </li>
+                </ul>
 
-        function renderCuadernoGrid(items) {
-            const grid = document.getElementById('cuaderno-grid');
-            if(items.length === 0) {
-                grid.innerHTML = '<p style="padding:20px; color:#6C757D;">No hay anotaciones guardadas aún.</p>';
-                return;
-            }
-            grid.innerHTML = items.map(item => `
-                <div class="card-item">
-                    <span style="font-size:0.75rem; font-weight:bold; color:var(--primary-color); background:#EBF2EE; padding:3px 8px; border-radius:4px;">${item.categoria} - ${item.idioma} (${item.nivel})</span>
-                    <h4 style="margin-top:8px;">${item.termino}</h4>
-                    <p style="font-size:0.9rem; color:#555;">${item.explicacion}</p>
+                <div class="tab-content" id="examTabsContent">
+                    <!-- PESTAÑA: EXÁMENES OFICIALES -->
+                    <div class="tab-pane fade show active" id="tab-oficial" role="tabpanel">
+                        <label class="form-label text-light small"><i class="bi bi-journal-check"></i> Elige un Examen</label>
+                        <select id="examen_oficial_select" class="form-select form-select-sm bg-dark text-light border-secondary mb-2">
+                            <!-- Se rellena dinámicamente según el idioma seleccionado -->
+                        </select>
+                    </div>
+
+                    <!-- PESTAÑA: PERSONALIZAR EXAMEN -->
+                    <div class="tab-pane fade" id="tab-custom" role="tabpanel">
+                        <label class="form-label text-light small"><i class="bi bi-pencil-square"></i> Nombre del Examen / Prueba</label>
+                        <input type="text" id="custom_examen_name" class="form-control form-control-sm bg-dark text-light border-secondary mb-2" placeholder="Ej: OPIc, Examen Oposición, Parcial Univ...">
+                    </div>
                 </div>
-            `).join('');
-        }
 
-        function filtrarCuaderno(categoria, evt) {
-            document.querySelectorAll('.cuaderno-tab-btn').forEach(b => b.classList.remove('active'));
-            if(evt) evt.currentTarget.classList.add('active');
-
-            if(categoria === 'todos') {
-                renderCuadernoGrid(itemsCuadernoGlobal);
-            } else {
-                const filtrados = itemsCuadernoGlobal.filter(i => i.categoria === categoria);
-                renderCuadernoGrid(filtrados);
-            }
-        }
-
-        async function cargarHistorial() {
-            const res = await fetch('/historial/listar');
-            const data = await res.json();
-            const list = document.getElementById('historial-list');
-            list.innerHTML = data.map(c => `
-                <div class="card-item">
-                    <h4>${c.titulo}</h4>
-                    <p style="font-size:0.85rem; color:#666;">Modo: ${c.modo} | Fecha: ${c.fecha}</p>
+                <!-- CRITERIOS Y RÚBRICA COMÚN -->
+                <div class="mt-2">
+                    <label class="form-label text-light small"><i class="bi bi-card-checklist"></i> Criterios / Rúbrica</label>
+                    <textarea id="rubrica" class="form-control form-control-sm bg-dark text-light border-secondary" rows="2" placeholder="Ej: Evaluar gramática estricta, vocabulario formal, límite de palabras..."></textarea>
                 </div>
-            `).join('');
-        }
+            </div>
 
-        async function enviarFeedback() {
-            const score = document.getElementById('fb-score').value;
-            const comment = document.getElementById('fb-comment').value;
-            await fetch('/feedback', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ score, comment })
-            });
-            alert('¡Feedback enviado correctamente!');
-            document.getElementById('fb-comment').value = '';
-        }
+            <div class="mt-auto">
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm w-100 mb-2"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+            </div>
+        </div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            actualizarExamenesDisponibles();
-            cambiarModoInterfaz();
+        <!-- ÁREA PRINCIPAL DE CHAT -->
+        <div class="col-md-9 col-lg-10 p-4 d-flex flex-column" style="height: 100vh;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0 text-dark fw-bold" id="mode_title">Tutor General</h4>
+                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                    <i class="bi bi-chat-heart"></i> Enviar Valoración
+                </button>
+            </div>
+
+            <!-- Caja de Conversaciones -->
+            <div id="chat_box" class="chat-box mb-3 d-flex flex-column gap-3">
+                <div class="p-3 msg-tutor shadow-sm">
+                    <strong>Oralis:</strong>
+                    <p class="mb-0 mt-1">¡Hola {{ user_name }}! Soy tu tutor de idiomas. ¿En qué puedo ayudarte hoy o qué duda te gustaría resolver?</p>
+                </div>
+            </div>
+
+            <!-- Entrada de Texto y Adjuntos -->
+            <div class="input-group">
+                <input type="file" id="file_input" class="d-none" onchange="handleFileUpload(event)">
+                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('file_input').click()">
+                    <i class="bi bi-paperclip"></i>
+                </button>
+                <textarea id="user_input" class="form-control" rows="1" placeholder="Escribe tu mensaje o pregunta aquí..." onkeydown="checkEnter(event)"></textarea>
+                <button class="btn btn-primary px-4" id="btn_send" onclick="sendMessage()"><i class="bi bi-send-fill"></i></button>
+            </div>
+            <div id="file_indicator" class="form-text text-success d-none mt-1">
+                <i class="bi bi-file-earmark-check"></i> Archivo listo: <span id="file_name_disp"></span> 
+                <a href="#" onclick="clearFile()" class="text-danger ms-2">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE FEEDBACK -->
+<div class="modal fade" id="feedbackModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tu opinión nos ayuda a mejorar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Puntuación (1 a 5 estrellas)</label>
+                    <select id="fb_score" class="form-select">
+                        <option value="5" selected>⭐⭐⭐⭐⭐ (Excelente)</option>
+                        <option value="4">⭐⭐⭐⭐ (Muy Bueno)</option>
+                        <option value="3">⭐⭐⭐ (Aceptable)</option>
+                        <option value="2">⭐⭐ (Regular)</option>
+                        <option value="1">⭐ (Malas sugerencias)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Comentario</label>
+                    <textarea id="fb_comment" class="form-control" rows="3" placeholder="¿Qué podemos mejorar de Oralis?"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="submitFeedback()">Enviar Feedback</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let attachedFile = { name: '', content: '' };
+
+// Catálogo completo de exámenes oficiales por idioma
+const examenesPorIdioma = {
+    'Inglés': ['Cambridge B2 First (FCE)', 'Cambridge C1 Advanced (CAE)', 'Cambridge C2 Proficiency (CPE)', 'IELTS Academic', 'IELTS General Training', 'TOEFL iBT', 'TOEIC', 'Linguaskill', 'Aptis General / Advanced', 'EOI (Escuela Oficial de Idiomas)'],
+    'Español (ELE)': ['DELE A1', 'DELE A2', 'DELE B1', 'DELE B2', 'DELE C1', 'DELE C2', 'SIELE Global', 'CCSE (Nacionalidad Española)', 'EOI (Escuela Oficial de Idiomas)'],
+    'Francés': ['DELF A1', 'DELF A2', 'DELF B1', 'DELF B2', 'DALF C1', 'DALF C2', 'TCF (Test de Connaissance du Français)', 'TEF (Test d\'Évaluation de Français)', 'EOI (Escuela Oficial de Idiomas)'],
+    'Alemán': ['Goethe-Zertifikat A1-C2', 'TestDaF', 'DSH', 'telc Deutsch B1/B2/C1', 'ÖSD (Österreichisches Sprachdiplom)', 'EOI (Escuela Oficial de Idiomas)'],
+    'Italiano': ['CELI (Università di Perugia)', 'CILS (Università di Siena)', 'PLIDA (Dante Alighieri)', 'IT (Roma Tre)', 'EOI (Escuela Oficial de Idiomas)'],
+    'Portugués': ['CAPLE (Pleco, DIPLE, DAPLE, CIPLE)', 'CELPE-Bras (Brasil)', 'EOI (Escuela Oficial de Idiomas)'],
+    'Latín': ['Examen Universitario de Traducción Latina', 'Acreditación Sintáctica Clásica', 'Selectividad / AU Latina'],
+    'Griego Antiguo': ['Examen Universitario de Filología Clásica', 'Traducción de Textos Clásicos Griego', 'Selectividad / AU Griego'],
+    'Chino Mandarín': ['HSK 1', 'HSK 2', 'HSK 3', 'HSK 4', 'HSK 5', 'HSK 6', 'HSKK (Oral)', 'TOCFL (Taiwán)'],
+    'Japonés': ['JLPT N5', 'JLPT N4', 'JLPT N3', 'JLPT N2', 'JLPT N1', 'BJT (Business Japanese)'],
+    'Coreano': ['TOPIK I (Nivel 1-2)', 'TOPIK II (Nivel 3-6)'],
+    'Ruso': ['TORFL / TRKI 1 (B1)', 'TORFL / TRKI 2 (B2)', 'TORFL / TRKI 3 (C1)', 'EOI (Escuela Oficial de Idiomas)'],
+    'Árabe': ['ALPT (Arabic Language Proficiency Test)', 'EOI (Escuela Oficial de Idiomas)'],
+    'Neerlandés': ['CNaVT', 'NT2 (Staatsexamen NT2)'],
+    'Catalán': ['Certificats de la Llengua Catalana (A1-C2)', 'EOI'],
+    'Euskera': ['HABE / EGA (1-4)', 'EOI'],
+    'Gallego': ['CELGA (1-4)', 'EOI']
+};
+
+function updateExamsList() {
+    const lang = document.getElementById('target_lang').value;
+    const selectExamen = document.getElementById('examen_oficial_select');
+    selectExamen.innerHTML = '';
+
+    const examenes = examenesPorIdioma[lang] || ['Examen de Certificación Estándar'];
+
+    examenes.forEach(ex => {
+        const opt = document.createElement('option');
+        opt.value = ex;
+        opt.innerText = ex;
+        selectExamen.appendChild(opt);
+    });
+}
+
+function toggleModeOptions() {
+    const mode = document.getElementById('mode_select').value;
+    document.getElementById('opts_practica_oral').classList.toggle('d-none', mode !== 'practica_oral');
+    document.getElementById('opts_examenes').classList.toggle('d-none', mode !== 'examenes');
+    
+    const titles = {
+        'tutor_general': 'Tutor General (Consultas y Gramática)',
+        'practica_oral': 'Práctica Oral (Simulación de Conversación)',
+        'examenes': 'Exámenes Oficiales y Pruebas',
+        'writing': 'Práctica de Writing (Redacción y Corrección)'
+    };
+    document.getElementById('mode_title').innerText = titles[mode] || 'Chat con Oralis';
+}
+
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        attachedFile.name = file.name;
+        attachedFile.content = e.target.result;
+        document.getElementById('file_name_disp').innerText = file.name;
+        document.getElementById('file_indicator').classList.remove('d-none');
+    };
+    reader.readAsText(file);
+}
+
+function clearFile() {
+    attachedFile = { name: '', content: '' };
+    document.getElementById('file_input').value = '';
+    document.getElementById('file_indicator').classList.add('d-none');
+}
+
+function checkEnter(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+}
+
+function cleanFormatting(str) {
+    return str.replace(/[\*#]/g, '');
+}
+
+async function sendMessage() {
+    const input = document.getElementById('user_input');
+    const message = input.value.trim();
+    if (!message && !attachedFile.content) return;
+
+    const chatBox = document.getElementById('chat_box');
+
+    // 1. Mostrar mensaje del usuario
+    const userDiv = document.createElement('div');
+    userDiv.className = 'p-3 msg-user shadow-sm';
+    userDiv.innerHTML = `<strong>Tú:</strong><p class="mb-0 mt-1">${cleanFormatting(message)}</p>${attachedFile.name ? `<small class="text-muted"><i class="bi bi-paperclip"></i> Adjunto: ${attachedFile.name}</small>` : ''}`;
+    chatBox.appendChild(userDiv);
+
+    input.value = '';
+    
+    // 2. Crear contenedor para la respuesta del tutor
+    const tutorDiv = document.createElement('div');
+    tutorDiv.className = 'p-3 msg-tutor shadow-sm';
+    tutorDiv.innerHTML = `<strong>Oralis:</strong> <div id="stream_target"><span class="spinner-border spinner-border-sm"></span> Pensando respuesta...</div>`;
+    chatBox.appendChild(tutorDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const streamTarget = tutorDiv.querySelector('#stream_target');
+
+    // Comprobar qué pestaña de examen está activa
+    let selectedExam = "";
+    const activeTab = document.querySelector('#examTabs .nav-link.active').id;
+    if (activeTab === 'tab-custom-btn') {
+        const customName = document.getElementById('custom_examen_name').value.trim();
+        selectedExam = customName ? `Personalizado (${customName})` : 'Examen Personalizado';
+    } else {
+        selectedExam = document.getElementById('examen_oficial_select').value;
+    }
+
+    // Preparar carga útil
+    const payload = {
+        message: message,
+        target_lang: document.getElementById('target_lang').value,
+        cefr_level: document.getElementById('cefr_level').value,
+        mode: document.getElementById('mode_select').value,
+        rol_practica: document.getElementById('rol_practica').value,
+        examen_oficial: selectedExam,
+        rubrica: document.getElementById('rubrica').value,
+        file_name: attachedFile.name,
+        file_content: attachedFile.content
+    };
+
+    clearFile();
+
+    try {
+        const response = await fetch('/chat_stream', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-    </script>
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let fullText = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            fullText += decoder.decode(value, { stream: true });
+            streamTarget.innerHTML = formatOralisResponse(fullText);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+    } catch (err) {
+        streamTarget.innerHTML = `<span class="text-danger">Error de comunicación con el servidor.</span>`;
+    }
+}
+
+function formatOralisResponse(raw) {
+    let clean = cleanFormatting(raw);
+
+    let principal = "";
+    let traduccion = "";
+    let correccion = "";
+
+    const pMatch = clean.match(/\[RESPUESTA_PRINCIPAL\]([\s\S]*?)(?=\[TRADUCCION_INTEGRADA\]|\[CORRECCION_Y_MEJORA\]|$)/);
+    const tMatch = clean.match(/\[TRADUCCION_INTEGRADA\]([\s\S]*?)(?=\[CORRECCION_Y_MEJORA\]|$)/);
+    const cMatch = clean.match(/\[CORRECCION_Y_MEJORA\]([\s\S]*?)$/);
+
+    if (pMatch) principal = pMatch[1].trim();
+    if (tMatch) traduccion = tMatch[1].trim();
+    if (cMatch) correccion = cMatch[1].trim();
+
+    if (!principal && !traduccion && !correccion) {
+        return `<p class="mt-1 mb-0">${clean}</p>`;
+    }
+
+    let html = '';
+    if (principal) {
+        html += `<div class="mb-2"><p class="mb-0 fw-semibold">${principal}</p></div>`;
+    }
+    if (traduccion) {
+        html += `<div class="mb-2 text-muted small border-start border-3 ps-2"><em>${traduccion}</em></div>`;
+    }
+    if (correccion) {
+        html += `<div class="mt-2 pt-2 border-top"><span class="badge bg-info text-dark section-badge mb-1">Feedback y Sugerencias</span><div>${correccion}</div></div>`;
+    }
+
+    return html;
+}
+
+async function submitFeedback() {
+    const score = document.getElementById('fb_score').value;
+    const comment = document.getElementById('fb_comment').value;
+
+    await fetch('/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score, comment })
+    });
+
+    const modalEl = document.getElementById('feedbackModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+    alert('¡Gracias por tu opinión!');
+}
+
+window.onload = function() {
+    updateExamsList();
+};
+</script>
 </body>
+</html>
 </html>
