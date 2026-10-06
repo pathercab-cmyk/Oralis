@@ -14,7 +14,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Si utilizas OpenRouter para acceder a Qwen, puedes añadir base_url="https://openrouter.ai/api/v1" al inicializar
 GROQ_KEY = os.environ.get("GROQ_API_KEY", "TU_API_KEY_AQUI")
 groq_client = Groq(api_key=GROQ_KEY)
 
@@ -30,7 +29,7 @@ class Cuaderno(db.Model):
     usuario_email = db.Column(db.String(120), nullable=False)
     idioma = db.Column(db.String(50), nullable=False)
     nivel = db.Column(db.String(10), nullable=False)
-    categoria = db.Column(db.String(50), nullable=False) # 'Vocabulario' o 'Gramática'
+    categoria = db.Column(db.String(50), nullable=False)
     termino = db.Column(db.Text, nullable=False)
     explicacion = db.Column(db.Text, nullable=False)
     fecha = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -106,6 +105,13 @@ def chat_stream():
     rol_practica = data.get('rol_practica', 'Interlocutor General')
     examen_oficial = data.get('examen_oficial', '')
     rubrica = data.get('rubrica', '')
+    
+    file_name = data.get('file_name', '')
+    file_content = data.get('file_content', '')
+
+    prompt_contenido = user_message
+    if file_content:
+        prompt_contenido += f"\n\n--- ARCHIVO ADJUNTO ({file_name}) ---\n{file_content}\n--- FIN DEL ARCHIVO ---"
 
     system_prompt = f"""
 Eres Oralis, un tutor inteligente de idiomas.
@@ -133,7 +139,7 @@ Analiza los errores cometidos en el mensaje del usuario (gramática, vocabulario
                 model="qwen/qwen3.8-27b",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message}
+                    {"role": "user", "content": prompt_contenido}
                 ],
                 temperature=0.7,
                 max_tokens=1500,
@@ -148,12 +154,11 @@ Analiza los errores cometidos en el mensaje del usuario (gramática, vocabulario
 
     return Response(stream_with_context(generate()), content_type='text/plain; charset=utf-8')
 
-# --- RUTAS DE DATOS Y SERVICIOS ---
+# --- RUTAS DE DATOS ---
 @app.route('/cuaderno/listar')
 def listar_cuaderno():
     if 'user_email' not in session:
         return jsonify([])
-
     items = Cuaderno.query.filter_by(usuario_email=session['user_email']).order_by(Cuaderno.fecha.desc()).all()
     return jsonify([{
         'id': item.id,
@@ -169,7 +174,6 @@ def listar_cuaderno():
 def listar_historial():
     if 'user_email' not in session:
         return jsonify([])
-
     chats = HistorialChat.query.filter_by(usuario_email=session['user_email']).order_by(HistorialChat.fecha.desc()).all()
     return jsonify([{
         'id': c.id,
@@ -183,7 +187,6 @@ def listar_historial():
 def save_feedback():
     if 'user_email' not in session:
         return jsonify({'error': 'No autorizado'}), 401
-
     data = request.get_json() or {}
     nuevo_fb = Feedback(
         usuario_email=session['user_email'],
@@ -198,7 +201,6 @@ def save_feedback():
 def admin_feedbacks():
     if session.get('user_email') != 'p75886777@gmail.com':
         return "Acceso denegado", 403
-
     feedbacks = Feedback.query.order_by(Feedback.fecha_creacion.desc()).all()
     total_usuarios = Usuario.query.count()
     return render_template('admin_feedbacks.html', feedbacks=feedbacks, total_usuarios=total_usuarios)
