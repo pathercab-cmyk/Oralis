@@ -9,17 +9,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --bg-cream: #FDFBF7;
-            --card-offwhite: #FAFAFA;
-            --input-bg: #FFFFFF;
-            --accent-green: #4E8B71;
-            --accent-green-hover: #3D6F59;
+            --bg-main: #F5F7F5;
+            --card-bg: #FFFFFF;
+            --accent-green: #2E6B52;
+            --accent-green-hover: #23533F;
+            --accent-coral: #E07A5F;
             --text-dark: #2C3E35;
             --border-color: #E2E8E0;
         }
 
         body {
-            background-color: var(--bg-cream);
+            background-color: var(--bg-main);
             color: var(--text-dark);
             font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh;
@@ -30,51 +30,61 @@
         }
 
         .auth-card {
-            background-color: var(--card-offwhite);
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 20px;
             padding: 2.5rem;
             width: 100%;
-            max-width: 440px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            max-width: 420px;
+            box-shadow: 0 10px 30px rgba(46, 107, 82, 0.06);
         }
 
         .brand-icon {
-            width: 50px;
-            height: 50px;
+            width: 54px;
+            height: 54px;
             background-color: var(--accent-green);
             color: #FFFFFF;
-            border-radius: 14px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            margin: 0 auto 1rem auto;
-            box-shadow: 0 4px 12px rgba(78, 139, 113, 0.3);
+            margin: 0 auto 1.2rem auto;
+            box-shadow: 0 6px 16px rgba(46, 107, 82, 0.25);
+        }
+
+        .nav-pills {
+            background-color: #EEF2EE;
+            padding: 4px;
+            border-radius: 12px;
         }
 
         .nav-pills .nav-link {
             color: #6C7A72;
             font-weight: 600;
-            border-radius: 10px;
+            border-radius: 9px;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease;
         }
 
         .nav-pills .nav-link.active {
             background-color: var(--accent-green);
             color: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .form-control, .form-select {
-            background-color: var(--input-bg);
+        .form-control {
+            background-color: #FBFDFB;
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 0.7rem 1rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus {
             border-color: var(--accent-green);
-            box-shadow: 0 0 0 3px rgba(78, 139, 113, 0.15);
+            box-shadow: 0 0 0 3px rgba(46, 107, 82, 0.15);
         }
 
         .btn-green {
@@ -85,11 +95,27 @@
             padding: 0.75rem;
             font-weight: 600;
             width: 100%;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .btn-green:hover {
             background-color: var(--accent-green-hover);
+            color: #FFFFFF;
+        }
+
+        .btn-coral {
+            background-color: var(--accent-coral);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .btn-coral:hover {
+            background-color: #D0694E;
             color: #FFFFFF;
         }
     </style>
@@ -97,11 +123,11 @@
 <body>
 
 <div class="auth-card">
-    <div class="brand-icon">O</div>
-    <h4 class="fw-bold text-center mb-1">Bienvenido a Oralis</h4>
+    <div class="brand-icon"><i class="bi bi-chat-quote-fill"></i></div>
+    <h4 class="fw-bold text-center mb-1">Oralis</h4>
     <p class="text-muted small text-center mb-4">Tu tutor inteligente de idiomas personalizado</p>
 
-    <!-- Selector entre Login y Registro -->
+    <!-- Pestañas de Login / Registro -->
     <ul class="nav nav-pills nav-justified mb-4" id="authTabs">
         <li class="nav-item">
             <button class="nav-link active" id="tab-login" data-bs-toggle="pill" data-bs-target="#pane-login">Iniciar Sesión</button>
@@ -127,7 +153,7 @@
             </form>
         </div>
 
-        <!-- FORMULARIO DE REGISTRO -->
+        <!-- FORMULARIO DE REGISTRO (SIN NIVEL CEFR) -->
         <div class="tab-pane fade" id="pane-register">
             <form id="formRegister">
                 <div class="mb-3">
@@ -138,22 +164,11 @@
                     <label class="form-label small fw-semibold">Correo Electrónico</label>
                     <input type="email" id="regEmail" class="form-control" placeholder="tu@correo.com" required>
                 </div>
-                <div class="mb-3">
+                <div class="mb-4">
                     <label class="form-label small fw-semibold">Contraseña</label>
                     <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
                 </div>
-                <div class="mb-4">
-                    <label class="form-label small fw-semibold">Tu Nivel CEFR Inicial</label>
-                    <select id="regNivel" class="form-select">
-                        <option value="A1">A1 - Principiante Inicial</option>
-                        <option value="A2">A2 - Principiante Elemental</option>
-                        <option value="B1" selected>B1 - Intermedio Básico</option>
-                        <option value="B2">B2 - Intermedio Alto</option>
-                        <option value="C1">C1 - Avanzado</option>
-                        <option value="C2">C2 - Dominio Nativo</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-green">Registrarme</button>
+                <button type="submit" class="btn btn-coral">Registrarme</button>
             </form>
         </div>
     </div>
@@ -161,7 +176,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Enviar Inicio de Sesión
+    // Iniciar Sesión
     document.getElementById('formLogin').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
@@ -181,18 +196,17 @@
         }
     });
 
-    // Enviar Registro
+    // Registrar Usuario
     document.getElementById('formRegister').addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('regUser').value;
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
-        const nivel_cefr = document.getElementById('regNivel').value;
 
         const res = await fetch('/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password, nivel_cefr })
+            body: JSON.stringify({ username, email, password })
         });
 
         const data = await res.json();
