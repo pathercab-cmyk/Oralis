@@ -2,106 +2,41 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oralis - Panel de Administración</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <title>Panel Administrador - Oralis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-cream: #FDFBF7;
-            --card-offwhite: #FAFAFA;
-            --accent-green: #4E8B71;
-            --text-dark: #2C3E35;
-            --border-color: #E2E8E0;
-        }
-
-        body {
-            background-color: var(--bg-cream);
-            color: var(--text-dark);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            padding: 2rem;
-        }
-
-        .card-custom {
-            background-color: var(--card-offwhite);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.03);
-        }
-
-        .table {
-            --bs-table-bg: transparent;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; padding: 30px; background: #F8F9FA; }
+        table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; border: 1px solid #E2E8E0; text-align: left; }
+        th { background: #2E6B52; color: white; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1 text-success"><i class="bi bi-shield-lock me-2"></i>Panel de Administración</h4>
-            <p class="text-muted small mb-0">Administradora: {{ admin_email }}</p>
-        </div>
-        <a href="/" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Volver a Oralis</a>
-    </div>
-
-    <!-- Muestras Métricas del Sistema -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-6">
-            <div class="card-custom">
-                <span class="text-muted small">Total de Usuarios Registrados</span>
-                <h3 class="fw-bold text-success mb-0">{{ total_usuarios }}</h3>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card-custom">
-                <span class="text-muted small">Writings Evaluados</span>
-                <h3 class="fw-bold text-success mb-0">{{ total_writings }}</h3>
-            </div>
-        </div>
-    </div>
-
-    <!-- Listado de Feedbacks -->
-    <div class="card-custom">
-        <h6 class="fw-bold mb-3">Sugerencias y Comentarios Recibidos:</h6>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Usuario / Email</th>
-                        <th>Puntuación</th>
-                        <th>Comentario</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for fb in feedbacks %}
-                    <tr>
-                        <td class="small text-muted">{{ fb.fecha_creacion.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td class="fw-semibold">{{ fb.usuario_email }}</td>
-                        <td>
-                            {% for i in range(fb.puntuacion) %}⭐{% endfor %}
-                        </td>
-                        <td>{{ fb.comentario }}</td>
-                        <td>
-                            <form action="/admin/feedbacks/eliminar/{{ fb.id }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Borrar este comentario?')"><i class="bi bi-trash"></i></button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted py-4">No hay feedbacks registrados aún.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
+    <h2>Panel de Administración de Oralis</h2>
+    <p>Total de usuarios registrados: <strong>{{ total_usuarios }}</strong></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Puntuación</th>
+                <th>Comentario</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fb in feedbacks %}
+            <tr>
+                <td>{{ fb.usuario_email }}</td>
+                <td>{{ fb.puntuacion }} ⭐</td>
+                <td>{{ fb.comentario }}</td>
+                <td>{{ fb.fecha_creacion }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">No hay feedback registrado aún.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
