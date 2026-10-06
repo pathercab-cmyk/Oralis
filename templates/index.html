@@ -57,6 +57,10 @@
         .block-translation { margin-top: 10px; background: #FFFBF0; border-left: 4px solid #E0A96D; padding: 8px 12px; border-radius: 6px; font-size: 0.88rem; }
         .block-correction { margin-top: 10px; background: #EBF3EF; border-left: 4px solid var(--primary-color); padding: 8px 12px; border-radius: 6px; font-size: 0.88rem; }
 
+        /* ESTILOS DE LISTAS HTML */
+        .msg-content ul, .msg-content ol { padding-left: 20px; margin: 8px 0; }
+        .msg-content li { margin-bottom: 4px; }
+
         .chat-input-container { display: flex; padding: 12px; gap: 8px; border-top: 1px solid var(--border-color); background: #FFFFFF; align-items: center; }
         .chat-input-container textarea { resize: none; }
         .btn-primary { background: var(--primary-color); color: #FFF; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; font-size: 0.9rem; }
@@ -535,18 +539,24 @@
         }
 
         function renderizarRespuesta(element, rawText) {
+            // Eliminar asteriscos y almohadillas del texto original
+            let cleanedText = rawText.replace(/[*#]/g, '');
+
             let html = '';
-            const pResp = rawText.split('[TRADUCCION_INTEGRADA]')[0].replace('[RESPUESTA_PRINCIPAL]', '').trim();
-            const rest1 = rawText.split('[TRADUCCION_INTEGRADA]')[1] || '';
+            const pResp = cleanedText.split('[TRADUCCION_INTEGRADA]')[0].replace('[RESPUESTA_PRINCIPAL]', '').trim();
+            const rest1 = cleanedText.split('[TRADUCCION_INTEGRADA]')[1] || '';
             const pTrad = rest1.split('[CORRECCION_Y_MEJORA]')[0];
             const pCorr = rest1.split('[CORRECCION_Y_MEJORA]')[1] || '';
 
             const modoActual = document.getElementById('select-modo').value;
             const ocultarAltavoz = (modoActual === 'writing') ? 'hidden' : '';
 
-            html += `<p>${pResp}</p>`;
+            // Texto sin etiquetas HTML para la síntesis de voz
+            const textoLimpioVoz = pResp.replace(/<[^>]*>?/gm, '');
+
+            html += `<div>${pResp}</div>`;
             
-            html += `<button class="btn-audio-speak ${ocultarAltavoz}" onclick="reproducirAudioMensaje(\`${pResp.replace(/`/g, '\\`').replace(/"/g, '&quot;')}\`)">
+            html += `<button class="btn-audio-speak ${ocultarAltavoz}" onclick="reproducirAudioMensaje(\`${textoLimpioVoz.replace(/`/g, '\\`').replace(/"/g, '&quot;')}\`)">
                         <i class="fa-solid fa-volume-high"></i> Escuchar pronunciación
                      </button>`;
 
