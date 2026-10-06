@@ -126,12 +126,10 @@
         <div class="user-profile">
             <span><i class="fa-solid fa-circle-user"></i> {{ user_name }}</span>
             
-            <!-- ACCESO PRIVADO EXCLUSIVO PARA EL DUEÑO/ADMINISTRADOR -->
-            {% if user_email == 'p75886777@gmail.com' %}
-                <a href="/admin/feedbacks" class="btn-admin" title="Ver Opiniones de Usuarios">
-                    <i class="fa-solid fa-shield-halved"></i> Ver Opiniones
-                </a>
-            {% endif %}
+            <!-- ACCESO DIRECTO A OPINIONES -->
+            <a href="/admin/feedback" class="btn-admin" title="Ver Opiniones de Usuarios">
+                <i class="fa-solid fa-shield-halved"></i> Ver Opiniones
+            </a>
 
             <a href="/logout" style="color:#DC3545; text-decoration:none; margin-left:6px;" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></a>
         </div>
@@ -194,7 +192,7 @@
                         <label for="select-modo">Modo de Aprendizaje:</label>
                         <select id="select-modo" onchange="cambiarModoInterfaz()">
                             <option value="tutor_general">💬 Modo 1: Tutor General</option>
-                            <option value="practica_oral">🎙️ Modo 2: Práctica Oral</option>
+                            <option value="practica_oral">🎙️️ Modo 2: Práctica Oral</option>
                             <option value="examenes">🎓 Modo 3: Exámenes Oficiales</option>
                             <option value="writing">📝 Modo 4: Práctica de Writing</option>
                         </select>
