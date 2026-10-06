@@ -86,7 +86,7 @@ def login():
     usuario_existente = Usuario.query.filter_by(email=email).first()
 
     if usuario_existente:
-        # Si el usuario ya existe, validamos la contraseña e iniciamos sesión (sirve tanto para login como si intentan registrar un correo existente)
+        # Si el usuario ya existe, validamos la contraseña e iniciamos sesión
         if check_password_hash(usuario_existente.password_hash, password):
             session.permanent = True
             session['user_email'] = usuario_existente.email
@@ -99,7 +99,7 @@ def login():
     if action == 'register':
         nombre = data.get('nombre', '').strip()
         if not nombre:
-            nombre = email.split('@')[0].capitalize()  # Nombre por defecto si no se ingresa uno
+            nombre = email.split('@')[0].capitalize()
 
         nuevo_usuario = Usuario(
             nombre=nombre,
@@ -145,29 +145,56 @@ def chat_stream():
     if file_content:
         prompt_contenido += f"\n\n--- ARCHIVO ADJUNTO ({file_name}) ---\n{file_content}\n--- FIN DEL ARCHIVO ---"
 
+    # Definición específica de conducta según el modo activo
+    instruccion_modo = ""
+    if mode == "tutor_general":
+        instruccion_modo = (
+            "ESTÁS EN MODO TUTOR GENERAL. Tu objetivo principal es resolver dudas, explicar temas gramaticales, "
+            "proporcionar vocabulario y responder preguntas del alumno. "
+            "NO incites, sugieras ni fuerces al usuario a realizar simulaciones de examen, ni dinámicas orales, ni "
+            "pruebas de nivel a menos que el usuario te lo solicite explícitamente."
+        )
+    elif mode == "practica_oral":
+        instruccion_modo = (
+            f"ESTÁS EN MODO PRÁCTICA ORAL. Asume el rol de: {rol_practica}. "
+            "Mantén un diálogo fluido simulando esta situación real y haz preguntas acordes al nivel para promover la conversación."
+        )
+    elif mode == "examenes":
+        instruccion_modo = (
+            f"ESTÁS EN MODO EXÁMENES OFICIALES. Simula un examen oficial del tipo: {examen_oficial}. "
+            f"Evalúa según la siguiente rúbrica: {rubrica}. Sé riguroso, haz preguntas del tipo de examen y evalúa el nivel {cefr_level}."
+        )
+    elif mode == "writing":
+        instruccion_modo = (
+            "ESTÁS EN MODO PRÁCTICA DE WRITING. Revisa la composición o archivo adjunto. Proporciona una corrección minuciosa "
+            "de estructura, coherencia, vocabulario y gramática adaptada al nivel CEFR objetivo."
+        )
+
     system_prompt = f"""
 Eres Oralis, un tutor inteligente de idiomas. El estudiante con el que hablas se llama {user_name}.
 Refiérete a él por su nombre ({user_name}) de forma cercana y natural durante la conversación.
-- Idioma Objetivo: {target_lang}.
-- Nivel CEFR: {cefr_level}.
-- Modo Activo: {mode}.
-- Rol/Simulación: {rol_practica}.
-- Examen Seleccionado: {examen_oficial}.
-- Rúbrica: {rubrica}.
+
+CONFIGURACIÓN DE LA SESIÓN:
+- Idioma Objetivo: {target_lang}
+- Nivel CEFR Objetivo: {cefr_level}
+- Modo Activo: {mode}
+
+INSTRUCCIÓN DE MODO ESPECÍFICA:
+{instruccion_modo}
 
 REGLAS DE FORMATO ESTRICTAS:
-1. NO utilices nunca asteriscos (* o **) ni almohadillas (#) en tus respuestas.
-2. Si vas a proporcionar vocabulario, ejemplos, correcciones o listas de items, debes escribirlos usando elementos o etiquetas de lista HTML explicitas como <ul> y <li>, o listas numeradas <ol> y <li>.
+1. NO utilices NUNCA asteriscos (* o **) ni almohadillas (#) en ninguna parte de tu respuesta.
+2. Si vas a proporcionar listas de vocabulario, ejemplos, correcciones o puntos clave, debes estructurarlos obligatoriamente usando etiquetas HTML explícitas como <ul> y <li>, o listas numeradas <ol> y <li>.
 
 ESTRUCTURA DE SALIDA OBLIGATORIA:
 [RESPUESTA_PRINCIPAL]
-Escribe aquí tu respuesta directa en {target_lang} respondiendo adecuadamente según el rol y nivel {cefr_level}.
+Escribe aquí tu respuesta directa en {target_lang} adecuada al modo actual y adaptada al nivel {cefr_level}.
 
 [TRADUCCION_INTEGRADA]
 Traduce aquí la respuesta principal al idioma español para ayudar al estudiante.
 
 [CORRECCION_Y_MEJORA]
-Analiza los errores cometidos en el mensaje del usuario (gramática, vocabulario, sintaxis) y proporciona sugerencias concretas de mejora en formato de lista HTML (<ul><li>...</li></ul>).
+Analiza los errores cometidos en el mensaje o texto del usuario (gramática, vocabulario, sintaxis) y proporciona sugerencias concretas de mejora usando listas HTML (<ul><li>...</li></ul>). Si el mensaje es correcto, indícalo felicitándolo.
 """
 
     def generate():
