@@ -5,38 +5,48 @@
     <title>Panel Administrador - Oralis</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; padding: 30px; background: #F8F9FA; }
-        table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px; border: 1px solid #E2E8E0; text-align: left; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; padding: 30px; background: #F8F9FA; color: #2B2D42; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-back { background: #EBF2EE; color: #2E6B52; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); }
+        th, td { padding: 14px; border: 1px solid #E2E8E0; text-align: left; }
         th { background: #2E6B52; color: white; }
+        tr:nth-child(even) { background-color: #FAFAFA; }
     </style>
 </head>
 <body>
-    <h2>Panel de Administración de Oralis</h2>
-    <p>Total de usuarios registrados: <strong>{{ total_usuarios }}</strong></p>
+
+    <div class="header-container">
+        <h2>Panel de Administración - Opiniones de Usuarios</h2>
+        <a href="/" class="btn-back">← Volver al Tutor</a>
+    </div>
+
+    <p>Total de opiniones recibidas: <strong>{{ feedbacks|length }}</strong></p>
+
     <table>
         <thead>
             <tr>
                 <th>Usuario</th>
                 <th>Puntuación</th>
                 <th>Comentario</th>
-                <th>Fecha</th>
             </tr>
         </thead>
         <tbody>
             {% for fb in feedbacks %}
             <tr>
-                <td>{{ fb.usuario_email }}</td>
-                <td>{{ fb.puntuacion }} ⭐</td>
-                <td>{{ fb.comentario }}</td>
-                <td>{{ fb.fecha_creacion }}</td>
+                <td><strong>{{ fb.user }}</strong></td>
+                <td>{{ fb.score }} ⭐</td>
+                <td>{{ fb.comment }}</td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="4">No hay feedback registrado aún.</td>
+                <td colspan="3" style="text-align: center; color: #6C757D; padding: 20px;">
+                    No hay opiniones registradas aún.
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
 </body>
 </html>
