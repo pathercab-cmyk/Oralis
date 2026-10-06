@@ -3,192 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Oralis</title>
+    <title>Oralis - Acceso y Registro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --bg-dark: #12181b;
-            --card-bg: #1e252b;
-            --input-bg: #151b20;
-            --accent-green: #10b981;
-            --accent-green-hover: #059669;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --border-color: #2e3740;
+            --bg-cream: #FDFBF7;
+            --card-offwhite: #FAFAFA;
+            --input-bg: #FFFFFF;
+            --accent-green: #4E8B71;
+            --accent-green-hover: #3D6F59;
+            --text-dark: #2C3E35;
+            --border-color: #E2E8E0;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
             font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
-            padding: 1.5rem;
+            padding: 2rem 1rem;
         }
 
         .auth-card {
-            background: var(--card-bg);
+            background-color: var(--card-offwhite);
             border: 1px solid var(--border-color);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
             padding: 2.5rem;
             width: 100%;
             max-width: 440px;
-        }
-
-        .brand-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
         .brand-icon {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--accent-green);
+            color: #FFFFFF;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.5rem;
             font-weight: 700;
-            color: #fff;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            margin: 0 auto 1rem auto;
+            box-shadow: 0 4px 12px rgba(78, 139, 113, 0.3);
         }
 
-        .brand-title {
-            color: var(--text-main);
-            font-weight: 700;
-            font-size: 2.2rem;
-            letter-spacing: -0.5px;
+        .nav-pills .nav-link {
+            color: #6C7A72;
+            font-weight: 600;
+            border-radius: 10px;
         }
 
-        .brand-subtitle {
-            color: var(--text-muted);
-            text-align: center;
-            font-size: 0.95rem;
-            margin-bottom: 2rem;
+        .nav-pills .nav-link.active {
+            background-color: var(--accent-green);
+            color: #FFFFFF;
         }
 
-        .form-label {
-            color: var(--text-main);
-            font-weight: 500;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control {
+        .form-control, .form-select {
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
-            color: var(--text-main);
-            border-radius: 12px;
-            padding: 0.8rem 1rem;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
         }
 
-        .form-control:focus {
-            background-color: var(--input-bg);
-            color: var(--text-main);
+        .form-control:focus, .form-select:focus {
             border-color: var(--accent-green);
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
-        }
-
-        .form-control::placeholder {
-            color: #4b5563;
+            box-shadow: 0 0 0 3px rgba(78, 139, 113, 0.15);
         }
 
         .btn-green {
             background-color: var(--accent-green);
-            color: #ffffff;
+            color: #FFFFFF;
             border: none;
-            border-radius: 12px;
-            padding: 0.85rem;
+            border-radius: 10px;
+            padding: 0.75rem;
             font-weight: 600;
-            font-size: 1rem;
             width: 100%;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+            transition: all 0.2s;
         }
 
         .btn-green:hover {
             background-color: var(--accent-green-hover);
-            color: #ffffff;
-            transform: translateY(-1px);
-        }
-
-        .auth-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .auth-footer a {
-            color: var(--accent-green);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .auth-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .alert-custom {
-            background-color: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #f87171;
-            border-radius: 10px;
-            padding: 0.75rem;
-            font-size: 0.9rem;
-            text-align: center;
-            margin-bottom: 1.5rem;
+            color: #FFFFFF;
         }
     </style>
 </head>
 <body>
 
 <div class="auth-card">
-    <div class="brand-logo">
-        <div class="brand-icon">O</div>
-        <div class="brand-title">Oralis</div>
-    </div>
-    <div class="brand-subtitle">Tu tutor inteligente de idiomas</div>
+    <div class="brand-icon">O</div>
+    <h4 class="fw-bold text-center mb-1">Bienvenido a Oralis</h4>
+    <p class="text-muted small text-center mb-4">Tu tutor inteligente de idiomas personalizado</p>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert-custom">
-                    {{ message }}
+    <!-- Selector entre Login y Registro -->
+    <ul class="nav nav-pills nav-justified mb-4" id="authTabs">
+        <li class="nav-item">
+            <button class="nav-link active" id="tab-login" data-bs-toggle="pill" data-bs-target="#pane-login">Iniciar Sesión</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-register" data-bs-toggle="pill" data-bs-target="#pane-register">Crear Cuenta</button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- FORMULARIO DE INICIO DE SESIÓN -->
+        <div class="tab-pane fade show active" id="pane-login">
+            <form id="formLogin">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Correo Electrónico</label>
+                    <input type="email" id="loginEmail" class="form-control" placeholder="tu@correo.com" required>
                 </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <form action="{{ url_for('login') }}" method="POST">
-        <div class="mb-3">
-            <label for="email" class="form-label">Correo Electrónico</label>
-            <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" required>
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">Contraseña</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-green">Entrar a Oralis</button>
+            </form>
         </div>
 
-        <div class="mb-4">
-            <label for="password" class="form-label">Contraseña</label>
-            <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+        <!-- FORMULARIO DE REGISTRO -->
+        <div class="tab-pane fade" id="pane-register">
+            <form id="formRegister">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Nombre de Usuario</label>
+                    <input type="text" id="regUser" class="form-control" placeholder="Ej: maria_l" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Correo Electrónico</label>
+                    <input type="email" id="regEmail" class="form-control" placeholder="tu@correo.com" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Contraseña</label>
+                    <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">Tu Nivel CEFR Inicial</label>
+                    <select id="regNivel" class="form-select">
+                        <option value="A1">A1 - Principiante Inicial</option>
+                        <option value="A2">A2 - Principiante Elemental</option>
+                        <option value="B1" selected>B1 - Intermedio Básico</option>
+                        <option value="B2">B2 - Intermedio Alto</option>
+                        <option value="C1">C1 - Avanzado</option>
+                        <option value="C2">C2 - Dominio Nativo</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-green">Registrarme</button>
+            </form>
         </div>
-
-        <button type="submit" class="btn btn-green">Iniciar Sesión</button>
-    </form>
-
-    <div class="auth-footer">
-        ¿No tienes una cuenta? <a href="{{ url_for('registro') }}">Regístrate aquí</a>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Enviar Inicio de Sesión
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        const res = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (data.status === 'ok') {
+            window.location.href = '/';
+        } else {
+            alert(data.message || 'Error al iniciar sesión');
+        }
+    });
+
+    // Enviar Registro
+    document.getElementById('formRegister').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('regUser').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const nivel_cefr = document.getElementById('regNivel').value;
+
+        const res = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password, nivel_cefr })
+        });
+
+        const data = await res.json();
+        if (data.status === 'ok') {
+            window.location.href = '/';
+        } else {
+            alert(data.message || 'Error en el registro');
+        }
+    });
+</script>
 </body>
 </html>
