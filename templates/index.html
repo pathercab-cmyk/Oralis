@@ -4,302 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oralis - Tutor Inteligente de Idiomas</title>
-    <!-- Tipografía Plus Jakarta Sans y FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
             --bg-main: #F8F9FA;
-            --primary-color: #2E6B52; /* Verde salvia profundo */
-            --accent-color: #E07A5F;  /* Terracota / Coral suave */
+            --primary-color: #2E6B52;
+            --accent-color: #E07A5F;
             --card-bg: #FFFFFF;
             --border-color: #E2E8E0;
             --text-dark: #2B2D42;
             --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-dark); line-height: 1.6; }
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
+        /* NAVEGACIÓN SUPERIOR */
+        .navbar { display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 12px 28px; border-bottom: 1px solid var(--border-color); }
+        .logo { font-size: 1.4rem; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-btn { background: transparent; border: none; padding: 10px 16px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border-radius: 8px; color: #6C757D; transition: all 0.2s ease; }
+        .nav-btn.active, .nav-btn:hover { background-color: #EBF2EE; color: var(--primary-color); }
+        .user-profile { display: flex; align-items: center; gap: 15px; font-size: 0.9rem; }
+        .btn-admin { background: #E8F5E9; color: #2E7D32; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #A5D6A7; }
 
-        /* BARRA DE NAVEGACIÓN SUPERIOR */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #FFFFFF;
-            padding: 12px 28px;
-            border-bottom: 1px solid var(--border-color);
-        }
+        /* REGLA DE OCULTACIÓN STRICTA POR DEFECTO */
+        .hidden { display: none !important; }
 
-        .logo {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .main-container { padding: 20px; max-width: 1400px; margin: 0 auto; }
 
-        .nav-links {
-            display: flex;
-            gap: 8px;
-        }
+        /* LAYOUT CHAT Y CONFIGURACIÓN */
+        .tutor-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; height: calc(100vh - 120px); }
+        .sidebar-config { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+        .sidebar-config h3 { font-size: 1.1rem; color: var(--primary-color); border-bottom: 2px solid #EBF2EE; padding-bottom: 8px; }
 
-        .nav-btn {
-            background: transparent;
-            border: none;
-            padding: 10px 16px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            border-radius: 8px;
-            color: #6C757D;
-            transition: all 0.2s ease;
-        }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-weight: 600; font-size: 0.88rem; }
+        select, input, textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.93rem; font-family: inherit; background: #FAFAFA; }
+        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--primary-color); background: #FFF; }
 
-        .nav-btn.active, .nav-btn:hover {
-            background-color: #EBF2EE;
-            color: var(--primary-color);
-        }
+        .modo-extra { background: #F4F7F5; padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary-color); margin-top: 5px; }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 0.9rem;
-        }
+        /* CONTENEDOR DE CONVERSACIÓN */
+        .chat-wrapper { display: flex; flex-direction: column; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); overflow: hidden; }
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .message { max-width: 82%; padding: 16px; border-radius: 12px; }
+        .user-message { align-self: flex-end; background: var(--primary-color); color: #FFFFFF; }
+        .bot-message { align-self: flex-start; background: #FFFFFF; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); }
 
-        .btn-admin {
-            background: #E8F5E9;
-            color: #2E7D32;
-            padding: 6px 12px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            border: 1px solid #A5D6A7;
-        }
+        .block-translation { margin-top: 12px; background: #FFFBF0; border-left: 4px solid #E0A96D; padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; }
+        .block-correction { margin-top: 12px; background: #EBF3EF; border-left: 4px solid var(--primary-color); padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; }
 
-        .btn-logout {
-            color: #DC3545;
-            font-size: 1.1rem;
-            text-decoration: none;
-        }
+        .chat-input-container { display: flex; padding: 15px; gap: 10px; border-top: 1px solid var(--border-color); background: #FFFFFF; align-items: center; }
+        .chat-input-container textarea { resize: none; }
+        .btn-primary { background: var(--primary-color); color: #FFF; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-accent { background: var(--accent-color); color: #FFF; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
-        /* CONTENEDOR PRINCIPAL */
-        .main-container {
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        /* TARJETAS Y GRILLAS */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+        .card-item { background: #FFF; border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.2s; }
+        .card-item:hover { transform: translateY(-2px); }
 
-        .tab-content.hidden {
-            display: none !important;
-        }
-
-        /* LAYOUT TUTOR (COLUMNA IZQUIERDA + CHAT) */
-        .tutor-layout {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 20px;
-            height: calc(100vh - 120px);
-        }
-
-        .sidebar-config {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-soft);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-y: auto;
-        }
-
-        .sidebar-config h3 {
-            font-size: 1.1rem;
-            color: var(--primary-color);
-            border-bottom: 2px solid #EBF2EE;
-            padding-bottom: 8px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            font-size: 0.88rem;
-        }
-
-        select, input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.93rem;
-            font-family: inherit;
-            background: #FAFAFA;
-        }
-
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: #FFF;
-        }
-
-        .modo-extra {
-            background: #F4F7F5;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 3px solid var(--primary-color);
-            margin-top: 5px;
-        }
-
-        /* CHAT WRAPPER Y BORDES */
-        .chat-wrapper {
-            display: flex;
-            flex-direction: column;
-            background: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-soft);
-            overflow: hidden;
-        }
-
-        .chat-box {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .message {
-            max-width: 82%;
-            padding: 16px;
-            border-radius: 12px;
-            line-height: 1.5;
-        }
-
-        .user-message {
-            align-self: flex-end;
-            background: var(--primary-color);
-            color: #FFFFFF;
-        }
-
-        .bot-message {
-            align-self: flex-start;
-            background: #FFFFFF;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-soft);
-        }
-
-        /* BLOQUES ESTRUCTURADOS DE RESPUESTA */
-        .block-translation {
-            margin-top: 12px;
-            background: #FFFBF0;
-            border-left: 4px solid #E0A96D;
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        .block-correction {
-            margin-top: 12px;
-            background: #EBF3EF;
-            border-left: 4px solid var(--primary-color);
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        /* INPUT INFERIOR Y BOTONES */
-        .chat-input-container {
-            display: flex;
-            padding: 15px;
-            gap: 10px;
-            border-top: 1px solid var(--border-color);
-            background: #FFFFFF;
-            align-items: center;
-        }
-
-        .chat-input-container textarea {
-            resize: none;
-            background: #FFF;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: #FFF;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-accent {
-            background: var(--accent-color);
-            color: #FFF;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-icon {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* GRILLAS Y TARJETAS PARA PESTAÑAS */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .card-item {
-            background: #FFF;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 16px;
-            box-shadow: var(--shadow-soft);
-        }
+        /* PESTAÑAS CUADERNO */
+        .cuaderno-tabs { display: flex; gap: 10px; margin-top: 15px; }
+        .cuaderno-tab-btn { background: #EBF2EE; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary-color); }
+        .cuaderno-tab-btn.active { background: var(--primary-color); color: white; }
     </style>
 </head>
 <body>
 
-    <!-- NAV BAR SUPERIOR -->
+    <!-- NAVBAR -->
     <header class="navbar">
-        <div class="logo">
-            <i class="fa-solid fa-comments"></i> <span>Oralis</span>
-        </div>
+        <div class="logo"><i class="fa-solid fa-comments"></i> <span>Oralis</span></div>
         <nav class="nav-links">
             <button class="nav-btn active" onclick="switchTab('tutor', event)"><i class="fa-solid fa-robot"></i> Tutor de Idiomas</button>
             <button class="nav-btn" onclick="switchTab('cuaderno', event)"><i class="fa-solid fa-book-bookmark"></i> Mi Cuaderno</button>
@@ -312,20 +90,19 @@
             {% if user_email == 'p75886777@gmail.com' %}
                 <a href="/admin/feedbacks" class="btn-admin"><i class="fa-solid fa-shield-halved"></i> Admin Panel</a>
             {% endif %}
-            <a href="/logout" class="btn-logout" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></a>
+            <a href="/logout" style="color:#DC3545; text-decoration:none; margin-left:10px;" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></a>
         </div>
     </header>
 
     <main class="main-container">
 
-        <!-- PESTAÑA 1: TUTOR DE IDIOMAS Y CONFIGURACIÓN -->
+        <!-- PESTAÑA 1: TUTOR -->
         <section id="tab-tutor" class="tab-content">
             <div class="tutor-layout">
                 
                 <aside class="sidebar-config">
                     <h3><i class="fa-solid fa-sliders"></i> Configuración</h3>
 
-                    <!-- SELECTOR DE 13 IDIOMAS -->
                     <div class="form-group">
                         <label for="select-idioma">Idioma Objetivo:</label>
                         <select id="select-idioma" onchange="actualizarExamenesDisponibles()">
@@ -345,7 +122,6 @@
                         </select>
                     </div>
 
-                    <!-- NIVEL CEFR -->
                     <div class="form-group">
                         <label for="select-cefr">Nivel CEFR Deseado:</label>
                         <select id="select-cefr">
@@ -358,38 +134,41 @@
                         </select>
                     </div>
 
-                    <!-- 4 MODOS PRINCIPALES -->
                     <div class="form-group">
                         <label for="select-modo">Modo de Aprendizaje:</label>
                         <select id="select-modo" onchange="cambiarModoInterfaz()">
                             <option value="tutor_general">💬 Modo 1: Tutor General</option>
-                            <option value="practica_oral">🎙️ Modo 2: Práctica Oral (Listening & Speaking)</option>
-                            <option value="examenes">🎓 Modo 3: Exámenes Oficiales / Universitarios</option>
+                            <option value="practica_oral">🎙️ Modo 2: Práctica Oral</option>
+                            <option value="examenes">🎓 Modo 3: Exámenes Oficiales</option>
                             <option value="writing">📝 Modo 4: Práctica de Writing</option>
                         </select>
                     </div>
 
-                    <!-- OPCIONES DINÁMICAS POR MODO -->
+                    <!-- MODO 2: ROL PERSONALIZABLE (OCULTO POR DEFECTO) -->
                     <div id="opciones-modo-2" class="modo-extra hidden">
                         <label for="select-rol">Rol de Oralis:</label>
-                        <select id="select-rol">
+                        <select id="select-rol" onchange="evaluarRolPersonalizado()">
                             <option value="Entrevistador de Trabajo">Entrevistador de Trabajo</option>
                             <option value="Médico en Consulta">Médico en Consulta</option>
                             <option value="Recepcionista de Hotel">Recepcionista de Hotel</option>
                             <option value="Guía Turístico">Guía Turístico</option>
                             <option value="Cliente en Restaurante">Cliente en Restaurante</option>
                             <option value="Colega de Oficina">Colega de Oficina</option>
+                            <option value="otro">Personalizado (Escribir abajo)...</option>
                         </select>
+                        <input type="text" id="rol-custom" class="hidden" style="margin-top:8px;" placeholder="Ej: Agente inmobiliario...">
                     </div>
 
+                    <!-- MODO 3: EXÁMENES (OCULTO POR DEFECTO) -->
                     <div id="opciones-modo-3" class="modo-extra hidden">
                         <label for="select-examen">Certificación / Examen:</label>
                         <select id="select-examen"></select>
 
                         <label for="rubrica-text" style="margin-top:8px; display:block;">Rúbrica o Criterios:</label>
-                        <textarea id="rubrica-text" rows="2" placeholder="Pega aquí los criterios específicos del examen..."></textarea>
+                        <textarea id="rubrica-text" rows="2" placeholder="Pega los criterios específicos aquí..."></textarea>
                     </div>
 
+                    <!-- MODO 4: WRITING (OCULTO POR DEFECTO) -->
                     <div id="opciones-modo-4" class="modo-extra hidden">
                         <label for="modo-correccion-writing">Sistema de Corrección:</label>
                         <select id="modo-correccion-writing">
@@ -400,18 +179,16 @@
 
                 </aside>
 
-                <!-- ÁREA DE CONVERSACIÓN -->
                 <div class="chat-wrapper">
                     <div id="chat-box" class="chat-box">
                         <div class="message bot-message">
                             <div class="msg-content">
-                                <p>¡Hola! Soy Oralis, tu tutor inteligente de idiomas. Selecciona tus preferencias en el panel lateral y comencemos a practicar.</p>
+                                <p>¡Hola! Soy Oralis, tu tutor inteligente de idiomas. Selecciona tus preferencias e inicia la conversación.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="chat-input-container">
-                        <button id="btn-mic" class="btn-icon" onclick="toggleSTT()" title="Grabar Voz"><i class="fa-solid fa-microphone"></i></button>
                         <textarea id="user-input" rows="1" placeholder="Escribe un mensaje aquí..."></textarea>
                         <button class="btn-primary" onclick="enviarMensaje()"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
                     </div>
@@ -423,10 +200,15 @@
         <!-- PESTAÑA 2: MI CUADERNO -->
         <section id="tab-cuaderno" class="tab-content hidden">
             <h2><i class="fa-solid fa-book-bookmark"></i> Mi Cuaderno (Repaso Inteligente)</h2>
+            <div class="cuaderno-tabs">
+                <button class="cuaderno-tab-btn active" onclick="filtrarCuaderno('todos', event)">Ver Todos</button>
+                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Vocabulario', event)">📘 Vocabulario</button>
+                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Gramática', event)">📐 Gramática</button>
+            </div>
             <div id="cuaderno-grid" class="cards-grid"></div>
         </section>
 
-        <!-- PESTAÑA 3: BANCO RECOMENDADO -->
+        <!-- PESTAÑA 3: BANCO DE RECURSOS -->
         <section id="tab-banco" class="tab-content hidden">
             <h2><i class="fa-solid fa-book-open"></i> Banco Recomendado de Recursos</h2>
             <div class="cards-grid">
@@ -435,13 +217,21 @@
                     <p>Mejora la cohesión y fluidez de tus textos y conversaciones.</p>
                 </div>
                 <div class="card-item" onclick="cargarEnChat('Iniciar práctica de expresiones idiomáticas')">
-                    <h4>💡 Idioms y Expresiones</h4>
+                    <h4>💡 Idioms y Modismos</h4>
                     <p>Habla como un nativo utilizando modismos habituales.</p>
+                </div>
+                <div class="card-item" onclick="cargarEnChat('Simular vocabulario para una entrevista de trabajo')">
+                    <h4>💼 Entrevistas de Trabajo</h4>
+                    <p>Vocabulario clave y respuestas recomendadas en entornos profesionales.</p>
+                </div>
+                <div class="card-item" onclick="cargarEnChat('Quiero repasar la conjugación de verbos en pasado')">
+                    <h4>⌛ Conjugación en Pasado</h4>
+                    <p>Ejercicios prácticos sobre tiempos verbales pasados.</p>
                 </div>
             </div>
         </section>
 
-        <!-- PESTAÑA 4: HISTORIAL DE CHATS -->
+        <!-- PESTAÑA 4: HISTORIAL -->
         <section id="tab-historial" class="tab-content hidden">
             <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de Chats</h2>
             <div id="historial-list" class="cards-grid"></div>
@@ -458,14 +248,13 @@
                     <option value="3">⭐⭐⭐ Aceptable</option>
                 </select>
                 <label style="margin-top:10px;">Comentario:</label>
-                <textarea id="fb-comment" rows="4" placeholder="Escribe tu opinión..."></textarea>
+                <textarea id="fb-comment" rows="4" placeholder="Escribe tu opinión o sugerencias..."></textarea>
                 <button class="btn-accent" style="margin-top:10px;" onclick="enviarFeedback()">Enviar Opinión</button>
             </div>
         </section>
 
     </main>
 
-    <!-- SCRIPTS UNIFICADOS DE INTERACTIVIDAD -->
     <script>
         const examenesPorIdioma = {
             "Inglés": ["Cambridge (KET, PET, FCE, CAE, CPE)", "IELTS", "TOEFL", "Aptis"],
@@ -483,6 +272,8 @@
             "Griego Antiguo": ["Exámenes de Lenguas Clásicas / Accreditation"]
         };
 
+        let itemsCuadernoGlobal = [];
+
         function switchTab(tabName, evt) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -492,6 +283,25 @@
 
             if(tabName === 'cuaderno') cargarCuaderno();
             if(tabName === 'historial') cargarHistorial();
+        }
+
+        function cambiarModoInterfaz() {
+            const modo = document.getElementById('select-modo').value;
+            document.querySelectorAll('.modo-extra').forEach(el => el.classList.add('hidden'));
+
+            if (modo === 'practica_oral') document.getElementById('opciones-modo-2').classList.remove('hidden');
+            if (modo === 'examenes') document.getElementById('opciones-modo-3').classList.remove('hidden');
+            if (modo === 'writing') document.getElementById('opciones-modo-4').classList.remove('hidden');
+        }
+
+        function evaluarRolPersonalizado() {
+            const val = document.getElementById('select-rol').value;
+            const inputCustom = document.getElementById('rol-custom');
+            if(val === 'otro') {
+                inputCustom.classList.remove('hidden');
+            } else {
+                inputCustom.classList.add('hidden');
+            }
         }
 
         function actualizarExamenesDisponibles() {
@@ -508,15 +318,6 @@
             });
         }
 
-        function cambiarModoInterfaz() {
-            const modo = document.getElementById('select-modo').value;
-            document.querySelectorAll('.modo-extra').forEach(el => el.classList.add('hidden'));
-
-            if (modo === 'practica_oral') document.getElementById('opciones-modo-2').classList.remove('hidden');
-            if (modo === 'examenes') document.getElementById('opciones-modo-3').classList.remove('hidden');
-            if (modo === 'writing') document.getElementById('opciones-modo-4').classList.remove('hidden');
-        }
-
         async function enviarMensaje() {
             const input = document.getElementById('user-input');
             const msg = input.value.trim();
@@ -525,12 +326,17 @@
             appendMessage('user', msg);
             input.value = '';
 
+            let rolFinal = document.getElementById('select-rol').value;
+            if(rolFinal === 'otro') {
+                rolFinal = document.getElementById('rol-custom').value || 'Rol Personalizado';
+            }
+
             const payload = {
                 message: msg,
                 target_lang: document.getElementById('select-idioma').value,
                 cefr_level: document.getElementById('select-cefr').value,
                 mode: document.getElementById('select-modo').value,
-                rol_practica: document.getElementById('select-rol').value,
+                rol_practica: rolFinal,
                 examen_oficial: document.getElementById('select-examen').value,
                 rubrica: document.getElementById('rubrica-text').value
             };
@@ -544,7 +350,7 @@
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let fullText = '';
-            const botMsgDiv = appendMessage('bot', 'Procesando respuesta...');
+            const botMsgDiv = appendMessage('bot', 'Oralis generando respuesta...');
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -562,13 +368,11 @@
             const pCorr = rest1.split('[CORRECCION_Y_MEJORA]')[1] || '';
 
             html += `<p>${pResp}</p>`;
-            html += `<button class="btn-accent" style="margin-top:8px; font-size:0.8rem;" onclick="reproducirTTS('${encodeURIComponent(pResp)}')">🔊 Escuchar Audio Nativo</button>`;
-
             if(pTrad) {
                 html += `<div class="block-translation"><strong>🌐 Traducción Integrada:</strong><br>${pTrad}</div>`;
             }
             if(pCorr) {
-                html += `<div class="block-correction"><strong>💡 Corrección y Análisis Pedagógico:</strong><br>${pCorr}</div>`;
+                html += `<div class="block-correction"><strong>💡 Análisis Pedagógico y Corrección:</strong><br>${pCorr}</div>`;
             }
 
             element.querySelector('.msg-content').innerHTML = html;
@@ -584,11 +388,6 @@
             return msgDiv;
         }
 
-        function reproducirTTS(texto) {
-            const utterance = new SpeechSynthesisUtterance(decodeURIComponent(texto));
-            speechSynthesis.speak(utterance);
-        }
-
         function cargarEnChat(texto) {
             switchTab('tutor');
             document.getElementById('user-input').value = texto;
@@ -596,15 +395,35 @@
 
         async function cargarCuaderno() {
             const res = await fetch('/cuaderno/listar');
-            const data = await res.json();
+            itemsCuadernoGlobal = await res.json();
+            renderCuadernoGrid(itemsCuadernoGlobal);
+        }
+
+        function renderCuadernoGrid(items) {
             const grid = document.getElementById('cuaderno-grid');
-            grid.innerHTML = data.map(item => `
+            if(items.length === 0) {
+                grid.innerHTML = '<p style="padding:20px; color:#6C757D;">No hay anotaciones guardadas aún.</p>';
+                return;
+            }
+            grid.innerHTML = items.map(item => `
                 <div class="card-item">
-                    <span style="font-size:0.8rem; font-weight:bold; color:var(--primary-color)">${item.idioma} - ${item.nivel}</span>
-                    <h4>${item.termino}</h4>
-                    <p>${item.explicacion}</p>
+                    <span style="font-size:0.75rem; font-weight:bold; color:var(--primary-color); background:#EBF2EE; padding:3px 8px; border-radius:4px;">${item.categoria} - ${item.idioma} (${item.nivel})</span>
+                    <h4 style="margin-top:8px;">${item.termino}</h4>
+                    <p style="font-size:0.9rem; color:#555;">${item.explicacion}</p>
                 </div>
             `).join('');
+        }
+
+        function filtrarCuaderno(categoria, evt) {
+            document.querySelectorAll('.cuaderno-tab-btn').forEach(b => b.classList.remove('active'));
+            if(evt) evt.currentTarget.classList.add('active');
+
+            if(categoria === 'todos') {
+                renderCuadernoGrid(itemsCuadernoGlobal);
+            } else {
+                const filtrados = itemsCuadernoGlobal.filter(i => i.categoria === categoria);
+                renderCuadernoGrid(filtrados);
+            }
         }
 
         async function cargarHistorial() {
@@ -614,7 +433,7 @@
             list.innerHTML = data.map(c => `
                 <div class="card-item">
                     <h4>${c.titulo}</h4>
-                    <p>Modo: ${c.modo} | Fecha: ${c.fecha}</p>
+                    <p style="font-size:0.85rem; color:#666;">Modo: ${c.modo} | Fecha: ${c.fecha}</p>
                 </div>
             `).join('');
         }
@@ -627,12 +446,13 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ score, comment })
             });
-            alert('¡Feedback enviado exitosamente!');
+            alert('¡Feedback enviado correctamente!');
             document.getElementById('fb-comment').value = '';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             actualizarExamenesDisponibles();
+            cambiarModoInterfaz();
         });
     </script>
 </body>
