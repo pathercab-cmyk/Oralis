@@ -2,47 +2,147 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oralis - Tutor Virtual de Idiomas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Oralis - Tutor Inteligente de Idiomas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body { background-color: #f4f6f9; }
-        .chat-box { height: 60vh; overflow-y: auto; background: #ffffff; border-radius: 8px; padding: 20px; border: 1px solid #dee2e6; }
-        .msg-user { background-color: #e3f2fd; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
-        .msg-tutor { background-color: #f8f9fa; border-left: 4px solid #0d6efd; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
-        .tag-box { background-color: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-top: 8px; }
-        .pulse-recording { animation: pulse-animation 1.5s infinite; }
-        @keyframes pulse-animation {
-            0% { box-shadow: 0 0 0 0px rgba(220, 53, 69, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
-            100% { box-shadow: 0 0 0 0px rgba(220, 53, 69, 0); }
+        :root {
+            --bg-main: #F8F9FA;
+            --primary-color: #2E6B52;
+            --accent-color: #E07A5F;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8E0;
+            --text-dark: #2B2D42;
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-dark); line-height: 1.6; }
+
+        /* NAVBAR CON ADAPTACIÓN MÓVIL */
+        .navbar { display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 12px 20px; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 10px; }
+        .logo { font-size: 1.4rem; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; max-width: 100%; }
+        .nav-btn { background: transparent; border: none; padding: 8px 12px; font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 8px; color: #6C757D; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; }
+        .nav-btn.active, .nav-btn:hover { background-color: #EBF2EE; color: var(--primary-color); }
+        
+        .user-profile { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+        .btn-admin { background: #E8F5E9; color: #2E7D32; padding: 4px 8px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #A5D6A7; font-size: 0.8rem; }
+
+        .hidden { display: none !important; }
+
+        .main-container { padding: 16px; max-width: 1400px; margin: 0 auto; }
+
+        /* LAYOUT CHAT Y CONFIGURACIÓN (RESPONSIVE) */
+        .tutor-layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; height: calc(100vh - 100px); }
+        .sidebar-config { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+        .sidebar-config h3 { font-size: 1rem; color: var(--primary-color); border-bottom: 2px solid #EBF2EE; padding-bottom: 6px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-weight: 600; font-size: 0.85rem; }
+        select, input, textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; font-family: inherit; background: #FAFAFA; }
+        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--primary-color); background: #FFF; }
+
+        .modo-extra { background: #F4F7F5; padding: 10px; border-radius: 8px; border-left: 3px solid var(--primary-color); margin-top: 4px; }
+
+        /* CONTENEDOR CHAT */
+        .chat-wrapper { display: flex; flex-direction: column; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); overflow: hidden; height: 100%; }
+        .chat-box { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+        .message { max-width: 88%; padding: 12px 16px; border-radius: 12px; position: relative; font-size: 0.95rem; }
+        .user-message { align-self: flex-end; background: var(--primary-color); color: #FFFFFF; }
+        .bot-message { align-self: flex-start; background: #FFFFFF; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); }
+
+        .block-translation { margin-top: 10px; background: #FFFBF0; border-left: 4px solid #E0A96D; padding: 8px 12px; border-radius: 6px; font-size: 0.88rem; }
+        .block-correction { margin-top: 10px; background: #EBF3EF; border-left: 4px solid var(--primary-color); padding: 8px 12px; border-radius: 6px; font-size: 0.88rem; }
+
+        /* ESTILOS DE LISTAS HTML */
+        .msg-content ul, .msg-content ol { padding-left: 20px; margin: 8px 0; }
+        .msg-content li { margin-bottom: 4px; }
+
+        .chat-input-container { display: flex; padding: 12px; gap: 8px; border-top: 1px solid var(--border-color); background: #FFFFFF; align-items: center; }
+        .chat-input-container textarea { resize: none; }
+        .btn-primary { background: var(--primary-color); color: #FFF; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; font-size: 0.9rem; }
+        .btn-icon { background: #EBF2EE; color: var(--primary-color); border: none; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: background 0.2s; flex-shrink: 0; }
+        .btn-icon:hover { background: #D6E4DC; }
+        .btn-icon.recording { background: #DC3545; color: #FFF; animation: pulse 1.2s infinite; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-audio-speak { background: transparent; border: none; color: var(--primary-color); cursor: pointer; font-size: 0.9rem; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+        .btn-audio-speak:hover { color: #1e4736; }
+
+        /* UPLOAD STYLES */
+        .file-upload-box { border: 2px dashed var(--border-color); padding: 10px; border-radius: 8px; text-align: center; background: #FFFFFF; margin-top: 6px; cursor: pointer; transition: all 0.2s; }
+        .file-upload-box:hover { border-color: var(--primary-color); background: #F4F7F5; }
+        .file-badge { display: inline-flex; align-items: center; gap: 6px; background: #EBF2EE; color: var(--primary-color); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin-top: 6px; }
+
+        /* TARJETAS Y GRILLAS */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 16px; }
+        .card-item { background: #FFF; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.2s; }
+        .card-item:hover { transform: translateY(-2px); }
+
+        .cuaderno-tabs { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-bottom: 4px; }
+        .cuaderno-tab-btn { background: #EBF2EE; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary-color); font-size: 0.85rem; white-space: nowrap; }
+        .cuaderno-tab-btn.active { background: var(--primary-color); color: white; }
+
+        /* ADAPTACIÓN MÓVIL Y TABLET MEDIANTE MEDIA QUERIES */
+        @media (max-width: 850px) {
+            .navbar { padding: 10px 14px; }
+            .tutor-layout { grid-template-columns: 1fr; height: auto; display: flex; flex-direction: column; }
+            .sidebar-config { max-height: 250px; overflow-y: auto; }
+            .chat-wrapper { height: 500px; }
+            .message { max-width: 92%; }
+            .user-profile span { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        }
+
+        @media (max-width: 480px) {
+            .main-container { padding: 10px; }
+            .chat-wrapper { height: 440px; }
+            .chat-input-container { padding: 8px; gap: 6px; }
+            .btn-primary { padding: 10px 12px; font-size: 0.85rem; }
+            .nav-btn { padding: 6px 10px; font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="#"><i class="bi bi-translate"></i> Oralis</a>
-        <div class="d-flex align-items-center text-white">
-            <span class="me-3">Hola, <strong>{{ user_name }}</strong></span>
-            <button class="btn btn-sm btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#notebookModal" onclick="loadNotebook()"><i class="bi bi-journal-bookmark"></i> Mi Cuaderno</button>
-            <button class="btn btn-sm btn-light text-primary" onclick="clearChat()"><i class="bi bi-trash"></i> Limpiar Chat</button>
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="logo"><i class="fa-solid fa-comments"></i> <span>Oralis</span></div>
+        <nav class="nav-links">
+            <button class="nav-btn active" onclick="switchTab('tutor', event)"><i class="fa-solid fa-robot"></i> Tutor</button>
+            <button class="nav-btn" onclick="switchTab('cuaderno', event)"><i class="fa-solid fa-book-bookmark"></i> Cuaderno</button>
+            <button class="nav-btn" onclick="switchTab('banco', event)"><i class="fa-solid fa-book-open"></i> Banco</button>
+            <button class="nav-btn" onclick="switchTab('historial', event)"><i class="fa-solid fa-clock-rotate-left"></i> Historial</button>
+            <button class="nav-btn" onclick="switchTab('feedback', event)"><i class="fa-solid fa-star"></i> Feedback</button>
+        </nav>
+        <div class="user-profile">
+            <span><i class="fa-solid fa-circle-user"></i> {{ user_name }}</span>
+            {% if user_email == 'p75886777@gmail.com' %}
+                <a href="/admin/feedbacks" class="btn-admin"><i class="fa-solid fa-shield-halved"></i> Admin</a>
+            {% endif %}
+            <a href="/logout" style="color:#DC3545; text-decoration:none; margin-left:6px;" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></a>
         </div>
-    </div>
-</nav>
+    </header>
 
-<div class="container my-4">
-    <div class="row g-3">
-        <!-- Panel de Configuración -->
-        <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white fw-bold">Configuración</div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label">Idioma Objetivo</label>
-                        <select id="target_lang" class="form-select">
+    <main class="main-container">
+
+        <!-- PESTAÑA 1: TUTOR -->
+        <section id="tab-tutor" class="tab-content">
+            <div class="tutor-layout">
+                
+                <aside class="sidebar-config">
+                    <h3><i class="fa-solid fa-sliders"></i> Configuración</h3>
+
+                    <div class="form-group">
+                        <label for="select-idioma">Idioma Objetivo:</label>
+                        <select id="select-idioma" onchange="actualizarExamenesDisponibles()">
                             <optgroup label="Idiomas Principales">
                                 <option value="Inglés" selected>Inglés</option>
                                 <option value="Español (ELE)">Español como Idioma Extranjero (ELE)</option>
@@ -72,268 +172,507 @@
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Nivel CEFR</label>
-                        <select id="cefr_level" class="form-select">
+                    <div class="form-group">
+                        <label for="select-cefr">Nivel CEFR Deseado:</label>
+                        <select id="select-cefr">
                             <option value="A1">A1 - Principiante</option>
                             <option value="A2">A2 - Elemental</option>
                             <option value="B1" selected>B1 - Intermedio</option>
                             <option value="B2">B2 - Intermedio Alto</option>
                             <option value="C1">C1 - Avanzado</option>
-                            <option value="C2">C2 - Maestría</option>
+                            <option value="C2">C2 - Maestría / Nativo</option>
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Modo de Trabajo</label>
-                        <select id="mode" class="form-select" onchange="toggleModeFields()">
-                            <option value="tutor_general">Tutor General</option>
-                            <option value="practica_oral">Práctica Oral (Simulación)</option>
-                            <option value="examenes">Preparación de Exámenes</option>
-                            <option value="writing">Expresión Escrita</option>
+                    <div class="form-group">
+                        <label for="select-modo">Modo de Aprendizaje:</label>
+                        <select id="select-modo" onchange="cambiarModoInterfaz()">
+                            <option value="tutor_general">💬 Modo 1: Tutor General</option>
+                            <option value="practica_oral">🎙️ Modo 2: Práctica Oral</option>
+                            <option value="examenes">🎓 Modo 3: Exámenes Oficiales</option>
+                            <option value="writing">📝 Modo 4: Práctica de Writing</option>
                         </select>
                     </div>
 
-                    <div id="field_practica" class="mb-3 d-none">
-                        <label class="form-label">Rol para Simulación</label>
-                        <input type="text" id="rol_practica" class="form-control" placeholder="Ej: Entrevistador de trabajo">
+                    <!-- MODO 2: ROL PERSONALIZABLE -->
+                    <div id="opciones-modo-2" class="modo-extra hidden">
+                        <label for="select-rol">Rol de Oralis:</label>
+                        <select id="select-rol" onchange="evaluarRolPersonalizado()">
+                            <option value="Entrevistador de Trabajo">Entrevistador de Trabajo</option>
+                            <option value="Médico en Consulta">Médico en Consulta</option>
+                            <option value="Recepcionista de Hotel">Recepcionista de Hotel</option>
+                            <option value="Guía Turístico">Guía Turístico</option>
+                            <option value="Cliente en Restaurante">Cliente en Restaurante</option>
+                            <option value="Colega de Oficina">Colega de Oficina</option>
+                            <option value="otro">Personalizado (Escribir abajo)...</option>
+                        </select>
+                        <input type="text" id="rol-custom" class="hidden" style="margin-top:6px;" placeholder="Ej: Agente inmobiliario...">
                     </div>
 
-                    <div id="field_examenes" class="mb-3 d-none">
-                        <label class="form-label">Examen / Rúbrica</label>
-                        <input type="text" id="examen_oficial" class="form-control mb-2" placeholder="Ej: Cambridge B2 First">
-                        <textarea id="rubrica" class="form-control" rows="2" placeholder="Criterios o rúbrica..."></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <!-- MODO 3: EXÁMENES -->
+                    <div id="opciones-modo-3" class="modo-extra hidden">
+                        <label for="select-examen">Certificación / Examen:</label>
+                        <select id="select-examen"></select>
 
-        <!-- Chat Principal -->
-        <div class="col-md-9">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div id="chat_box" class="chat-box mb-3">
-                        <div class="msg-tutor">
-                            <strong><i class="bi bi-robot"></i> Oralis:</strong>
-                            <p class="mb-0 mt-1">¡Hola! Soy tu tutor de idiomas. ¿Qué te gustaría practicar hoy?</p>
+                        <label for="rubrica-text" style="margin-top:6px; display:block;">Rúbrica o Criterios:</label>
+                        <textarea id="rubrica-text" rows="2" placeholder="Pega los criterios específicos aquí..."></textarea>
+                    </div>
+
+                    <!-- MODO 4: WRITING -->
+                    <div id="opciones-modo-4" class="modo-extra hidden">
+                        <label for="modo-correccion-writing">Sistema de Corrección:</label>
+                        <select id="modo-correccion-writing">
+                            <option value="normal">Modo Normal (Muestra solución)</option>
+                            <option value="desafio">Modo Desafío (Guiado con pistas)</option>
+                        </select>
+
+                        <label style="margin-top: 8px; display:block;">Adjuntar Composición (.txt, .md, .doc):</label>
+                        <div class="file-upload-box" onclick="document.getElementById('writing-file-input').click()">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size:1.2rem; color:var(--primary-color);"></i>
+                            <p style="font-size:0.78rem; margin-top:2px;">Haz clic aquí para subir archivo</p>
+                        </div>
+                        <input type="file" id="writing-file-input" class="hidden" accept=".txt,.md,.doc,.docx" onchange="procesarArchivoAdjunto(event)">
+                        
+                        <div id="file-info-badge" class="file-badge hidden">
+                            <i class="fa-solid fa-paperclip"></i>
+                            <span id="file-name-text">archivo.txt</span>
+                            <i class="fa-solid fa-xmark" style="cursor:pointer; margin-left:6px;" onclick="quitarArchivoAdjunto()" title="Quitar archivo"></i>
                         </div>
                     </div>
 
-                    <div class="input-group">
-                        <textarea id="user_message" class="form-control" placeholder="Escribe o habla en tu idioma objetivo..." rows="2"></textarea>
-                        
-                        <!-- Micrófono -->
-                        <button type="button" id="mic_btn" class="btn btn-outline-secondary" onclick="toggleMic()" title="Hablar por micrófono">
-                            <i class="bi bi-mic-fill"></i>
+                </aside>
+
+                <div class="chat-wrapper">
+                    <div id="chat-box" class="chat-box">
+                        <div class="message bot-message">
+                            <div class="msg-content">
+                                <p>¡Hola {{ user_name }}! Soy Oralis, tu tutor inteligente de idiomas. Selecciona tus preferencias e inicia la conversación.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-container">
+                        <!-- BOTÓN DE MICRÓFONO (SE OCULTA EN MODO WRITING) -->
+                        <button id="btn-mic" class="btn-icon" onclick="toggleReconocimientoVoz()" title="Grabar audio con micrófono">
+                            <i class="fa-solid fa-microphone"></i>
                         </button>
                         
-                        <!-- Enviar -->
-                        <button type="button" class="btn btn-primary" onclick="sendMessage()">
-                            <i class="bi bi-send-fill"></i> Enviar
-                        </button>
+                        <textarea id="user-input" rows="1" placeholder="Escribe o dicta tu mensaje aquí..."></textarea>
+                        <button class="btn-primary" onclick="enviarMensaje()"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Modal Mi Cuaderno -->
-<div class="modal fade" id="notebookModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-journal-bookmark"></i> Mi Cuaderno</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <ul class="nav nav-tabs" id="notebookTab" role="tablist">
-                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#vocabTab">Vocabulario</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#grammarTab">Gramática</button></li>
-                </ul>
-                <div class="tab-content p-3">
-                    <div class="tab-pane fade show active" id="vocabTab"><ul id="vocab_list" class="list-group"></ul></div>
-                    <div class="tab-pane fade" id="grammarTab"><ul id="grammar_list" class="list-group"></ul></div>
+        </section>
+
+        <!-- PESTAÑA 2: MI CUADERNO -->
+        <section id="tab-cuaderno" class="tab-content hidden">
+            <h2><i class="fa-solid fa-book-bookmark"></i> Mi Cuaderno (Repaso Inteligente)</h2>
+            <div class="cuaderno-tabs">
+                <button class="cuaderno-tab-btn active" onclick="filtrarCuaderno('todos', event)">Ver Todos</button>
+                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Vocabulario', event)">📘 Vocabulario</button>
+                <button class="cuaderno-tab-btn" onclick="filtrarCuaderno('Gramática', event)">📐 Gramática</button>
+            </div>
+            <div id="cuaderno-grid" class="cards-grid"></div>
+        </section>
+
+        <!-- PESTAÑA 3: BANCO DE RECURSOS -->
+        <section id="tab-banco" class="tab-content hidden">
+            <h2><i class="fa-solid fa-book-open"></i> Banco Recomendado de Recursos</h2>
+            <div class="cards-grid">
+                <div class="card-item" onclick="cargarEnChat('Quiero practicar conectores avanzados')">
+                    <h4>🔗 Conectores Avanzados</h4>
+                    <p>Mejora la cohesión y fluidez de tus textos y conversaciones.</p>
+                </div>
+                <div class="card-item" onclick="cargarEnChat('Iniciar práctica de expresiones idiomáticas')">
+                    <h4>💡 Idioms y Modismos</h4>
+                    <p>Habla como un nativo utilizando modismos habituales.</p>
+                </div>
+                <div class="card-item" onclick="cargarEnChat('Simular vocabulario para una entrevista de trabajo')">
+                    <h4>💼 Entrevistas de Trabajo</h4>
+                    <p>Vocabulario clave y respuestas recomendadas en entornos profesionales.</p>
+                </div>
+                <div class="card-item" onclick="cargarEnChat('Quiero repasar la conjugación de verbos en pasado')">
+                    <h4>⌛ Conjugación en Pasado</h4>
+                    <p>Ejercicios prácticos sobre tiempos verbales pasados.</p>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+        </section>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-// MAPEO DE IDIOMAS Y CÓDIGOS ISO/BCP47
-const langCodes = {
-    "Inglés": "en-US",
-    "Español (ELE)": "es-ES",
-    "Francés": "fr-FR",
-    "Alemán": "de-DE",
-    "Italiano": "it-IT",
-    "Portugués": "pt-PT",
-    "Latín": "la",
-    "Griego Antiguo": "el-GR",
-    "Neerlandés": "nl-NL",
-    "Ruso": "ru-RU",
-    "Polaco": "pl-PL",
-    "Sueco": "sv-SE",
-    "Noruego": "no-NO",
-    "Danés": "da-DK",
-    "Finés": "fi-FI",
-    "Griego": "el-GR",
-    "Turco": "tr-TR",
-    "Checo": "cs-CZ",
-    "Rumano": "ro-RO",
-    "Húngaro": "hu-HU"
-};
+        <!-- PESTAÑA 4: HISTORIAL -->
+        <section id="tab-historial" class="tab-content hidden">
+            <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de Chats</h2>
+            <div id="historial-list" class="cards-grid"></div>
+        </section>
 
-// ALTAVOZ (TEXT-TO-SPEECH)
-function speakText(text) {
-    if (!('speechSynthesis' in window)) {
-        alert("Tu navegador no soporta reproducción de voz.");
-        return;
-    }
-    window.speechSynthesis.cancel();
-    const cleanText = text.replace(/\[.*?\]/g, '').trim();
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    const selectedLang = document.getElementById("target_lang").value;
-    utterance.lang = langCodes[selectedLang] || "en-US";
-    utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
-}
+        <!-- PESTAÑA 5: FEEDBACK -->
+        <section id="tab-feedback" class="tab-content hidden">
+            <h2><i class="fa-solid fa-star"></i> Enviar Feedback al Administrador</h2>
+            <div style="max-width: 500px; margin-top:15px;" class="form-group">
+                <label>Puntuación:</label>
+                <select id="fb-score">
+                    <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                    <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
+                    <option value="3">⭐⭐⭐ Aceptable</option>
+                </select>
+                <label style="margin-top:10px;">Comentario:</label>
+                <textarea id="fb-comment" rows="4" placeholder="Escribe tu opinión o sugerencias..."></textarea>
+                <button class="btn-primary" style="margin-top:10px; width:100%;" onclick="enviarFeedback()">Enviar Opinión</button>
+            </div>
+        </section>
 
-// MICRÓFONO (SPEECH-TO-TEXT)
-let recognition = null;
-let isRecording = false;
+    </main>
 
-function toggleMic() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        alert("Tu navegador no soporta el reconocimiento de voz. Usa Chrome o Edge.");
-        return;
-    }
+    <script>
+        const examenesPorIdioma = {
+            "Inglés": ["Cambridge (KET, PET, FCE, CAE, CPE)", "IELTS", "TOEFL", "Aptis"],
+            "Español (ELE)": ["DELE", "SIELE"],
+            "Francés": ["DELF", "DALF", "TCF", "TEF"],
+            "Alemán": ["Goethe-Zertifikat (A1-C2)", "TestDaF", "DSH"],
+            "Italiano": ["CILS", "CELI", "PLIDA"],
+            "Portugués": ["CAPLE (PLE)", "Celpe-Bras"],
+            "Latín": ["Exámenes de Lenguas Clásicas / EvAU"],
+            "Griego Antiguo": ["Exámenes de Lenguas Clásicas / Accreditation"],
+            "Neerlandés": ["CNaVT", "NT2"],
+            "Ruso": ["TORFL / TRKI"],
+            "Polaco": ["Egzamin Certyfikatowy z Języka Polskiego"],
+            "Sueco": ["TISUS", "Swedex"],
+            "Noruego": ["Norskprøven"],
+            "Danés": ["Prøve i Dansk"],
+            "Finés": ["YKI (Yleiset kielitutkinnot)"],
+            "Griego": ["State Certificate of Language Proficiency (KGP)"],
+            "Turco": ["TYS (Türkçe Yeterlik Sınavı)"],
+            "Checo": ["CCE (Certifikovaná zkouška z češtiny)"],
+            "Rumano": ["RLS (Institutul Limbii Române)"],
+            "Húngaro": ["ECL Exam in Hungarian"]
+        };
 
-    const micBtn = document.getElementById("mic_btn");
-    const messageInput = document.getElementById("user_message");
+        const idiomaCodigosISO = {
+            "Inglés": "en-US",
+            "Español (ELE)": "es-ES",
+            "Francés": "fr-FR",
+            "Alemán": "de-DE",
+            "Italiano": "it-IT",
+            "Portugués": "pt-PT",
+            "Latín": "la",
+            "Griego Antiguo": "el-GR",
+            "Neerlandés": "nl-NL",
+            "Ruso": "ru-RU",
+            "Polaco": "pl-PL",
+            "Sueco": "sv-SE",
+            "Noruego": "no-NO",
+            "Danés": "da-DK",
+            "Finés": "fi-FI",
+            "Griego": "el-GR",
+            "Turco": "tr-TR",
+            "Checo": "cs-CZ",
+            "Rumano": "ro-RO",
+            "Húngaro": "hu-HU"
+        };
 
-    if (isRecording) {
-        if (recognition) recognition.stop();
-        return;
-    }
+        let itemsCuadernoGlobal = [];
+        let archivoAdjuntoContenido = '';
+        let archivoAdjuntoNombre = '';
+        
+        let recognition = null;
+        let isRecording = false;
 
-    recognition = new SpeechRecognition();
-    const selectedLang = document.getElementById("target_lang").value;
-    recognition.lang = langCodes[selectedLang] || "en-US";
-    recognition.interimResults = false;
+        function switchTab(tabName, evt) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
 
-    recognition.onstart = function() {
-        isRecording = true;
-        micBtn.classList.remove("btn-outline-secondary");
-        micBtn.classList.add("btn-danger", "pulse-recording");
-        micBtn.innerHTML = '<i class="bi bi-mic-mute-fill"></i> Escuchando...';
-    };
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            if(evt) evt.currentTarget.classList.add('active');
 
-    recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        messageInput.value = (messageInput.value ? messageInput.value + " " : "") + transcript;
-    };
+            if(tabName === 'cuaderno') cargarCuaderno();
+            if(tabName === 'historial') cargarHistorial();
+        }
 
-    recognition.onerror = stopRecordingState;
-    recognition.onend = stopRecordingState;
-    recognition.start();
-}
+        function cambiarModoInterfaz() {
+            const modo = document.getElementById('select-modo').value;
+            document.querySelectorAll('.modo-extra').forEach(el => el.classList.add('hidden'));
 
-function stopRecordingState() {
-    isRecording = false;
-    const micBtn = document.getElementById("mic_btn");
-    micBtn.classList.remove("btn-danger", "pulse-recording");
-    micBtn.classList.add("btn-outline-secondary");
-    micBtn.innerHTML = '<i class="bi bi-mic-fill"></i>';
-}
+            const btnMic = document.getElementById('btn-mic');
 
-function toggleModeFields() {
-    const mode = document.getElementById("mode").value;
-    document.getElementById("field_practica").classList.toggle("d-none", mode !== "practica_oral");
-    document.getElementById("field_examenes").classList.toggle("d-none", mode !== "examenes");
-}
+            if (modo === 'practica_oral') document.getElementById('opciones-modo-2').classList.remove('hidden');
+            if (modo === 'examenes') document.getElementById('opciones-modo-3').classList.remove('hidden');
+            if (modo === 'writing') document.getElementById('opciones-modo-4').classList.remove('hidden');
 
-async function sendMessage() {
-    const input = document.getElementById("user_message");
-    const message = input.value.trim();
-    if (!message) return;
+            if (modo === 'writing') {
+                btnMic.classList.add('hidden');
+                document.querySelectorAll('.btn-audio-speak').forEach(el => el.classList.add('hidden'));
+            } else {
+                btnMic.classList.remove('hidden');
+                document.querySelectorAll('.btn-audio-speak').forEach(el => el.classList.remove('hidden'));
+            }
+        }
 
-    const chatBox = document.getElementById("chat_box");
-    
-    // Añadir mensaje de usuario
-    chatBox.innerHTML += `<div class="msg-user"><strong>Tú:</strong><p class="mb-0 mt-1">${message}</p></div>`;
-    input.value = "";
+        function evaluarRolPersonalizado() {
+            const val = document.getElementById('select-rol').value;
+            const inputCustom = document.getElementById('rol-custom');
+            if(val === 'otro') {
+                inputCustom.classList.remove('hidden');
+            } else {
+                inputCustom.classList.add('hidden');
+            }
+        }
 
-    // Contenedor respuesta tutor
-    const tutorMsgDiv = document.createElement("div");
-    tutorMsgDiv.className = "msg-tutor";
-    tutorMsgDiv.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center mb-1">
-            <strong><i class="bi bi-robot"></i> Oralis:</strong>
-            <button class="btn btn-sm btn-link text-dark p-0" onclick="speakText(this.closest('.msg-tutor').innerText)" title="Escuchar">
-                <i class="bi bi-volume-up-fill fs-5"></i>
-            </button>
-        </div>
-        <div class="content">...</div>`;
-    chatBox.appendChild(tutorMsgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
+        function actualizarExamenesDisponibles() {
+            const idioma = document.getElementById('select-idioma').value;
+            const selectExamen = document.getElementById('select-examen');
+            selectExamen.innerHTML = '';
 
-    const contentDiv = tutorMsgDiv.querySelector(".content");
+            const lista = examenesPorIdioma[idioma] || ["Examen General"];
+            lista.forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex;
+                opt.textContent = ex;
+                selectExamen.appendChild(opt);
+            });
+        }
 
-    const payload = {
-        message: message,
-        target_lang: document.getElementById("target_lang").value,
-        cefr_level: document.getElementById("cefr_level").value,
-        mode: document.getElementById("mode").value,
-        rol_practica: document.getElementById("rol_practica").value,
-        examen_oficial: document.getElementById("examen_oficial").value,
-        rubrica: document.getElementById("rubrica").value
-    };
+        function procesarArchivoAdjunto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-    const response = await fetch("/chat_stream", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-    });
+            archivoAdjuntoNombre = file.name;
+            const reader = new FileReader();
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    contentDiv.innerHTML = "";
+            reader.onload = function(e) {
+                archivoAdjuntoContenido = e.target.result;
+                document.getElementById('file-name-text').innerText = file.name;
+                document.getElementById('file-info-badge').classList.remove('hidden');
+            };
 
-    while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        contentDiv.innerHTML += decoder.decode(value);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-}
+            reader.readAsText(file);
+        }
 
-async function clearChat() {
-    await fetch("/clear_chat", { method: "POST" });
-    document.getElementById("chat_box").innerHTML = `
-        <div class="msg-tutor">
-            <strong><i class="bi bi-robot"></i> Oralis:</strong>
-            <p class="mb-0 mt-1">Historial borrado. ¿Qué quieres practicar ahora?</p>
-        </div>`;
-}
+        function quitarArchivoAdjunto() {
+            archivoAdjuntoContenido = '';
+            archivoAdjuntoNombre = '';
+            document.getElementById('writing-file-input').value = '';
+            document.getElementById('file-info-badge').classList.add('hidden');
+        }
 
-async function loadNotebook() {
-    const res = await fetch("/get_notebook");
-    const data = await res.json();
-    const vocabList = document.getElementById("vocab_list");
-    const grammarList = document.getElementById("grammar_list");
+        function toggleReconocimientoVoz() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Tu navegador no soporta el reconocimiento de voz por micrófono. Usa Google Chrome o Microsoft Edge.");
+                return;
+            }
 
-    vocabList.innerHTML = data.notebook.vocabulary.length ? 
-        data.notebook.vocabulary.map(item => `<li class="list-group-item">${item}</li>`).join("") : 
-        "<li class='list-group-item text-muted'>Sin vocabulario guardado.</li>";
+            const btnMic = document.getElementById('btn-mic');
+            const idioma = document.getElementById('select-idioma').value;
+            const isoCode = idiomaCodigosISO[idioma] || 'en-US';
 
-    grammarList.innerHTML = data.notebook.grammar.length ? 
-        data.notebook.grammar.map(item => `<li class="list-group-item">${item}</li>`).join("") : 
-        "<li class='list-group-item text-muted'>Sin reglas gramaticales guardadas.</li>";
-}
-</script>
+            if (isRecording) {
+                if (recognition) recognition.stop();
+                btnMic.classList.remove('recording');
+                isRecording = false;
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = isoCode;
+            recognition.interimResults = false;
+
+            recognition.onstart = function() {
+                isRecording = true;
+                btnMic.classList.add('recording');
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                const userInput = document.getElementById('user-input');
+                userInput.value = (userInput.value ? userInput.value + ' ' : '') + transcript;
+            };
+
+            recognition.onerror = function(event) {
+                btnMic.classList.remove('recording');
+                isRecording = false;
+            };
+
+            recognition.onend = function() {
+                btnMic.classList.remove('recording');
+                isRecording = false;
+            };
+
+            recognition.start();
+        }
+
+        function reproducirAudioMensaje(texto) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(texto);
+                const idioma = document.getElementById('select-idioma').value;
+                utterance.lang = idiomaCodigosISO[idioma] || 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Tu navegador no soporta la reproducción de texto a voz.");
+            }
+        }
+
+        async function enviarMensaje() {
+            const input = document.getElementById('user-input');
+            const msg = input.value.trim();
+
+            if(!msg && !archivoAdjuntoContenido) return;
+
+            let displayMsg = msg;
+            if(archivoAdjuntoNombre) {
+                displayMsg += `\n📎 [Archivo adjunto: ${archivoAdjuntoNombre}]`;
+            }
+
+            appendMessage('user', displayMsg);
+            input.value = '';
+
+            let rolFinal = document.getElementById('select-rol').value;
+            if(rolFinal === 'otro') {
+                rolFinal = document.getElementById('rol-custom').value || 'Rol Personalizado';
+            }
+
+            const payload = {
+                message: msg,
+                target_lang: document.getElementById('select-idioma').value,
+                cefr_level: document.getElementById('select-cefr').value,
+                mode: document.getElementById('select-modo').value,
+                rol_practica: rolFinal,
+                examen_oficial: document.getElementById('select-examen').value,
+                rubrica: document.getElementById('rubrica-text').value,
+                file_name: archivoAdjuntoNombre,
+                file_content: archivoAdjuntoContenido
+            };
+
+            quitarArchivoAdjunto();
+
+            const response = await fetch('/chat_stream', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+            const botMsgDiv = appendMessage('bot', 'Oralis pensando...');
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                fullText += decoder.decode(value, { stream: true });
+                renderizarRespuesta(botMsgDiv, fullText);
+            }
+        }
+
+        function renderizarRespuesta(element, rawText) {
+            // Eliminar asteriscos y almohadillas del texto original
+            let cleanedText = rawText.replace(/[*#]/g, '');
+
+            let html = '';
+            const pResp = cleanedText.split('[TRADUCCION_INTEGRADA]')[0].replace('[RESPUESTA_PRINCIPAL]', '').trim();
+            const rest1 = cleanedText.split('[TRADUCCION_INTEGRADA]')[1] || '';
+            const pTrad = rest1.split('[CORRECCION_Y_MEJORA]')[0];
+            const pCorr = rest1.split('[CORRECCION_Y_MEJORA]')[1] || '';
+
+            const modoActual = document.getElementById('select-modo').value;
+            const ocultarAltavoz = (modoActual === 'writing') ? 'hidden' : '';
+
+            // Texto sin etiquetas HTML para la síntesis de voz
+            const textoLimpioVoz = pResp.replace(/<[^>]*>?/gm, '');
+
+            html += `<div>${pResp}</div>`;
+            
+            html += `<button class="btn-audio-speak ${ocultarAltavoz}" onclick="reproducirAudioMensaje(\`${textoLimpioVoz.replace(/`/g, '\\`').replace(/"/g, '&quot;')}\`)">
+                        <i class="fa-solid fa-volume-high"></i> Escuchar pronunciación
+                     </button>`;
+
+            if(pTrad) {
+                html += `<div class="block-translation"><strong>🌐 Traducción Integrada:</strong><br>${pTrad}</div>`;
+            }
+            if(pCorr) {
+                html += `<div class="block-correction"><strong>💡 Análisis Pedagógico y Corrección:</strong><br>${pCorr}</div>`;
+            }
+
+            element.querySelector('.msg-content').innerHTML = html;
+        }
+
+        function appendMessage(sender, text) {
+            const chatBox = document.getElementById('chat-box');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}-message`;
+            msgDiv.innerHTML = `<div class="msg-content">${text.replace(/\n/g, '<br>')}</div>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return msgDiv;
+        }
+
+        function cargarEnChat(texto) {
+            switchTab('tutor');
+            document.getElementById('user-input').value = texto;
+        }
+
+        async function cargarCuaderno() {
+            const res = await fetch('/cuaderno/listar');
+            itemsCuadernoGlobal = await res.json();
+            renderCuadernoGrid(itemsCuadernoGlobal);
+        }
+
+        function renderCuadernoGrid(items) {
+            const grid = document.getElementById('cuaderno-grid');
+            if(items.length === 0) {
+                grid.innerHTML = '<p style="padding:20px; color:#6C757D;">No hay anotaciones guardadas aún.</p>';
+                return;
+            }
+            grid.innerHTML = items.map(item => `
+                <div class="card-item">
+                    <span style="font-size:0.75rem; font-weight:bold; color:var(--primary-color); background:#EBF2EE; padding:3px 8px; border-radius:4px;">${item.categoria} - ${item.idioma} (${item.nivel})</span>
+                    <h4 style="margin-top:8px;">${item.termino}</h4>
+                    <p style="font-size:0.9rem; color:#555;">${item.explicacion}</p>
+                </div>
+            `).join('');
+        }
+
+        function filtrarCuaderno(categoria, evt) {
+            document.querySelectorAll('.cuaderno-tab-btn').forEach(b => b.classList.remove('active'));
+            if(evt) evt.currentTarget.classList.add('active');
+
+            if(categoria === 'todos') {
+                renderCuadernoGrid(itemsCuadernoGlobal);
+            } else {
+                const filtrados = itemsCuadernoGlobal.filter(i => i.categoria === categoria);
+                renderCuadernoGrid(filtrados);
+            }
+        }
+
+        async function cargarHistorial() {
+            const res = await fetch('/historial/listar');
+            const data = await res.json();
+            const list = document.getElementById('historial-list');
+            list.innerHTML = data.map(c => `
+                <div class="card-item">
+                    <h4>${c.titulo}</h4>
+                    <p style="font-size:0.85rem; color:#666;">Modo: ${c.modo} | Fecha: ${c.fecha}</p>
+                </div>
+            `).join('');
+        }
+
+        async function enviarFeedback() {
+            const score = document.getElementById('fb-score').value;
+            const comment = document.getElementById('fb-comment').value;
+            await fetch('/feedback', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ score, comment })
+            });
+            alert('¡Feedback enviado correctamente!');
+            document.getElementById('fb-comment').value = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarExamenesDisponibles();
+            cambiarModoInterfaz();
+        });
+    </script>
 </body>
 </html>
