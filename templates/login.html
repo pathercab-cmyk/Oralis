@@ -2,35 +2,138 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Oralis - Iniciar Sesión</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oralis - Acceso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8F9FA; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); width: 320px; }
-        h2 { color: #2E6B52; text-align: center; margin-bottom: 20px; }
-        input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #E2E8E0; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #2E6B52; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        :root {
+            --primary-color: #2E6B52;
+            --bg-main: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8E0;
+            --text-dark: #2B2D42;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-main); color: var(--text-dark); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+
+        .auth-card { background: var(--card-bg); width: 100%; max-width: 420px; padding: 32px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .auth-header { text-align: center; margin-bottom: 24px; }
+        .auth-header i { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 8px; }
+        .auth-header h2 { font-size: 1.6rem; color: var(--primary-color); }
+
+        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); }
+        .auth-tab-btn { flex: 1; padding: 10px; background: none; border: none; font-weight: 600; cursor: pointer; color: #6C757D; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .auth-tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 0.88rem; font-weight: 600; }
+        .form-group input { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; font-family: inherit; background: #FAFAFA; }
+        .form-group input:focus { outline: none; border-color: var(--primary-color); background: #FFF; }
+
+        .btn-submit { width: 100%; padding: 12px; background: var(--primary-color); color: #FFF; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+        .btn-submit:hover { background: #235440; }
+
+        .error-msg { background: #F8D7DA; color: #721C24; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Oralis</h2>
-        <input type="email" id="email" placeholder="Correo electrónico">
-        <input type="password" id="password" placeholder="Contraseña">
-        <button onclick="login()">Acceder / Registrarse</button>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <i class="fa-solid fa-comments"></i>
+            <h2>Oralis</h2>
+            <p style="font-size: 0.88rem; color: #6C757D;">Tu tutor inteligente de idiomas</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" onclick="cambiarTabAuth('login')">Iniciar Sesión</button>
+            <button class="auth-tab-btn" onclick="cambiarTabAuth('register')">Registrarse</button>
+        </div>
+
+        <div id="error-alert" class="error-msg"></div>
+
+        <!-- FORMULARIO DE INICIO DE SESIÓN -->
+        <form id="form-login" onsubmit="procesarAuth(event, 'login')">
+            <div class="form-group">
+                <label for="login-email">Correo Electrónico:</label>
+                <input type="email" id="login-email" required placeholder="tu@correo.com">
+            </div>
+            <div class="form-group">
+                <label for="login-pass">Contraseña:</label>
+                <input type="password" id="login-pass" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn-submit">Entrar</button>
+        </form>
+
+        <!-- FORMULARIO DE REGISTRO -->
+        <form id="form-register" class="hidden" onsubmit="procesarAuth(event, 'register')">
+            <div class="form-group">
+                <label for="reg-nombre">¿Cómo quieres que te llame Oralis?:</label>
+                <input type="text" id="reg-nombre" required placeholder="Ej: Carlos">
+            </div>
+            <div class="form-group">
+                <label for="reg-email">Correo Electrónico:</label>
+                <input type="email" id="reg-email" required placeholder="tu@correo.com">
+            </div>
+            <div class="form-group">
+                <label for="reg-pass">Contraseña:</label>
+                <input type="password" id="reg-pass" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn-submit">Crear Cuenta</button>
+        </form>
     </div>
+
     <script>
-        async function login() {
+        function cambiarTabAuth(tab) {
+            const errorDiv = document.getElementById('error-alert');
+            errorDiv.style.display = 'none';
+
+            document.querySelectorAll('.auth-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            if (tab === 'login') {
+                document.querySelectorAll('.auth-tab-btn')[0].classList.add('active');
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+            } else {
+                document.querySelectorAll('.auth-tab-btn')[1].classList.add('active');
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+            }
+        }
+
+        async function procesarAuth(event, action) {
+            event.preventDefault();
+            const errorDiv = document.getElementById('error-alert');
+            errorDiv.style.display = 'none';
+
+            let payload = { action };
+
+            if (action === 'login') {
+                payload.email = document.getElementById('login-email').value;
+                payload.password = document.getElementById('login-pass').value;
+            } else {
+                payload.nombre = document.getElementById('reg-nombre').value;
+                payload.email = document.getElementById('reg-email').value;
+                payload.password = document.getElementById('reg-pass').value;
+            }
+
             const res = await fetch('/login', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    email: document.getElementById('email').value,
-                    password: document.getElementById('password').value
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-            if (res.ok) window.location.href = '/';
-            else alert('Error al acceder');
+
+            const data = await res.json();
+
+            if (res.ok && data.status === 'ok') {
+                window.location.href = '/';
+            } else {
+                errorDiv.innerText = data.message || 'Ocurrió un error al procesar la solicitud.';
+                errorDiv.style.display = 'block';
+            }
         }
     </script>
 </body>
