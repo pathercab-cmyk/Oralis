@@ -1,20 +1,17 @@
 import os
 import json
 from flask import Flask, render_template, request, Response, redirect, url_for, session, jsonify
-from openai import OpenAI
+from groq import Groq
 
 app = Flask(__name__)
 # Clave secreta para la sesión de Flask
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "oralis_secret_key_change_in_production")
 
-# Inicialización del cliente de Groq utilizando la API compatible de OpenAI
+# Inicialización del cliente oficial de Groq
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "tu-api-key-de-groq-aqui")
-client = OpenAI(
-    base_url="https://api.groq.com/openai/v1",
-    api_key=GROQ_API_KEY
-)
+client = Groq(api_key=GROQ_API_KEY)
 
-# Modelo predeterminado de Groq seleccionado
+# Modelo de Groq seleccionado
 MODEL_NAME = "qwen/qwen3.8-27b"
 
 # Archivo de persistencia de valoraciones/feedback
@@ -141,7 +138,7 @@ def chat_stream():
     def generate():
         full_response_text = ""
         try:
-            # Llamada con streaming usando el SDK v1.x de OpenAI con el servidor de Groq
+            # Llamada con streaming usando el SDK oficial de Groq
             response = client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=messages,
@@ -194,98 +191,6 @@ def feedback():
         with open(FEEDBACK_FILE, "w", encoding="utf-8") as f:
             json.dump(feedbacks, f, ensure_ascii=False, indent=4)
         return jsonify({"status": "ok", "message": "Feedback recibido correctamente"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
-
-
-@app.route("/set_name", methods=["POST"])
-def set_name():
-    name = request.form.get("user_name", "Estudiante").strip()
-    session["user_name"] = name if name else "Estudiante"
-    return redirect(url_for("index"))
-
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("index"))
-
-
-@app.route("/chat_stream", methods=["POST"])
-def chat_stream():
-    data = request.get_json() or {}
-
-    user_message = data.get("message", "").strip()
-    target_lang = data.get("target_lang", "Inglés")
-    cefr_level = data.get("cefr_level", "B1")
-    mode = data.get("mode", "tutor_general")
-    rol_practica = data.get("rol_practica", "")
-    examen_oficial = data.get("examen_oficial", "")
-    rubrica = data.get("rubrica", "")
-    file_name = data.get("file_name", "")
-    file_content = data.get("file_content", "")
-
-    system_prompt = get_system_prompt(target_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica)
-
-    full_user_text = user_message
-    if file_content:
-        full_user_text += f"\n\n--- ARCHIVO ADJUNTO: {file_name} ---\n{file_content}\n--- FIN DEL ARCHIVO ---"
-
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": full_user_text}
-    ]
-
-    def generate():
-        try:
-            # Llamada en streaming usando la API de Groq y el modelo Qwen
-            response = openai.ChatCompletion.create(
-                model="qwen/qwen3.8-27b",
-                messages=messages,
-                stream=True,
-                temperature=0.7
-            )
-            for chunk in response:
-                content = chunk.choices[0].delta.get("content", "")
-                if content:
-                    yield content
-        except Exception as e:
-            yield f"[RESPUESTA_PRINCIPAL] Ocurrió un error al procesar tu respuesta con Groq: {str(e)}"
-
-    return Response(generate(), mimetype="text/plain; charset=utf-8")
-
-
-@app.route("/feedback", methods=["POST"])
-def feedback():
-    data = request.get_json() or {}
-    score = data.get("score")
-    comment = data.get("comment", "").strip()
-    user_name = session.get("user_name", "Anónimo")
-
-    feedback_entry = {
-        "user": user_name,
-        "score": score,
-        "comment": comment
-    }
-
-    feedbacks = []
-    if os.path.exists(FEEDBACK_FILE):
-        try:
-            with open(FEEDBACK_FILE, "r", encoding="utf-8") as f:
-                feedbacks = json.load(f)
-        except Exception:
-            feedbacks = []
-
-    feedbacks.append(feedback_entry)
-
-    try:
-        with open(FEEDBACK_FILE, "w", encoding="utf-8") as f:
-            json.dump(feedbacks, f, ensure_ascii=False, indent=4)
-        return jsonify({"status": "ok", "message": "Feedback registrado correctamente"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
