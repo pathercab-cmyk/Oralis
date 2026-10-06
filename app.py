@@ -153,6 +153,10 @@ Refiérete a él por su nombre ({user_name}) de forma cercana y natural durante 
 - Examen Seleccionado: {examen_oficial}.
 - Rúbrica: {rubrica}.
 
+REGLAS DE FORMATO ESTRICTAS:
+1. NO utilices nunca asteriscos (* o **) ni almohadillas (#) en tus respuestas.
+2. Si vas a proporcionar vocabulario, ejemplos, correcciones o listas de items, debes escribirlos usando elementos o etiquetas de lista HTML explicitas como <ul> y <li>, o listas numeradas <ol> y <li>.
+
 ESTRUCTURA DE SALIDA OBLIGATORIA:
 [RESPUESTA_PRINCIPAL]
 Escribe aquí tu respuesta directa en {target_lang} respondiendo adecuadamente según el rol y nivel {cefr_level}.
@@ -161,7 +165,7 @@ Escribe aquí tu respuesta directa en {target_lang} respondiendo adecuadamente s
 Traduce aquí la respuesta principal al idioma español para ayudar al estudiante.
 
 [CORRECCION_Y_MEJORA]
-Analiza los errores cometidos en el mensaje del usuario (gramática, vocabulario, sintaxis) y proporciona sugerencias concretas de mejora.
+Analiza los errores cometidos en el mensaje del usuario (gramática, vocabulario, sintaxis) y proporciona sugerencias concretas de mejora en formato de lista HTML (<ul><li>...</li></ul>).
 """
 
     def generate():
