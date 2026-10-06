@@ -1,12 +1,17 @@
 import os
 import json
+from datetime import timedelta
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from groq import Groq
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "oralis_secret_key_2026")
+app.secret_key = os.environ.get("SECRET_KEY", "oralis_secret_key_2026_persistente")
+
+# --- PERSISTENCIA DE SESIÓN ---
+# Mantiene la sesión abierta durante 30 días para no perder el login al recargar
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 
 # --- CONFIGURACIÓN BASE DE DATOS Y CLIENTE API ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///oralis.db'
@@ -50,6 +55,7 @@ class Feedback(db.Model):
     comentario = db.Column(db.Text, nullable=False)
     fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
 
+# Creación de tablas de forma segura
 with app.app_context():
     db.create_all()
 
@@ -73,14 +79,17 @@ def login():
     email = data.get('email', '').strip().lower()
     password = data.get('password', '').strip()
 
+    if not email or not password:
+        return jsonify({'status': 'error', 'message': 'Debes completar todos los campos.'}), 400
+
     if action == 'register':
         nombre = data.get('nombre', '').strip()
-        if not nombre or not email or not password:
-            return jsonify({'status': 'error', 'message': 'Todos los campos son obligatorios.'}), 400
+        if not nombre:
+            return jsonify({'status': 'error', 'message': 'Por favor ingresa tu nombre.'}), 400
 
         usuario_existente = Usuario.query.filter_by(email=email).first()
         if usuario_existente:
-            return jsonify({'status': 'error', 'message': 'El correo electrónico ya está registrado.'}), 400
+            return jsonify({'status': 'error', 'message': 'El correo electrónico ya está registrado. Haz clic en "Iniciar Sesión".'}), 400
 
         nuevo_usuario = Usuario(
             nombre=nombre,
@@ -90,14 +99,16 @@ def login():
         db.session.add(nuevo_usuario)
         db.session.commit()
 
+        session.permanent = True
         session['user_email'] = email
         session['user_name'] = nombre
         return jsonify({'status': 'ok'})
 
-    # Acción por defecto: Iniciar Sesión (Email + Contraseña)
+    # ACCIÓN: INICIAR SESIÓN (LOG IN)
     usuario = Usuario.query.filter_by(email=email).first()
     if usuario and check_password_hash(usuario.password_hash, password):
-        session['user_email'] = email
+        session.permanent = True
+        session['user_email'] = usuario.email
         session['user_name'] = usuario.nombre
         return jsonify({'status': 'ok'})
 
@@ -105,8 +116,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('user_email', None)
-    session.pop('user_name', None)
+    session.clear()
     return redirect(url_for('login_page'))
 
 # --- STREAM CHAT CON MODELO QWEN 3.8 27B ---
