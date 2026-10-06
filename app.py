@@ -4,24 +4,23 @@ from flask import Flask, render_template, request, Response, redirect, url_for, 
 from groq import Groq
 
 app = Flask(__name__)
-# Clave secreta para la sesión de Flask
+# Clave secreta para la gestión de sesiones
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "oralis_secret_key_change_in_production")
 
-# Inicialización del cliente oficial de Groq
+# Inicialización del cliente de Groq
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "tu-api-key-de-groq-aqui")
 client = Groq(api_key=GROQ_API_KEY)
 
-# Modelo de Groq seleccionado
+# Modelo predeterminado de Groq
 MODEL_NAME = "qwen/qwen3.8-27b"
 
-# Archivo de persistencia de valoraciones/feedback
+# Archivos de persistencia local
 FEEDBACK_FILE = "feedback.json"
+NOTEBOOK_FILE = "notebook.json"
 
 
 def get_system_prompt(target_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica):
-    """
-    Construye el Prompt del Sistema completo adaptado a la configuración actual del usuario.
-    """
+    """Construye el Prompt del Sistema completo adaptado a la configuración actual del usuario."""
     prompt = f"""Eres Oralis, un tutor virtual experto e interactivo en la enseñanza de idiomas.
 
 Configuración del estudiante:
@@ -61,22 +60,21 @@ Analiza el último mensaje escrito por el usuario. Si cometió errores gramatica
     return prompt
 
 
+# -------------------------------------------------------------------
+# RUTAS DE NAVEGACIÓN Y SESIÓN
+# -------------------------------------------------------------------
+
 @app.route("/")
 def index():
-    """Ruta principal que renderiza la interfaz."""
     if "user_name" not in session:
         session["user_name"] = "Estudiante"
-    
-    # Inicializa el historial de conversación en la sesión si no existe
     if "chat_history" not in session:
         session["chat_history"] = []
-        
     return render_template("index.html", user_name=session["user_name"])
 
 
 @app.route("/set_name", methods=["POST"])
 def set_name():
-    """Actualiza el nombre del usuario en la sesión actual."""
     name = request.form.get("user_name", "Estudiante").strip()
     session["user_name"] = name if name else "Estudiante"
     return redirect(url_for("index"))
@@ -84,24 +82,23 @@ def set_name():
 
 @app.route("/clear_chat", methods=["POST"])
 def clear_chat():
-    """Limpia el historial de la conversación en la sesión."""
     session["chat_history"] = []
+    session.modified = True
     return jsonify({"status": "ok", "message": "Historial reiniciado"})
 
 
 @app.route("/logout")
 def logout():
-    """Cierra la sesión y limpia las variables."""
     session.clear()
     return redirect(url_for("index"))
 
 
+# -------------------------------------------------------------------
+# CHAT Y STREAMING CON GROQ
+# -------------------------------------------------------------------
+
 @app.route("/chat_stream", methods=["POST"])
 def chat_stream():
-    """
-    Endpoint principal de conversación con Groq (Streaming response).
-    Mantiene historial de conversación, adjuntos y parámetros de exámenes/rúbricas.
-    """
     data = request.get_json() or {}
 
     user_message = data.get("message", "").strip()
@@ -114,31 +111,22 @@ def chat_stream():
     file_name = data.get("file_name", "")
     file_content = data.get("file_content", "")
 
-    # Construir prompt de sistema
     system_prompt = get_system_prompt(target_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica)
 
-    # Preparar el contenido del mensaje del usuario
     full_user_text = user_message
     if file_content:
         full_user_text += f"\n\n--- ARCHIVO ADJUNTO ({file_name}) ---\n{file_content}\n--- FIN ARCHIVO ---"
 
-    # Recuperar o inicializar el historial de la conversación en sesión
     history = session.get("chat_history", [])
 
-    # Construir el listado final de mensajes para el modelo
     messages = [{"role": "system", "content": system_prompt}]
-    
-    # Añadir historial previo
     for msg in history:
         messages.append({"role": msg["role"], "content": msg["content"]})
-        
-    # Añadir el mensaje actual del usuario
     messages.append({"role": "user", "content": full_user_text})
 
     def generate():
         full_response_text = ""
         try:
-            # Llamada con streaming usando el SDK oficial de Groq
             response = client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=messages,
@@ -151,10 +139,10 @@ def chat_stream():
                     full_response_text += content
                     yield content
 
-            # Guardar la interacción en el historial de la sesión
+            # Guardar en el historial de sesión (se limita a las últimas 20 interacciones)
             history.append({"role": "user", "content": full_user_text})
             history.append({"role": "assistant", "content": full_response_text})
-            session["chat_history"] = history
+            session["chat_history"] = history[-20:]
             session.modified = True
 
         except Exception as e:
@@ -163,9 +151,66 @@ def chat_stream():
     return Response(generate(), mimetype="text/plain; charset=utf-8")
 
 
+# -------------------------------------------------------------------
+# MI CUADERNO (VOCABULARIO Y GRAMÁTICA)
+# -------------------------------------------------------------------
+
+@app.route("/get_notebook", methods=["GET"])
+def get_notebook():
+    user_name = session.get("user_name", "Estudiante")
+    notebook_data = {"vocabulary": [], "grammar": []}
+    
+    if os.path.exists(NOTEBOOK_FILE):
+        try:
+            with open(NOTEBOOK_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                notebook_data = data.get(user_name, {"vocabulary": [], "grammar": []})
+        except Exception:
+            pass
+
+    return jsonify({"status": "ok", "notebook": notebook_data})
+
+
+@app.route("/save_notebook", methods=["POST"])
+def save_notebook():
+    data = request.get_json() or {}
+    user_name = session.get("user_name", "Estudiante")
+    
+    item_type = data.get("type")  # 'vocabulary' o 'grammar'
+    content = data.get("content", "").strip()
+
+    if not content or item_type not in ["vocabulary", "grammar"]:
+        return jsonify({"status": "error", "message": "Datos inválidos"}), 400
+
+    all_notebooks = {}
+    if os.path.exists(NOTEBOOK_FILE):
+        try:
+            with open(NOTEBOOK_FILE, "r", encoding="utf-8") as f:
+                all_notebooks = json.load(f)
+        except Exception:
+            all_notebooks = {}
+
+    user_data = all_notebooks.get(user_name, {"vocabulary": [], "grammar": []})
+    
+    if content not in user_data[item_type]:
+        user_data[item_type].append(content)
+
+    all_notebooks[user_name] = user_data
+
+    try:
+        with open(NOTEBOOK_FILE, "w", encoding="utf-8") as f:
+            json.dump(all_notebooks, f, ensure_ascii=False, indent=4)
+        return jsonify({"status": "ok", "message": "Guardado en Mi Cuaderno"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# -------------------------------------------------------------------
+# FEEDBACK Y PANEL DE ADMINISTRACIÓN
+# -------------------------------------------------------------------
+
 @app.route("/feedback", methods=["POST"])
 def feedback():
-    """Registra las valoraciones del usuario en feedback.json."""
     data = request.get_json() or {}
     score = data.get("score")
     comment = data.get("comment", "").strip()
@@ -190,9 +235,22 @@ def feedback():
     try:
         with open(FEEDBACK_FILE, "w", encoding="utf-8") as f:
             json.dump(feedbacks, f, ensure_ascii=False, indent=4)
-        return jsonify({"status": "ok", "message": "Feedback recibido correctamente"})
+        return jsonify({"status": "ok", "message": "Feedback recibido"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/admin/feedback", methods=["GET"])
+def admin_feedback():
+    feedbacks = []
+    if os.path.exists(FEEDBACK_FILE):
+        try:
+            with open(FEEDBACK_FILE, "r", encoding="utf-8") as f:
+                feedbacks = json.load(f)
+        except Exception:
+            feedbacks = []
+            
+    return render_template("admin_feedback.html", feedbacks=feedbacks)
 
 
 if __name__ == "__main__":
