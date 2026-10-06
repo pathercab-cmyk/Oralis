@@ -21,7 +21,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-dark); line-height: 1.6; }
 
-        /* NAVEGACIÓN SUPERIOR */
+        /* NAVBAR */
         .navbar { display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 12px 28px; border-bottom: 1px solid var(--border-color); }
         .logo { font-size: 1.4rem; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
         .nav-links { display: flex; gap: 8px; }
@@ -30,7 +30,6 @@
         .user-profile { display: flex; align-items: center; gap: 15px; font-size: 0.9rem; }
         .btn-admin { background: #E8F5E9; color: #2E7D32; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; border: 1px solid #A5D6A7; }
 
-        /* REGLA DE OCULTACIÓN STRICTA POR DEFECTO */
         .hidden { display: none !important; }
 
         .main-container { padding: 20px; max-width: 1400px; margin: 0 auto; }
@@ -47,10 +46,10 @@
 
         .modo-extra { background: #F4F7F5; padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary-color); margin-top: 5px; }
 
-        /* CONTENEDOR DE CONVERSACIÓN */
+        /* CONTENEDOR CHAT */
         .chat-wrapper { display: flex; flex-direction: column; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); overflow: hidden; }
         .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-        .message { max-width: 82%; padding: 16px; border-radius: 12px; }
+        .message { max-width: 82%; padding: 16px; border-radius: 12px; position: relative; }
         .user-message { align-self: flex-end; background: var(--primary-color); color: #FFFFFF; }
         .bot-message { align-self: flex-start; background: #FFFFFF; border: 1px solid var(--border-color); box-shadow: var(--shadow-soft); }
 
@@ -59,15 +58,30 @@
 
         .chat-input-container { display: flex; padding: 15px; gap: 10px; border-top: 1px solid var(--border-color); background: #FFFFFF; align-items: center; }
         .chat-input-container textarea { resize: none; }
-        .btn-primary { background: var(--primary-color); color: #FFF; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .btn-accent { background: var(--accent-color); color: #FFF; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-primary { background: var(--primary-color); color: #FFF; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .btn-icon { background: #EBF2EE; color: var(--primary-color); border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: background 0.2s; }
+        .btn-icon:hover { background: #D6E4DC; }
+        .btn-icon.recording { background: #DC3545; color: #FFF; animation: pulse 1.2s infinite; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-audio-speak { background: transparent; border: none; color: var(--primary-color); cursor: pointer; font-size: 1.1rem; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+        .btn-audio-speak:hover { color: #1e4736; }
+
+        /* UPLOAD STYLES */
+        .file-upload-box { border: 2px dashed var(--border-color); padding: 12px; border-radius: 8px; text-align: center; background: #FFFFFF; margin-top: 8px; cursor: pointer; transition: all 0.2s; }
+        .file-upload-box:hover { border-color: var(--primary-color); background: #F4F7F5; }
+        .file-badge { display: inline-flex; align-items: center; gap: 6px; background: #EBF2EE; color: var(--primary-color); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; margin-top: 6px; }
 
         /* TARJETAS Y GRILLAS */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
         .card-item { background: #FFF; border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.2s; }
         .card-item:hover { transform: translateY(-2px); }
 
-        /* PESTAÑAS CUADERNO */
         .cuaderno-tabs { display: flex; gap: 10px; margin-top: 15px; }
         .cuaderno-tab-btn { background: #EBF2EE; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary-color); }
         .cuaderno-tab-btn.active { background: var(--primary-color); color: white; }
@@ -144,7 +158,7 @@
                         </select>
                     </div>
 
-                    <!-- MODO 2: ROL PERSONALIZABLE (OCULTO POR DEFECTO) -->
+                    <!-- MODO 2: ROL PERSONALIZABLE -->
                     <div id="opciones-modo-2" class="modo-extra hidden">
                         <label for="select-rol">Rol de Oralis:</label>
                         <select id="select-rol" onchange="evaluarRolPersonalizado()">
@@ -159,7 +173,7 @@
                         <input type="text" id="rol-custom" class="hidden" style="margin-top:8px;" placeholder="Ej: Agente inmobiliario...">
                     </div>
 
-                    <!-- MODO 3: EXÁMENES (OCULTO POR DEFECTO) -->
+                    <!-- MODO 3: EXÁMENES -->
                     <div id="opciones-modo-3" class="modo-extra hidden">
                         <label for="select-examen">Certificación / Examen:</label>
                         <select id="select-examen"></select>
@@ -168,13 +182,26 @@
                         <textarea id="rubrica-text" rows="2" placeholder="Pega los criterios específicos aquí..."></textarea>
                     </div>
 
-                    <!-- MODO 4: WRITING (OCULTO POR DEFECTO) -->
+                    <!-- MODO 4: WRITING -->
                     <div id="opciones-modo-4" class="modo-extra hidden">
                         <label for="modo-correccion-writing">Sistema de Corrección:</label>
                         <select id="modo-correccion-writing">
                             <option value="normal">Modo Normal (Muestra solución)</option>
                             <option value="desafio">Modo Desafío (Guiado con pistas)</option>
                         </select>
+
+                        <label style="margin-top: 10px; display:block;">Adjuntar Composición (.txt, .md, .doc):</label>
+                        <div class="file-upload-box" onclick="document.getElementById('writing-file-input').click()">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size:1.4rem; color:var(--primary-color);"></i>
+                            <p style="font-size:0.8rem; margin-top:4px;">Haz clic aquí para subir tu redacción</p>
+                        </div>
+                        <input type="file" id="writing-file-input" class="hidden" accept=".txt,.md,.doc,.docx" onchange="procesarArchivoAdjunto(event)">
+                        
+                        <div id="file-info-badge" class="file-badge hidden">
+                            <i class="fa-solid fa-paperclip"></i>
+                            <span id="file-name-text">archivo.txt</span>
+                            <i class="fa-solid fa-xmark" style="cursor:pointer; margin-left:6px;" onclick="quitarArchivoAdjunto()" title="Quitar archivo"></i>
+                        </div>
                     </div>
 
                 </aside>
@@ -189,7 +216,12 @@
                     </div>
 
                     <div class="chat-input-container">
-                        <textarea id="user-input" rows="1" placeholder="Escribe un mensaje aquí..."></textarea>
+                        <!-- BOTÓN DE MICRÓFONO (SE OCULTA EN MODO WRITING) -->
+                        <button id="btn-mic" class="btn-icon" onclick="toggleReconocimientoVoz()" title="Grabar audio con micrófono">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        
+                        <textarea id="user-input" rows="1" placeholder="Escribe o dicta tu mensaje aquí..."></textarea>
                         <button class="btn-primary" onclick="enviarMensaje()"><i class="fa-solid fa-paper-plane"></i> Enviar</button>
                     </div>
                 </div>
@@ -272,7 +304,29 @@
             "Griego Antiguo": ["Exámenes de Lenguas Clásicas / Accreditation"]
         };
 
+        const idiomaCodigosISO = {
+            "Inglés": "en-US",
+            "Alemán": "de-DE",
+            "Italiano": "it-IT",
+            "Francés": "fr-FR",
+            "Neerlandés": "nl-NL",
+            "Portugués": "pt-PT",
+            "Japonés": "ja-JP",
+            "Chino Mandarín": "zh-CN",
+            "Ruso": "ru-RU",
+            "Rumano": "ro-RO",
+            "Español ELE": "es-ES",
+            "Latín": "la",
+            "Griego Antiguo": "el-GR"
+        };
+
         let itemsCuadernoGlobal = [];
+        let archivoAdjuntoContenido = '';
+        let archivoAdjuntoNombre = '';
+        
+        // RECONOCIMIENTO DE VOZ Y TEXT-TO-SPEECH
+        let recognition = null;
+        let isRecording = false;
 
         function switchTab(tabName, evt) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -289,9 +343,20 @@
             const modo = document.getElementById('select-modo').value;
             document.querySelectorAll('.modo-extra').forEach(el => el.classList.add('hidden'));
 
+            const btnMic = document.getElementById('btn-mic');
+
             if (modo === 'practica_oral') document.getElementById('opciones-modo-2').classList.remove('hidden');
             if (modo === 'examenes') document.getElementById('opciones-modo-3').classList.remove('hidden');
             if (modo === 'writing') document.getElementById('opciones-modo-4').classList.remove('hidden');
+
+            // OCULTAR MICRÓFONO Y ALTAVOCES SÓLO EN MODO WRITING
+            if (modo === 'writing') {
+                btnMic.classList.add('hidden');
+                document.querySelectorAll('.btn-audio-speak').forEach(el => el.classList.add('hidden'));
+            } else {
+                btnMic.classList.remove('hidden');
+                document.querySelectorAll('.btn-audio-speak').forEach(el => el.classList.remove('hidden'));
+            }
         }
 
         function evaluarRolPersonalizado() {
@@ -318,12 +383,103 @@
             });
         }
 
+        function procesarArchivoAdjunto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            archivoAdjuntoNombre = file.name;
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                archivoAdjuntoContenido = e.target.result;
+                document.getElementById('file-name-text').innerText = file.name;
+                document.getElementById('file-info-badge').classList.remove('hidden');
+            };
+
+            reader.readAsText(file);
+        }
+
+        function quitarArchivoAdjunto() {
+            archivoAdjuntoContenido = '';
+            archivoAdjuntoNombre = '';
+            document.getElementById('writing-file-input').value = '';
+            document.getElementById('file-info-badge').classList.add('hidden');
+        }
+
+        // MICRÓFONO: GRAVAR VOZ A TEXTO
+        function toggleReconocimientoVoz() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Tu navegador no soporta el reconocimiento de voz por micrófono.");
+                return;
+            }
+
+            const btnMic = document.getElementById('btn-mic');
+            const idioma = document.getElementById('select-idioma').value;
+            const isoCode = idiomaCodigosISO[idioma] || 'en-US';
+
+            if (isRecording) {
+                if (recognition) recognition.stop();
+                btnMic.classList.remove('recording');
+                isRecording = false;
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = isoCode;
+            recognition.interimResults = false;
+
+            recognition.onstart = function() {
+                isRecording = true;
+                btnMic.classList.add('recording');
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                const userInput = document.getElementById('user-input');
+                userInput.value = (userInput.value ? userInput.value + ' ' : '') + transcript;
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Error en el micrófono: ", event.error);
+                btnMic.classList.remove('recording');
+                isRecording = false;
+            };
+
+            recognition.onend = function() {
+                btnMic.classList.remove('recording');
+                isRecording = false;
+            };
+
+            recognition.start();
+        }
+
+        // ALTAVOZ: LECTURA EN VOZ ALTA DE LOS MENSAJES DEL BOT
+        function reproducirAudioMensaje(texto) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Detener cualquier audio previo
+                const utterance = new SpeechSynthesisUtterance(texto);
+                const idioma = document.getElementById('select-idioma').value;
+                utterance.lang = idiomaCodigosISO[idioma] || 'en-US';
+                utterance.rate = 0.9; // Velocidad de articulación clara
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Tu navegador no soporta la reproducción de texto a voz.");
+            }
+        }
+
         async function enviarMensaje() {
             const input = document.getElementById('user-input');
             const msg = input.value.trim();
-            if(!msg) return;
 
-            appendMessage('user', msg);
+            if(!msg && !archivoAdjuntoContenido) return;
+
+            let displayMsg = msg;
+            if(archivoAdjuntoNombre) {
+                displayMsg += `\n📎 [Archivo adjunto: ${archivoAdjuntoNombre}]`;
+            }
+
+            appendMessage('user', displayMsg);
             input.value = '';
 
             let rolFinal = document.getElementById('select-rol').value;
@@ -338,8 +494,12 @@
                 mode: document.getElementById('select-modo').value,
                 rol_practica: rolFinal,
                 examen_oficial: document.getElementById('select-examen').value,
-                rubrica: document.getElementById('rubrica-text').value
+                rubrica: document.getElementById('rubrica-text').value,
+                file_name: archivoAdjuntoNombre,
+                file_content: archivoAdjuntoContenido
             };
+
+            quitarArchivoAdjunto();
 
             const response = await fetch('/chat_stream', {
                 method: 'POST',
@@ -350,7 +510,7 @@
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let fullText = '';
-            const botMsgDiv = appendMessage('bot', 'Oralis generando respuesta...');
+            const botMsgDiv = appendMessage('bot', 'Oralis pensando...');
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -362,12 +522,21 @@
 
         function renderizarRespuesta(element, rawText) {
             let html = '';
-            const pResp = rawText.split('[TRADUCCION_INTEGRADA]')[0].replace('[RESPUESTA_PRINCIPAL]', '');
+            const pResp = rawText.split('[TRADUCCION_INTEGRADA]')[0].replace('[RESPUESTA_PRINCIPAL]', '').trim();
             const rest1 = rawText.split('[TRADUCCION_INTEGRADA]')[1] || '';
             const pTrad = rest1.split('[CORRECCION_Y_MEJORA]')[0];
             const pCorr = rest1.split('[CORRECCION_Y_MEJORA]')[1] || '';
 
+            const modoActual = document.getElementById('select-modo').value;
+            const ocultarAltavoz = (modoActual === 'writing') ? 'hidden' : '';
+
             html += `<p>${pResp}</p>`;
+            
+            // BOTÓN ALTAVOZ SÓLO SI NO ES MODO WRITING
+            html += `<button class="btn-audio-speak ${ocultarAltavoz}" onclick="reproducirAudioMensaje(\`${pResp.replace(/`/g, '\\`').replace(/"/g, '&quot;')}\`)">
+                        <i class="fa-solid fa-volume-high"></i> Escuchar pronunciación
+                     </button>`;
+
             if(pTrad) {
                 html += `<div class="block-translation"><strong>🌐 Traducción Integrada:</strong><br>${pTrad}</div>`;
             }
@@ -382,7 +551,7 @@
             const chatBox = document.getElementById('chat-box');
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${sender}-message`;
-            msgDiv.innerHTML = `<div class="msg-content">${text}</div>`;
+            msgDiv.innerHTML = `<div class="msg-content">${text.replace(/\n/g, '<br>')}</div>`;
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
             return msgDiv;
