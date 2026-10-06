@@ -20,7 +20,7 @@ groq_client = Groq(api_key=GROQ_KEY)
 # --- MODELOS DE BASE DE DATOS ---
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+    nombre = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
 
@@ -58,7 +58,7 @@ with app.app_context():
 def home():
     if 'user_email' not in session:
         return redirect(url_for('login_page'))
-    return render_template('index.html', user_email=session['user_email'])
+    return render_template('index.html', user_email=session['user_email'], user_name=session.get('user_name', 'Estudiante'))
 
 @app.route('/login_page')
 def login_page():
@@ -69,26 +69,44 @@ def login_page():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
+    action = data.get('action', 'login')  # 'login' o 'register'
     email = data.get('email', '').strip().lower()
     password = data.get('password', '').strip()
 
+    if action == 'register':
+        nombre = data.get('nombre', '').strip()
+        if not nombre or not email or not password:
+            return jsonify({'status': 'error', 'message': 'Todos los campos son obligatorios.'}), 400
+
+        usuario_existente = Usuario.query.filter_by(email=email).first()
+        if usuario_existente:
+            return jsonify({'status': 'error', 'message': 'El correo electrónico ya está registrado.'}), 400
+
+        nuevo_usuario = Usuario(
+            nombre=nombre,
+            email=email,
+            password_hash=generate_password_hash(password)
+        )
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+
+        session['user_email'] = email
+        session['user_name'] = nombre
+        return jsonify({'status': 'ok'})
+
+    # Acción por defecto: Iniciar Sesión (Email + Contraseña)
     usuario = Usuario.query.filter_by(email=email).first()
     if usuario and check_password_hash(usuario.password_hash, password):
         session['user_email'] = email
+        session['user_name'] = usuario.nombre
         return jsonify({'status': 'ok'})
 
-    if not usuario:
-        nuevo = Usuario(username=email.split('@')[0], email=email, password_hash=generate_password_hash(password))
-        db.session.add(nuevo)
-        db.session.commit()
-        session['user_email'] = email
-        return jsonify({'status': 'ok'})
-
-    return jsonify({'status': 'error', 'message': 'Credenciales incorrectas.'}), 401
+    return jsonify({'status': 'error', 'message': 'Correo o contraseña incorrectos.'}), 401
 
 @app.route('/logout')
 def logout():
     session.pop('user_email', None)
+    session.pop('user_name', None)
     return redirect(url_for('login_page'))
 
 # --- STREAM CHAT CON MODELO QWEN 3.8 27B ---
@@ -109,12 +127,15 @@ def chat_stream():
     file_name = data.get('file_name', '')
     file_content = data.get('file_content', '')
 
+    user_name = session.get('user_name', 'Estudiante')
+
     prompt_contenido = user_message
     if file_content:
         prompt_contenido += f"\n\n--- ARCHIVO ADJUNTO ({file_name}) ---\n{file_content}\n--- FIN DEL ARCHIVO ---"
 
     system_prompt = f"""
-Eres Oralis, un tutor inteligente de idiomas.
+Eres Oralis, un tutor inteligente de idiomas. El estudiante con el que hablas se llama {user_name}.
+Refiérete a él por su nombre ({user_name}) de forma cercana y natural durante la conversación.
 - Idioma Objetivo: {target_lang}.
 - Nivel CEFR: {cefr_level}.
 - Modo Activo: {mode}.
