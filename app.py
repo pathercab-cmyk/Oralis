@@ -426,6 +426,67 @@ def admin_feedback():
         feedbacks_data = []
 
     return render_template("admin_feedback.html", feedbacks=feedbacks_data)
+    @app.route("/api/history/save", methods=["POST"])
+@login_required
+def save_chat_manual():
+    data = request.json
+    messages = data.get("messages", [])
+    target_lang = data.get("target_lang", "Inglés")
+    mode = data.get("mode", "general")
+
+    if not messages:
+        return jsonify({"success": False, "message": "No hay mensajes"}), 400
+
+    try:
+        # Crea o actualiza la sesión de historial
+        titulo = f"Práctica {target_lang} - {datetime.utcnow().strftime('%d/%m/%Y %H:%M')}"
+        chat_session = ChatHistory(
+            user_id=current_user.id,
+            titulo=titulo,
+            contenido=json.dumps(messages),
+            idioma=target_lang,
+            modo=mode
+        )
+        db.session.add(chat_session)
+        db.session.commit()
+        return jsonify({"success": True, "id": chat_session.id})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# 2. Eliminar un elemento del Cuaderno por ID
+@app.route("/api/notebook/delete/<int:item_id>", methods=["DELETE"])
+@login_required
+def delete_notebook_item(item_id):
+    item = NotebookItem.query.filter_by(id=item_id, user_id=current_user.id).first()
+    if not item:
+        return jsonify({"success": False, "message": "Elemento no encontrado"}), 404
+
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# 3. Eliminar un elemento del Historial por ID
+@app.route("/api/history/delete/<int:session_id>", methods=["DELETE"])
+@login_required
+def delete_history_item(session_id):
+    session_item = ChatHistory.query.filter_by(id=session_id, user_id=current_user.id).first()
+    if not session_item:
+        return jsonify({"success": False, "message": "Registro no encontrado"}), 404
+
+    try:
+        db.session.delete(session_item)
+        db.session.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 if __name__ == "__main__":
