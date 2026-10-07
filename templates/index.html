@@ -617,16 +617,24 @@
             `).join('');
         }
 
-        /* --- CORRECCIÓN EN ELIMINAR ITEM CUADERNO --- */
+        /* --- SOLUCIÓN ERROR 404 AL ELIMINAR ---
+           Intenta primero con POST (método habitual en Flask) y si no, con DELETE. */
         async function eliminarItemCuaderno(id) {
             if(!confirm("¿Estás seguro de eliminar este elemento del cuaderno?")) return;
             
             try {
-                // Intenta enviar petición con DELETE o POST según requerimiento
-                const res = await fetch(`/cuaderno/eliminar/${id}`, { 
-                    method: 'DELETE',
+                let res = await fetch(`/cuaderno/eliminar/${id}`, { 
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
+
+                // Si responde 404/405 con POST, intentar con DELETE
+                if (res.status === 404 || res.status === 405) {
+                    res = await fetch(`/cuaderno/eliminar/${id}`, { 
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                }
 
                 if (res.ok || res.status === 200 || res.status === 204) {
                     itemsCuadernoGlobal = itemsCuadernoGlobal.filter(item => item.id !== id);
@@ -678,15 +686,21 @@
             `).join('');
         }
 
-        /* --- CORRECCIÓN EN ELIMINAR ITEM HISTORIAL --- */
         async function eliminarItemHistorial(id) {
             if(!confirm("¿Deseas eliminar esta sesión del historial?")) return;
             
             try {
-                const res = await fetch(`/historial/eliminar/${id}`, { 
-                    method: 'DELETE',
+                let res = await fetch(`/historial/eliminar/${id}`, { 
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
+
+                if (res.status === 404 || res.status === 405) {
+                    res = await fetch(`/historial/eliminar/${id}`, { 
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                }
 
                 if (res.ok || res.status === 200 || res.status === 204) {
                     const el = document.getElementById(`history-item-${id}`);
@@ -727,7 +741,6 @@
             }
         }
 
-        // Inicializar componentes al cargar
         actualizarExamenesDisponibles();
     </script>
 </body>
