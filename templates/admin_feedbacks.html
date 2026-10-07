@@ -17,7 +17,7 @@
 <body>
 
     <div class="header-container">
-        <h2>Panel de Administración - Opiniones de Usuarios</h2>
+        <h2>Panel de Administración - Opiniones</h2>
         <a href="/" class="btn-back">← Volver al Tutor</a>
     </div>
 
@@ -29,18 +29,20 @@
                 <th>Usuario</th>
                 <th>Puntuación</th>
                 <th>Comentario</th>
+                <th>Fecha</th>
             </tr>
         </thead>
         <tbody>
             {% for fb in feedbacks %}
             <tr>
-                <td><strong>{{ fb.user }}</strong></td>
+                <td><strong>{{ fb.user or 'Anónimo' }}</strong></td>
                 <td>{{ fb.score }} ⭐</td>
                 <td>{{ fb.comment }}</td>
+                <td>{{ fb.date or 'Sin fecha' }}</td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="3" style="text-align: center; color: #6C757D; padding: 20px;">
+                <td colspan="4" style="text-align: center; color: #6C757D; padding: 20px;">
                     No hay opiniones registradas aún.
                 </td>
             </tr>
