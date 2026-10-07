@@ -10,8 +10,16 @@ from groq import Groq
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "oralis_secret_key_change_in_production")
 
-# Configuración de Base de Datos SQLite (fácil despliegue y persistencia)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", "sqlite:///oralis.db")
+db_url = os.getenv("DATABASE_URL", "sqlite:///oralis.db")
+
+# Render genera URLs que empiezan por 'postgres://' o 'postgresql://'
+# Esta transformación asegura que SQLAlchemy use el conector 'psycopg2' instalado
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+psycopg2://"):
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
