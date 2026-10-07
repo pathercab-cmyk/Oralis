@@ -47,6 +47,7 @@ class User(UserMixin, db.Model):
 
     notebook_items = db.relationship('NotebookItem', backref='user', lazy=True, cascade="all, delete-orphan")
     feedbacks = db.relationship('Feedback', backref='user', lazy=True, cascade="all, delete-orphan")
+    chat_histories = db.relationship('ChatHistory', backref='user', lazy=True, cascade="all, delete-orphan")
 
 
 class NotebookItem(db.Model):
@@ -58,6 +59,17 @@ class NotebookItem(db.Model):
     nivel = db.Column(db.String(10), nullable=False)
     termino = db.Column(db.String(200), nullable=False)
     explicacion = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class ChatHistory(db.Model):
+    __tablename__ = 'chat_histories'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    titulo = db.Column(db.String(200), nullable=False)
+    contenido = db.Column(db.Text, nullable=False)
+    idioma = db.Column(db.String(50), nullable=False)
+    modo = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -252,6 +264,7 @@ def chat_stream():
 
     user_message = data.get("message", "").strip()
     target_lang = data.get("target_lang", "Inglés")
+    native_lang = data.get("native_lang", "Español")
     cefr_level = data.get("cefr_level", "B1")
     mode = data.get("mode", "tutor_general")
     rol_practica = data.get("rol_practica", "")
@@ -260,7 +273,7 @@ def chat_stream():
     file_name = data.get("file_name", "")
     file_content = data.get("file_content", "")
 
-    system_prompt = get_system_prompt(target_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica)
+    system_prompt = get_system_prompt(target_lang, native_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica)
 
     full_user_text = user_message
     if file_content:
@@ -367,17 +380,14 @@ def guardar_cuaderno():
 @app.route("/historial/listar", methods=["GET"])
 @login_required
 def listar_historial():
-    history = session.get("chat_history", [])
-    resumido = []
-
-    for i in range(0, len(history), 2):
-        if i + 1 < len(history):
-            user_msg = history[i]["content"]
-            resumido.append({
-                "titulo": user_msg[:40] + ("..." if len(user_msg) > 40 else ""),
-                "modo": "Sesión Activa",
-                "fecha": datetime.now().strftime("%H:%M - %d/%m/%Y")
-            })
+    sessions = ChatHistory.query.filter_by(user_id=current_user.id).order_by(ChatHistory.created_at.desc()).all()
+    resumido = [{
+        "id": session_item.id,
+        "titulo": session_item.titulo,
+        "modo": session_item.modo,
+        "idioma": session_item.idioma,
+        "fecha": session_item.created_at.strftime("%H:%M - %d/%m/%Y")
+    } for session_item in sessions]
 
     return jsonify(resumido)
 
@@ -426,10 +436,16 @@ def admin_feedback():
         feedbacks_data = []
 
     return render_template("admin_feedback.html", feedbacks=feedbacks_data)
-    @app.route("/api/history/save", methods=["POST"])
+
+
+# -------------------------------------------------------------------
+# ENDPOINTS ADICIONALES DE HISTORIAL Y CUADERNO
+# -------------------------------------------------------------------
+
+@app.route("/api/history/save", methods=["POST"])
 @login_required
 def save_chat_manual():
-    data = request.json
+    data = request.json or {}
     messages = data.get("messages", [])
     target_lang = data.get("target_lang", "Inglés")
     mode = data.get("mode", "general")
@@ -438,7 +454,6 @@ def save_chat_manual():
         return jsonify({"success": False, "message": "No hay mensajes"}), 400
 
     try:
-        # Crea o actualiza la sesión de historial
         titulo = f"Práctica {target_lang} - {datetime.utcnow().strftime('%d/%m/%Y %H:%M')}"
         chat_session = ChatHistory(
             user_id=current_user.id,
@@ -455,7 +470,6 @@ def save_chat_manual():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# 2. Eliminar un elemento del Cuaderno por ID
 @app.route("/api/notebook/delete/<int:item_id>", methods=["DELETE"])
 @login_required
 def delete_notebook_item(item_id):
@@ -472,7 +486,6 @@ def delete_notebook_item(item_id):
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-# 3. Eliminar un elemento del Historial por ID
 @app.route("/api/history/delete/<int:session_id>", methods=["DELETE"])
 @login_required
 def delete_history_item(session_id):
