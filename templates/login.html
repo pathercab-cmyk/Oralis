@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oralis - Acceso</title>
+    <title>Oralis - Iniciar Sesión / Registro</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -16,123 +16,118 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-main); color: var(--text-dark); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-dark); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
 
-        .auth-card { background: var(--card-bg); width: 100%; max-width: 420px; padding: 32px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .auth-container { background: var(--card-bg); width: 100%; max-width: 420px; padding: 32px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         .auth-header { text-align: center; margin-bottom: 24px; }
-        .auth-header i { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 8px; }
-        .auth-header h2 { font-size: 1.6rem; color: var(--primary-color); }
+        .auth-header h1 { color: var(--primary-color); font-size: 1.8rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .auth-header p { font-size: 0.9rem; color: #6C757D; margin-top: 6px; }
 
-        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); }
-        .auth-tab-btn { flex: 1; padding: 10px; background: none; border: none; font-weight: 600; cursor: pointer; color: #6C757D; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-        .auth-tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+        .auth-tabs { display: flex; background: #F1F3F0; padding: 4px; border-radius: 10px; margin-bottom: 20px; }
+        .auth-tab-btn { flex: 1; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; background: transparent; color: #6C757D; transition: all 0.2s; }
+        .auth-tab-btn.active { background: var(--card-bg); color: var(--primary-color); shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
         .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 0.88rem; font-weight: 600; }
-        .form-group input { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; font-family: inherit; background: #FAFAFA; }
-        .form-group input:focus { outline: none; border-color: var(--primary-color); background: #FFF; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; }
+        .form-group input { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; font-family: inherit; }
+        .form-group input:focus { outline: none; border-color: var(--primary-color); }
 
-        .btn-submit { width: 100%; padding: 12px; background: var(--primary-color); color: #FFF; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-        .btn-submit:hover { background: #235440; }
+        .btn-submit { background: var(--primary-color); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; }
+        .btn-submit:hover { opacity: 0.9; }
 
-        .error-msg { background: #F8D7DA; color: #721C24; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+        .alert-message { padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; text-align: center; display: none; }
+        .alert-error { background: #F8D7DA; color: #721C24; border: 1px solid #F5C6CB; }
+        .alert-success { background: #D4EDDA; color: #155724; border: 1px solid #C3E6CB; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="auth-card">
+    <div class="auth-container">
         <div class="auth-header">
-            <i class="fa-solid fa-comments"></i>
-            <h2>Oralis</h2>
-            <p style="font-size: 0.88rem; color: #6C757D;">Tu tutor inteligente de idiomas</p>
+            <h1><i class="fa-solid fa-comments"></i> Oralis</h1>
+            <p>Tu tutor virtual inteligente de idiomas</p>
         </div>
 
         <div class="auth-tabs">
-            <button class="auth-tab-btn active" onclick="cambiarTabAuth('login')">Iniciar Sesión</button>
-            <button class="auth-tab-btn" onclick="cambiarTabAuth('register')">Registrarse</button>
+            <button class="auth-tab-btn active" onclick="setMode('login')">Iniciar Sesión</button>
+            <button class="auth-tab-btn" onclick="setMode('register')">Registrarse</button>
         </div>
 
-        <div id="error-alert" class="error-msg"></div>
+        <div id="alert-box" class="alert-message"></div>
 
-        <!-- FORMULARIO DE INICIO DE SESIÓN -->
-        <form id="form-login" onsubmit="procesarAuth(event, 'login')">
-            <div class="form-group">
-                <label for="login-email">Correo Electrónico:</label>
-                <input type="email" id="login-email" required placeholder="tu@correo.com">
+        <form id="auth-form" onsubmit="procesarAuth(event)">
+            <div id="field-nombre" class="form-group hidden">
+                <label for="input-nombre">Nombre Completo:</label>
+                <input type="text" id="input-nombre" placeholder="Ej: María García">
             </div>
-            <div class="form-group">
-                <label for="login-pass">Contraseña:</label>
-                <input type="password" id="login-pass" required placeholder="••••••••">
-            </div>
-            <button type="submit" class="btn-submit">Entrar</button>
-        </form>
 
-        <!-- FORMULARIO DE REGISTRO -->
-        <form id="form-register" class="hidden" onsubmit="procesarAuth(event, 'register')">
             <div class="form-group">
-                <label for="reg-nombre">¿Cómo quieres que te llame Oralis?:</label>
-                <input type="text" id="reg-nombre" required placeholder="Ej: Carlos">
+                <label for="input-email">Correo Electrónico:</label>
+                <input type="email" id="input-email" required placeholder="correo@ejemplo.com">
             </div>
+
             <div class="form-group">
-                <label for="reg-email">Correo Electrónico:</label>
-                <input type="email" id="reg-email" required placeholder="tu@correo.com">
+                <label for="input-password">Contraseña:</label>
+                <input type="password" id="input-password" required placeholder="••••••••">
             </div>
-            <div class="form-group">
-                <label for="reg-pass">Contraseña:</label>
-                <input type="password" id="reg-pass" required placeholder="••••••••">
-            </div>
-            <button type="submit" class="btn-submit">Crear Cuenta</button>
+
+            <button type="submit" id="btn-text" class="btn-submit">Entrar</button>
         </form>
     </div>
 
     <script>
-        function cambiarTabAuth(tab) {
-            const errorDiv = document.getElementById('error-alert');
-            errorDiv.style.display = 'none';
+        let currentAction = 'login';
 
-            document.querySelectorAll('.auth-tab-btn').forEach(btn => btn.classList.remove('active'));
+        function setMode(mode) {
+            currentAction = mode;
+            const tabs = document.querySelectorAll('.auth-tab-btn');
+            tabs[0].classList.toggle('active', mode === 'login');
+            tabs[1].classList.toggle('active', mode === 'register');
 
-            if (tab === 'login') {
-                document.querySelectorAll('.auth-tab-btn')[0].classList.add('active');
-                document.getElementById('form-login').classList.remove('hidden');
-                document.getElementById('form-register').classList.add('hidden');
-            } else {
-                document.querySelectorAll('.auth-tab-btn')[1].classList.add('active');
-                document.getElementById('form-login').classList.add('hidden');
-                document.getElementById('form-register').classList.remove('hidden');
-            }
+            document.getElementById('field-nombre').classList.toggle('hidden', mode === 'login');
+            document.getElementById('btn-text').innerText = mode === 'login' ? 'Entrar' : 'Crear Cuenta';
+            ocultarAlerta();
         }
 
-        async function procesarAuth(event, action) {
+        function mostrarAlerta(msg, esError = true) {
+            const box = document.getElementById('alert-box');
+            box.className = `alert-message ${esError ? 'alert-error' : 'alert-success'}`;
+            box.innerText = msg;
+            box.style.display = 'block';
+        }
+
+        function ocultarAlerta() {
+            document.getElementById('alert-box').style.display = 'none';
+        }
+
+        async function procesarAuth(event) {
             event.preventDefault();
-            const errorDiv = document.getElementById('error-alert');
-            errorDiv.style.display = 'none';
+            ocultarAlerta();
 
-            let payload = { action };
+            const email = document.getElementById('input-email').value;
+            const password = document.getElementById('input-password').value;
+            const nombre = document.getElementById('input-nombre').value;
 
-            if (action === 'login') {
-                payload.email = document.getElementById('login-email').value;
-                payload.password = document.getElementById('login-pass').value;
-            } else {
-                payload.nombre = document.getElementById('reg-nombre').value;
-                payload.email = document.getElementById('reg-email').value;
-                payload.password = document.getElementById('reg-pass').value;
-            }
+            const payload = { action: currentAction, email, password, nombre };
 
-            const res = await fetch('/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
 
-            const data = await res.json();
+                const data = await res.json();
 
-            if (res.ok && data.status === 'ok') {
-                window.location.href = '/';
-            } else {
-                errorDiv.innerText = data.message || 'Ocurrió un error al procesar la solicitud.';
-                errorDiv.style.display = 'block';
+                if (res.ok) {
+                    mostrarAlerta(data.message, false);
+                    setTimeout(() => window.location.href = '/', 800);
+                } else {
+                    mostrarAlerta(data.message || 'Error en la solicitud.');
+                }
+            } catch (err) {
+                mostrarAlerta('Error de conexión con el servidor.');
             }
         }
     </script>
