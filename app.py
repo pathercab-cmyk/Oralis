@@ -470,14 +470,20 @@ def save_chat_manual():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-@app.route('/cuaderno/eliminar/<int:item_id>', methods=['DELETE', 'POST'])
-def eliminar_cuaderno(item_id):
-    # Reemplaza esto con tu modelo/consulta de Base de Datos
-    item = Cuaderno.query.get(item_id)
-    if item:
-        db.session.delete(item)
-        db.session.commit()
-        return jsonify({"success": True}), 200
+@app.route('/cuaderno/eliminar/<int:id>', methods=['DELETE', 'POST'])
+def eliminar_cuaderno(id):
+    try:
+        # Reemplaza 'Cuaderno' por el nombre de tu modelo de base de datos
+        item = Cuaderno.query.get(id) 
+        if item:
+            db.session.delete(item)
+            db.session.commit()
+            
+            return jsonify({'success': True}), 200
+        return jsonify({'error': 'Elemento no encontrado'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
     
     return jsonify({"error": "Elemento no encontrado"}), 404
 
