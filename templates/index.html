@@ -619,42 +619,37 @@
 
         /* --- SOLUCIÓN ERROR 404 AL ELIMINAR ---
            Intenta primero con POST (método habitual en Flask) y si no, con DELETE. */
-        async function eliminarItemCuaderno(id) {
-            if(!confirm("¿Estás seguro de eliminar este elemento del cuaderno?")) return;
-            
-            try {
-                let res = await fetch(`/cuaderno/eliminar/${id}`, { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+     async function eliminarItemCuaderno(id) {
+    if (!confirm("¿Estás seguro de eliminar este elemento del cuaderno?")) return;
 
-                // Si responde 404/405 con POST, intentar con DELETE
-                if (res.status === 404 || res.status === 405) {
-                    res = await fetch(`/cuaderno/eliminar/${id}`, { 
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                }
+    try {
+        // Intento 1: Método DELETE
+        let res = await fetch(`/cuaderno/eliminar/${id}`, { method: 'DELETE' });
 
-                if (res.ok || res.status === 200 || res.status === 204) {
-                    itemsCuadernoGlobal = itemsCuadernoGlobal.filter(item => item.id !== id);
-                    const el = document.getElementById(`notebook-item-${id}`);
-                    if (el) {
-                        el.style.opacity = '0';
-                        setTimeout(() => el.remove(), 200);
-                    }
-                    if (itemsCuadernoGlobal.length === 0) {
-                        renderCuadernoGrid([]);
-                    }
-                } else {
-                    alert(`No se pudo eliminar el elemento. Código de respuesta: ${res.status}`);
-                }
-            } catch (err) {
-                console.error("Error al eliminar item del cuaderno:", err);
-                alert("Error de conexión al intentar eliminar.");
-            }
+        // Intento 2: Si devuelve 404/405, probamos con POST por compatibilidad
+        if (res.status === 404 || res.status === 405) {
+            res = await fetch(`/cuaderno/eliminar/${id}`, { method: 'POST' });
         }
 
+        if (res.ok) {
+            // Eliminar elemento de la vista
+            itemsCuadernoGlobal = itemsCuadernoGlobal.filter(item => item.id !== id);
+            const el = document.getElementById(`notebook-item-${id}`);
+            if (el) {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 200);
+            }
+            if (itemsCuadernoGlobal.length === 0) {
+                renderCuadernoGrid([]);
+            }
+        } else {
+            alert(`Error ${res.status}: La ruta '/cuaderno/eliminar/${id}' no existe en app.py o falla en la base de datos.`);
+        }
+    } catch (err) {
+        console.error("Error al eliminar item del cuaderno:", err);
+        alert("Error de conexión al intentar eliminar.");
+    }
+}
         async function cargarHistorial() {
             try {
                 const res = await fetch('/historial/listar');
