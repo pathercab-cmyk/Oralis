@@ -434,10 +434,13 @@
 
             let rolFinal = document.getElementById('select-rol').value;
             if(rolFinal === 'otro') rolFinal = document.getElementById('rol-custom').value || 'Rol Personalizado';
-
+            // Obtener el idioma seleccionado actualmente en el selector
+            const selectIdioma = document.getElementById('select-idioma');
+            const targetLangValue = selectIdioma ? selectIdioma.value : 'Inglés';
+            
             const payload = {
                 message: msg,
-                target_lang: document.getElementById('select-idioma').value,
+                target_lang: targetLangValue, // Se envía el valor real seleccionado ('Inglés', 'Francés', etc.)
                 cefr_level: document.getElementById('select-cefr').value,
                 mode: document.getElementById('select-modo').value,
                 rol_practica: rolFinal,
