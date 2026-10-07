@@ -2,53 +2,75 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel Administrador - Oralis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oralis - Panel de Administración de Feedback</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; padding: 30px; background: #F8F9FA; color: #2B2D42; }
-        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-back { background: #EBF2EE; color: #2E6B52; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); }
-        th, td { padding: 14px; border: 1px solid #E2E8E0; text-align: left; }
-        th { background: #2E6B52; color: white; }
-        tr:nth-child(even) { background-color: #FAFAFA; }
+        :root {
+            --primary-color: #2E6B52;
+            --bg-main: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --border-color: #E2E8E0;
+            --text-dark: #2B2D42;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: var(--text-dark); padding: 24px; }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .header-bar h1 { font-size: 1.6rem; color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+
+        .btn-back { background: #EBF2EE; color: var(--primary-color); padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+        .btn-back:hover { background: #D6E4DC; }
+
+        .table-responsive { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem; }
+        th, td { padding: 14px 18px; border-bottom: 1px solid var(--border-color); }
+        th { background: #F4F7F5; font-weight: 700; color: var(--primary-color); }
+        tr:last-child td { border-bottom: none; }
+
+        .score-badge { font-weight: 700; color: #E07A5F; }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <h2>Panel de Administración - Opiniones</h2>
-        <a href="/" class="btn-back">← Volver al Tutor</a>
+    <div class="container">
+        <div class="header-bar">
+            <h1><i class="fa-solid fa-shield-halved"></i> Feedback de los Usuarios</h1>
+            <a href="/" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Volver al Tutor</a>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Puntuación</th>
+                        <th>Comentario</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if feedbacks %}
+                        {% for fb in feedbacks %}
+                        <tr>
+                            <td><strong>{{ fb.user }}</strong></td>
+                            <td class="score-badge">⭐ {{ fb.score }}/5</td>
+                            <td>{{ fb.comment or 'Sin comentario' }}</td>
+                            <td style="color:#6C757D; font-size:0.85rem;">{{ fb.date }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; color:#6C757D; padding:24px;">No hay comentarios registrados todavía.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <p>Total de opiniones recibidas: <strong>{{ feedbacks|length }}</strong></p>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Usuario</th>
-                <th>Puntuación</th>
-                <th>Comentario</th>
-                <th>Fecha</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for fb in feedbacks %}
-            <tr>
-                <td><strong>{{ fb.user or 'Anónimo' }}</strong></td>
-                <td>{{ fb.score }} ⭐</td>
-                <td>{{ fb.comment }}</td>
-                <td>{{ fb.date or 'Sin fecha' }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="4" style="text-align: center; color: #6C757D; padding: 20px;">
-                    No hay opiniones registradas aún.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
 </body>
 </html>
