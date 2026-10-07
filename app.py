@@ -103,45 +103,47 @@ def get_active_groq_models():
 
 
 def get_system_prompt(target_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica):
-    """Construye el Prompt del Sistema completo adaptado a la configuración actual del usuario."""
+    """Construye el Prompt del Sistema con instrucciones estrictas de idioma."""
     prompt = f"""Eres Oralis, un tutor virtual experto e interactivo en la enseñanza de idiomas.
 
-Configuración del estudiante:
-- Idioma Objetivo: {target_lang}
+Configuración obligatoria del estudiante:
+- Idioma Objetivo a practicar: {target_lang}
 - Nivel CEFR: {cefr_level}
 - Modo de Trabajo: {mode}
 """
 
     if mode == "practica_oral":
         rol = rol_practica.strip() if rol_practica else "Hablante nativo en una conversación informal"
-        prompt += f"- Rol asignado para la simulación: {rol}\n"
-        prompt += "Debes mantener la conversación adoptando completamente ese rol, incentivando al usuario a responder en el idioma objetivo.\n"
+        prompt += f"- Rol asignado: {rol}\n"
+        prompt += "Adopta completamente ese rol e incentiva al usuario a mantener la conversación en el idioma objetivo.\n"
 
     elif mode == "examenes":
         examen = examen_oficial.strip() if examen_oficial else "Examen Oficial General"
-        prompt += f"- Examen / Prueba Específica: {examen}\n"
+        prompt += f"- Examen Objetivo: {examen}\n"
         if rubrica and rubrica.strip():
-            prompt += f"- Criterios y Rúbrica de Evaluación: {rubrica.strip()}\n"
-        prompt += "Modela tus preguntas, ejercicios y correcciones según las exigencias y el formato real de dicho examen.\n"
+            prompt += f"- Criterios/Rúbrica: {rubrica.strip()}\n"
+        prompt += "Sigue el formato y las exigencias de dicho examen.\n"
 
     elif mode == "writing":
-        prompt += "El usuario practicará la redacción escrita. Evalúa la corrección gramatical, riqueza de vocabulario, coherencia y adecuación formal.\n"
+        prompt += "Evalúa la redacción escrita (gramática, vocabulario y coherencia).\n"
 
-    prompt += """
+    prompt += f"""
+REGLA DE ORO DE IDIOMA:
+Debes responder SIEMPRE en {target_lang} dentro de la sección [RESPUESTA_PRINCIPAL]. NUNCA uses español en [RESPUESTA_PRINCIPAL], salvo si el idioma objetivo seleccionado es Español.
+
 ESTRUCTURA OBLIGATORIA DE TUS RESPUESTAS:
-Para mantener el formato limpio y estructurado en la interfaz web, organiza SIEMPRE tus respuestas utilizando exactamente las siguientes tres etiquetas separadoras:
+Usa exactamente estas tres etiquetas separadoras en tu mensaje:
 
 [RESPUESTA_PRINCIPAL]
-Escribe aquí tu respuesta, explicación, pregunta o intervención principal en el idioma objetivo.
+Escribe aquí tu respuesta, conversación o pregunta ÚNICAMENTE en {target_lang}. Adaptada al nivel {cefr_level}.
 
 [TRADUCCION_INTEGRADA]
-Si el nivel es A1, A2 o B1, incluye aquí la traducción o aclaración en español de tu respuesta principal. Si el nivel es B2, C1 o C2, puedes dejar esta sección vacía o incluir notas aclaratorias breves.
+Traducción o explicación al español de lo escrito en [RESPUESTA_PRINCIPAL].
 
 [CORRECCION_Y_MEJORA]
-Analiza el último mensaje escrito por el usuario. Si cometió errores gramaticales, ortográficos o de vocabulario, corrígelos aquí de forma constructiva e indica cómo expresarlo de forma más natural. Si no hubo errores, indica brevemente que su mensaje fue correcto.
+Análisis constructivo en español sobre el último mensaje enviado por el usuario (errores gramaticales, sugerencias o felicitación si no hubo fallos).
 """
     return prompt
-
 
 # -------------------------------------------------------------------
 # RUTAS DE NAVEGACIÓN Y AUTENTICACIÓN
