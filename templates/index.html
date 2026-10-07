@@ -472,27 +472,33 @@
         }
 
         function renderizarRespuesta(element, rawText) {
-            let pResp = rawText.split('[TRADUCCION_INTEGRADA]')[0].replace('[RESPUESTA_PRINCIPAL]', '').trim();
-            let rest1 = rawText.split('[TRADUCCION_INTEGRADA]')[1] || '';
-            let pTrad = rest1.split('[CORRECCION_Y_MEJORA]')[0] || '';
-            let pCorr = rest1.split('[CORRECCION_Y_MEJORA]')[1] || '';
+    let pResp = rawText.split('[TRADUCCION_INTEGRADA]')[0].replace('[RESPUESTA_PRINCIPAL]', '').trim();
+    let rest1 = rawText.split('[TRADUCCION_INTEGRADA]')[1] || '';
+    let pTrad = rest1.split('[CORRECCION_Y_MEJORA]')[0] || '';
+    let pCorr = rest1.split('[CORRECCION_Y_MEJORA]')[1] || '';
 
-            let html = `<div>${escapeHtml(pResp).replace(/\n/g, '<br>')}</div>`;
+    // Renderizamos cada sección usando la nueva función limpia de Markdown
+    let html = `<div>${formatMarkdownToHtml(pResp)}</div>`;
 
-            html += `<div class="chat-actions">
-                        <button class="btn-audio-speak" onclick="reproducirAudioMensaje(\`${escapeHtml(pResp).replace(/`/g, '\\`')}\`)">
-                            <i class="fa-solid fa-volume-high"></i> Escuchar
-                        </button>
-                        <button class="btn-save-notebook" onclick="guardarEnCuadernoRapido(\`${escapeHtml(pResp).replace(/`/g, '\\`')}\`, \`${escapeHtml(pCorr || pResp).replace(/`/g, '\\`')}\`)">
-                            <i class="fa-solid fa-bookmark"></i> Guardar en Cuaderno
-                        </button>
-                     </div>`;
+    html += `<div class="chat-actions">
+                <button class="btn-audio-speak" onclick="reproducirAudioMensaje(\`${escapeHtml(pResp).replace(/`/g, '\\`')}\`)">
+                    <i class="fa-solid fa-volume-high"></i> Escuchar
+                </button>
+                <button class="btn-save-notebook" onclick="guardarEnCuadernoRapido(\`${escapeHtml(pResp).replace(/`/g, '\\`')}\`, \`${escapeHtml(pCorr || pResp).replace(/`/g, '\\`')}\`)">
+                    <i class="fa-solid fa-bookmark"></i> Guardar en Cuaderno
+                </button>
+             </div>`;
 
-            if(pTrad.trim()) html += `<div class="block-translation"><strong>🌐 Traducción:</strong><br>${escapeHtml(pTrad).replace(/\n/g, '<br>')}</div>`;
-            if(pCorr.trim()) html += `<div class="block-correction"><strong>💡 Análisis / Corrección:</strong><br>${escapeHtml(pCorr).replace(/\n/g, '<br>')}</div>`;
+    if (pTrad.trim()) {
+        html += `<div class="block-translation"><strong>🌐 Traducción:</strong><br>${formatMarkdownToHtml(pTrad)}</div>`;
+    }
+    
+    if (pCorr.trim()) {
+        html += `<div class="block-correction"><strong>💡 Análisis / Corrección:</strong><br>${formatMarkdownToHtml(pCorr)}</div>`;
+    }
 
-            element.querySelector('.msg-content').innerHTML = html;
-        }
+    element.querySelector('.msg-content').innerHTML = html;
+}
 
         function appendMessage(sender, text) {
             const chatBox = document.getElementById('chat-box');
@@ -552,6 +558,24 @@
                 </div>
             `).join('');
         }
+        function formatMarkdownToHtml(str) {
+    if (!str) return '';
+    let text = escapeHtml(str);
+
+    // Eliminar encabezados tipo #, ##, ###
+    text = text.replace(/^#{1,6}\s+/gm, '');
+
+    // Convertir **texto** a <strong>texto</strong>
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Convertir *texto* a <em>texto</em>
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // Convertir saltos de línea a <br>
+    text = text.replace(/\n/g, '<br>');
+
+    return text;
+}
 
         async function enviarFeedback() {
             const score = document.getElementById('fb-score').value;
