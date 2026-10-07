@@ -388,13 +388,17 @@ def admin_feedback():
     if not current_user.is_admin:
         return redirect(url_for("index"))
 
-    feedbacks = Feedback.query.order_by(Feedback.created_at.desc()).all()
-    feedbacks_data = [{
-        "user": fb.user_name,
-        "score": fb.score,
-        "comment": fb.comment,
-        "date": fb.created_at.strftime("%d/%m/%Y %H:%M")
-    } for fb in feedbacks]
+    try:
+        feedbacks = Feedback.query.order_by(Feedback.created_at.desc()).all()
+        feedbacks_data = [{
+            "user": fb.user_name or "Anónimo",
+            "score": fb.score,
+            "comment": fb.comment,
+            "date": fb.created_at.strftime("%d/%m/%Y %H:%M") if fb.created_at else "N/A"
+        } for fb in feedbacks]
+    except Exception as e:
+        print(f"Error al obtener feedbacks: {e}")
+        feedbacks_data = []
 
     return render_template("admin_feedback.html", feedbacks=feedbacks_data)
 
