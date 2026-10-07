@@ -37,6 +37,7 @@ client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 # -------------------------------------------------------------------
 
 class User(UserMixin, db.Model):
+    __tablename__ = 'users'  # Evita conflictos con la palabra reservada 'user' en PostgreSQL
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -49,9 +50,10 @@ class User(UserMixin, db.Model):
 
 
 class NotebookItem(db.Model):
+    __tablename__ = 'notebook_items'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    categoria = db.Column(db.String(50), nullable=False)  # 'Vocabulario' o 'Gramática'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    categoria = db.Column(db.String(50), nullable=False)
     idioma = db.Column(db.String(50), nullable=False)
     nivel = db.Column(db.String(10), nullable=False)
     termino = db.Column(db.String(200), nullable=False)
@@ -60,13 +62,13 @@ class NotebookItem(db.Model):
 
 
 class Feedback(db.Model):
+    __tablename__ = 'feedbacks'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     user_name = db.Column(db.String(100), default="Anónimo")
     score = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
 
 @login_manager.user_loader
 def load_user(user_id):
