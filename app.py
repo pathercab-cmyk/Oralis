@@ -373,6 +373,23 @@ def guardar_cuaderno():
     return jsonify({"status": "ok", "message": "Anotación guardada en Mi Cuaderno"})
 
 
+@app.route('/cuaderno/eliminar/<int:id>', methods=['DELETE', 'POST'])
+@login_required
+def eliminar_cuaderno(id):
+    try:
+        item = NotebookItem.query.filter_by(id=id, user_id=current_user.id).first()
+        if not item:
+            return jsonify({'success': False, 'error': 'Elemento no encontrado o no autorizado'}), 404
+
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({'success': True}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 # -------------------------------------------------------------------
 # HISTORIAL DE CHATS
 # -------------------------------------------------------------------
@@ -390,6 +407,50 @@ def listar_historial():
     } for session_item in sessions]
 
     return jsonify(resumido)
+
+
+@app.route("/api/history/save", methods=["POST"])
+@login_required
+def save_chat_manual():
+    data = request.json or {}
+    messages = data.get("messages", [])
+    target_lang = data.get("target_lang", "Inglés")
+    mode = data.get("mode", "general")
+
+    if not messages:
+        return jsonify({"success": False, "message": "No hay mensajes"}), 400
+
+    try:
+        titulo = f"Práctica {target_lang} - {datetime.utcnow().strftime('%d/%m/%Y %H:%M')}"
+        chat_session = ChatHistory(
+            user_id=current_user.id,
+            titulo=titulo,
+            contenido=json.dumps(messages),
+            idioma=target_lang,
+            modo=mode
+        )
+        db.session.add(chat_session)
+        db.session.commit()
+        return jsonify({"success": True, "id": chat_session.id})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/history/delete/<int:session_id>", methods=["DELETE"])
+@login_required
+def delete_history_item(session_id):
+    session_item = ChatHistory.query.filter_by(id=session_id, user_id=current_user.id).first()
+    if not session_item:
+        return jsonify({"success": False, "message": "Registro no encontrado"}), 404
+
+    try:
+        db.session.delete(session_item)
+        db.session.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # -------------------------------------------------------------------
@@ -436,80 +497,6 @@ def admin_feedback():
         feedbacks_data = []
 
     return render_template("admin_feedback.html", feedbacks=feedbacks_data)
-
-
-# -------------------------------------------------------------------
-# ENDPOINTS ADICIONALES DE HISTORIAL Y CUADERNO
-# -------------------------------------------------------------------
-
-@app.route("/api/history/save", methods=["POST"])
-@login_required
-def save_chat_manual():
-    data = request.json or {}
-    messages = data.get("messages", [])
-    target_lang = data.get("target_lang", "Inglés")
-    mode = data.get("mode", "general")
-
-    if not messages:
-        return jsonify({"success": False, "message": "No hay mensajes"}), 400
-
-    try:
-        titulo = f"Práctica {target_lang} - {datetime.utcnow().strftime('%d/%m/%Y %H:%M')}"
-        chat_session = ChatHistory(
-            user_id=current_user.id,
-            titulo=titulo,
-            contenido=json.dumps(messages),
-            idioma=target_lang,
-            modo=mode
-        )
-        db.session.add(chat_session)
-        db.session.commit()
-        return jsonify({"success": True, "id": chat_session.id})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"success": False, "error": str(e)}), 500
-
-
-@app.route('/cuaderno/eliminar/<int:id>', methods=['DELETE', 'POST'])
-def eliminar_cuaderno(id):
-    try:
-        # Reemplaza 'Cuaderno' por el nombre de tu modelo de base de datos
-        item = Cuaderno.query.get(id) 
-        if item:
-            db.session.delete(item)
-            db.session.commit()
-            
-            return jsonify({'success': True}), 200
-        return jsonify({'error': 'Elemento no encontrado'}), 404
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-    
-    return jsonify({"error": "Elemento no encontrado"}), 404
-
-    try:
-        db.session.delete(item)
-        db.session.commit()
-        return jsonify({"success": True})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"success": False, "error": str(e)}), 500
-
-
-@app.route("/api/history/delete/<int:session_id>", methods=["DELETE"])
-@login_required
-def delete_history_item(session_id):
-    session_item = ChatHistory.query.filter_by(id=session_id, user_id=current_user.id).first()
-    if not session_item:
-        return jsonify({"success": False, "message": "Registro no encontrado"}), 404
-
-    try:
-        db.session.delete(session_item)
-        db.session.commit()
-        return jsonify({"success": True})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"success": False, "error": str(e)}), 500
 
 
 if __name__ == "__main__":
