@@ -4,5 +4,4 @@ Flask-Bcrypt
 Flask-Login
 gunicorn
 groq
-psycopg[binary]
 psycopg2-binary
