@@ -628,6 +628,65 @@ function renderizarItemHistorial(session) {
 
     return text;
 }
+        async function guardarChatManual() {
+    if (chatHistory.length === 0) {
+        alert("No hay mensajes en la conversación actual para guardar.");
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/history/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: chatHistory,
+                target_lang: document.getElementById('select-idioma').value,
+                mode: document.getElementById('select-modo').value
+            })
+        });
+        const res = await response.json();
+        if (res.success) {
+            alert("¡Conversación guardada con éxito!");
+        } else {
+            alert("Error al guardar la conversación.");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Error de conexión al guardar.");
+    }
+}
+
+// Eliminar un elemento específico del Cuaderno
+async function eliminarItemCuaderno(id) {
+    if (!confirm("¿Eliminar este elemento del cuaderno?")) return;
+
+    try {
+        const response = await fetch(`/api/notebook/delete/${id}`, { method: 'DELETE' });
+        const res = await response.json();
+        if (res.success) {
+            const el = document.getElementById(`notebook-item-${id}`);
+            if (el) el.remove();
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// Eliminar un elemento específico del Historial
+async function eliminarItemHistorial(id) {
+    if (!confirm("¿Eliminar este registro del historial?")) return;
+
+    try {
+        const response = await fetch(`/api/history/delete/${id}`, { method: 'DELETE' });
+        const res = await response.json();
+        if (res.success) {
+            const el = document.getElementById(`history-item-${id}`);
+            if (el) el.remove();
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
 
         async function enviarFeedback() {
             const score = document.getElementById('fb-score').value;
