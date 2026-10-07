@@ -470,12 +470,16 @@ def save_chat_manual():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
-@app.route("/api/notebook/delete/<int:item_id>", methods=["DELETE"])
-@login_required
-def delete_notebook_item(item_id):
-    item = NotebookItem.query.filter_by(id=item_id, user_id=current_user.id).first()
-    if not item:
-        return jsonify({"success": False, "message": "Elemento no encontrado"}), 404
+@app.route('/cuaderno/eliminar/<int:item_id>', methods=['DELETE', 'POST'])
+def eliminar_cuaderno(item_id):
+    # Reemplaza esto con tu modelo/consulta de Base de Datos
+    item = Cuaderno.query.get(item_id)
+    if item:
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({"success": True}), 200
+    
+    return jsonify({"error": "Elemento no encontrado"}), 404
 
     try:
         db.session.delete(item)
