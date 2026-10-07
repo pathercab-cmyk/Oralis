@@ -78,10 +78,10 @@
         .file-badge { display: inline-flex; align-items: center; gap: 6px; background: #EBF2EE; color: var(--primary-color); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin-top: 6px; }
 
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 16px; }
-        .card-item { background: #FFF; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; box-shadow: var(--shadow-soft); position: relative; transition: transform 0.2s; }
+        .card-item { background: #FFF; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; box-shadow: var(--shadow-soft); position: relative; transition: transform 0.2s, opacity 0.3s; }
         .card-item:hover { transform: translateY(-2px); }
-        .btn-trash { position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: #DC3545; cursor: pointer; font-size: 0.95rem; opacity: 0.7; transition: opacity 0.2s; }
-        .btn-trash:hover { opacity: 1; }
+        .btn-trash { position: absolute; top: 12px; right: 12px; background: transparent; border: none; color: #DC3545; cursor: pointer; font-size: 0.95rem; opacity: 0.7; transition: opacity 0.2s; padding: 4px; border-radius: 4px; }
+        .btn-trash:hover { opacity: 1; background: #FADBD8; }
 
         .cuaderno-tabs { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-bottom: 4px; }
         .cuaderno-tab-btn { background: #EBF2EE; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary-color); font-size: 0.85rem; white-space: nowrap; }
@@ -220,7 +220,6 @@
                 </aside>
 
                 <div class="chat-wrapper">
-                    <!-- BARRA DE HERRAMIENTAS SUPERIOR DEL CHAT -->
                     <div class="chat-header-toolbar">
                         <button class="btn-secondary-action" onclick="guardarChatManual()" title="Guardar conversación actual">
                             <i class="fa-solid fa-floppy-disk"></i> Guardar Chat
@@ -439,32 +438,43 @@
         }
 
         async function guardarEnCuadernoRapido(termino, explicacion) {
-            const payload = {
-                categoria: "Vocabulario",
-                idioma: document.getElementById('select-idioma').value,
-                nivel: document.getElementById('select-cefr').value,
-                termino: termino.slice(0, 50),
-                explicacion: explicacion
-            };
+            try {
+                const payload = {
+                    categoria: "Vocabulario",
+                    idioma: document.getElementById('select-idioma').value,
+                    nivel: document.getElementById('select-cefr').value,
+                    termino: termino.slice(0, 50),
+                    explicacion: explicacion
+                };
 
-            const res = await fetch('/cuaderno/guardar', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
+                const res = await fetch('/cuaderno/guardar', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
 
-            if (res.ok) alert('¡Guardado en Mi Cuaderno correctamente!');
+                if (res.ok) alert('¡Guardado en Mi Cuaderno correctamente!');
+                else alert('Ocurrió un error al guardar en el cuaderno.');
+            } catch (err) {
+                console.error(err);
+                alert('Error al comunicarse con el servidor.');
+            }
         }
 
         async function guardarChatManual() {
-            const res = await fetch('/historial/guardar', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'}
-            });
-            if (res.ok) {
-                alert('Conversación guardada con éxito.');
-            } else {
-                alert('No se pudo guardar la conversación.');
+            try {
+                const res = await fetch('/historial/guardar', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                if (res.ok) {
+                    alert('Conversación guardada con éxito.');
+                } else {
+                    alert('No se pudo guardar la conversación.');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Error de conexión con el servidor.');
             }
         }
 
@@ -498,22 +508,26 @@
 
             quitarArchivoAdjunto();
 
-            const response = await fetch('/chat_stream', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
+            try {
+                const response = await fetch('/chat_stream', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let fullText = '';
-            const botMsgDiv = appendMessage('bot', 'Oralis pensando...');
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullText = '';
+                const botMsgDiv = appendMessage('bot', 'Oralis pensando...');
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                fullText += decoder.decode(value, { stream: true });
-                renderizarRespuesta(botMsgDiv, fullText);
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    fullText += decoder.decode(value, { stream: true });
+                    renderizarRespuesta(botMsgDiv, fullText);
+                }
+            } catch (err) {
+                console.error("Error al enviar mensaje:", err);
             }
         }
 
@@ -563,8 +577,10 @@
         async function cargarCuaderno() {
             try {
                 const res = await fetch('/cuaderno/listar');
-                itemsCuadernoGlobal = await res.json();
-                renderCuadernoGrid(itemsCuadernoGlobal);
+                if (res.ok) {
+                    itemsCuadernoGlobal = await res.json();
+                    renderCuadernoGrid(itemsCuadernoGlobal);
+                }
             } catch(e) {
                 console.error("Error al cargar cuaderno", e);
             }
@@ -601,21 +617,43 @@
             `).join('');
         }
 
+        /* --- CORRECCIÓN EN ELIMINAR ITEM CUADERNO --- */
         async function eliminarItemCuaderno(id) {
             if(!confirm("¿Estás seguro de eliminar este elemento del cuaderno?")) return;
-            const res = await fetch(`/cuaderno/eliminar/${id}`, { method: 'DELETE' });
-            if(res.ok) {
-                itemsCuadernoGlobal = itemsCuadernoGlobal.filter(item => item.id !== id);
-                const el = document.getElementById(`notebook-item-${id}`);
-                if(el) el.remove();
+            
+            try {
+                // Intenta enviar petición con DELETE o POST según requerimiento
+                const res = await fetch(`/cuaderno/eliminar/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (res.ok || res.status === 200 || res.status === 204) {
+                    itemsCuadernoGlobal = itemsCuadernoGlobal.filter(item => item.id !== id);
+                    const el = document.getElementById(`notebook-item-${id}`);
+                    if (el) {
+                        el.style.opacity = '0';
+                        setTimeout(() => el.remove(), 200);
+                    }
+                    if (itemsCuadernoGlobal.length === 0) {
+                        renderCuadernoGrid([]);
+                    }
+                } else {
+                    alert(`No se pudo eliminar el elemento. Código de respuesta: ${res.status}`);
+                }
+            } catch (err) {
+                console.error("Error al eliminar item del cuaderno:", err);
+                alert("Error de conexión al intentar eliminar.");
             }
         }
 
         async function cargarHistorial() {
             try {
                 const res = await fetch('/historial/listar');
-                const historial = await res.json();
-                renderHistorialGrid(historial);
+                if (res.ok) {
+                    const historial = await res.json();
+                    renderHistorialGrid(historial);
+                }
             } catch(e) {
                 console.error("Error al cargar historial", e);
             }
@@ -640,12 +678,28 @@
             `).join('');
         }
 
+        /* --- CORRECCIÓN EN ELIMINAR ITEM HISTORIAL --- */
         async function eliminarItemHistorial(id) {
             if(!confirm("¿Deseas eliminar esta sesión del historial?")) return;
-            const res = await fetch(`/historial/eliminar/${id}`, { method: 'DELETE' });
-            if(res.ok) {
-                const el = document.getElementById(`history-item-${id}`);
-                if(el) el.remove();
+            
+            try {
+                const res = await fetch(`/historial/eliminar/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (res.ok || res.status === 200 || res.status === 204) {
+                    const el = document.getElementById(`history-item-${id}`);
+                    if (el) {
+                        el.style.opacity = '0';
+                        setTimeout(() => el.remove(), 200);
+                    }
+                } else {
+                    alert(`No se pudo eliminar del historial. Código de respuesta: ${res.status}`);
+                }
+            } catch (err) {
+                console.error("Error al eliminar del historial:", err);
+                alert("Error de conexión al intentar eliminar.");
             }
         }
 
@@ -657,15 +711,19 @@
                 return;
             }
 
-            const res = await fetch('/feedback/enviar', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ score, comment })
-            });
+            try {
+                const res = await fetch('/feedback/enviar', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ score, comment })
+                });
 
-            if(res.ok) {
-                alert("¡Gracias por tu opinión! Se ha enviado correctamente.");
-                document.getElementById('fb-comment').value = '';
+                if(res.ok) {
+                    alert("¡Gracias por tu opinión! Se ha enviado correctamente.");
+                    document.getElementById('fb-comment').value = '';
+                }
+            } catch (e) {
+                console.error(e);
             }
         }
 
