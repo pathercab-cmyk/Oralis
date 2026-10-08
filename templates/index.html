@@ -579,163 +579,129 @@
                 const res = await fetch('/cuaderno/listar');
                 if (res.ok) {
                     itemsCuadernoGlobal = await res.json();
-                    renderCuadernoGrid(itemsCuadernoGlobal);
+                    renderizarCuaderno(itemsCuadernoGlobal);
                 }
-            } catch(e) {
-                console.error("Error al cargar cuaderno", e);
+            } catch (err) {
+                console.error("Error cargando cuaderno:", err);
             }
         }
 
-        function filtrarCuaderno(categoria, evt) {
-            if(evt) {
-                document.querySelectorAll('.cuaderno-tab-btn').forEach(btn => btn.classList.remove('active'));
-                evt.currentTarget.classList.add('active');
-            }
-            if(categoria === 'todos') {
-                renderCuadernoGrid(itemsCuadernoGlobal);
-            } else {
-                const filtrados = itemsCuadernoGlobal.filter(item => item.categoria === categoria);
-                renderCuadernoGrid(filtrados);
-            }
-        }
+        function renderizarCuaderno(items) {
+            const container = document.getElementById('cuaderno-grid');
+            container.innerHTML = '';
 
-        function renderCuadernoGrid(items) {
-            const grid = document.getElementById('cuaderno-grid');
-            if(!items || items.length === 0) {
-                grid.innerHTML = '<p style="padding:20px; color:#6C757D;">No hay anotaciones guardadas aún.</p>';
+            if (items.length === 0) {
+                container.innerHTML = '<p style="color:#6C757D;">No hay notas guardadas aún.</p>';
                 return;
             }
-            grid.innerHTML = items.map(item => `
-                <div class="card-item" id="notebook-item-${item.id}">
-                    <button class="btn-trash" onclick="eliminarItemCuaderno(${item.id})" title="Eliminar anotación">
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card-item';
+                card.innerHTML = `
+                    <button class="btn-trash" onclick="eliminarItemCuaderno('${item.id}')" title="Eliminar nota">
                         <i class="fa-solid fa-trash"></i>
                     </button>
-                    <span style="font-size:0.75rem; font-weight:bold; color:var(--primary-color); background:#EBF2EE; padding:3px 8px; border-radius:4px;">${escapeHtml(item.categoria)} - ${escapeHtml(item.idioma)} (${escapeHtml(item.nivel)})</span>
-                    <h4 style="margin-top:8px;">${escapeHtml(item.termino)}</h4>
-                    <p style="font-size:0.9rem; color:#555; margin-top:4px;">${escapeHtml(item.explicacion)}</p>
-                </div>
-            `).join('');
+                    <span style="font-size:0.75rem; background:#EBF2EE; color:var(--primary-color); padding:2px 6px; border-radius:4px; font-weight:bold;">${escapeHtml(item.categoria || 'General')}</span>
+                    <h4 style="margin-top:6px;">${escapeHtml(item.termino)}</h4>
+                    <p style="font-size:0.85rem; color:#555; margin-top:4px;">${formatMarkdownToHtml(item.explicacion)}</p>
+                `;
+                container.appendChild(card);
+            });
         }
 
-        /* --- SOLUCIÓN ERROR 404 AL ELIMINAR ---
-           Intenta primero con POST (método habitual en Flask) y si no, con DELETE. */
-     async function eliminarItemCuaderno(id) {
-    if (!confirm("¿Estás seguro de eliminar este elemento del cuaderno?")) return;
+        function filtrarCuaderno(cat, evt) {
+            document.querySelectorAll('.cuaderno-tab-btn').forEach(btn => btn.classList.remove('active'));
+            if(evt) evt.target.classList.add('active');
 
-    try {
-        // Intento 1: Método DELETE
-        let res = await fetch(`/cuaderno/eliminar/${id}`, { method: 'DELETE' });
-
-        // Intento 2: Si devuelve 404/405, probamos con POST por compatibilidad
-        if (res.status === 404 || res.status === 405) {
-            res = await fetch(`/cuaderno/eliminar/${id}`, { method: 'POST' });
-        }
-
-        if (res.ok) {
-            // Eliminar elemento de la vista
-            itemsCuadernoGlobal = itemsCuadernoGlobal.filter(item => item.id !== id);
-            const el = document.getElementById(`notebook-item-${id}`);
-            if (el) {
-                el.style.opacity = '0';
-                setTimeout(() => el.remove(), 200);
+            if (cat === 'todos') {
+                renderizarCuaderno(itemsCuadernoGlobal);
+            } else {
+                const filtrados = itemsCuadernoGlobal.filter(i => i.categoria === cat);
+                renderizarCuaderno(filtrados);
             }
-            if (itemsCuadernoGlobal.length === 0) {
-                renderCuadernoGrid([]);
-            }
-        } else {
-            alert(`Error ${res.status}: La ruta '/cuaderno/eliminar/${id}' no existe en app.py o falla en la base de datos.`);
         }
-    } catch (err) {
-        console.error("Error al eliminar item del cuaderno:", err);
-        alert("Error de conexión al intentar eliminar.");
-    }
-}
+
+        async function eliminarItemCuaderno(id) {
+            if (!confirm('¿Deseas eliminar esta nota?')) return;
+            try {
+                const res = await fetch(`/cuaderno/eliminar/${id}`, { method: 'DELETE' });
+                if (res.ok) cargarCuaderno();
+            } catch (e) { me
+                console.error(e);
+            }
+        }
+
         async function cargarHistorial() {
             try {
                 const res = await fetch('/historial/listar');
                 if (res.ok) {
-                    const historial = await res.json();
-                    renderHistorialGrid(historial);
-                }
-            } catch(e) {
-                console.error("Error al cargar historial", e);
-            }
-        }
+                    const chats = await res.json();
+                    const container = document.getElementById('historial-list');
+                    container.innerHTML = '';
 
-        function renderHistorialGrid(historial) {
-            const list = document.getElementById('historial-list');
-            if(!historial || historial.length === 0) {
-                list.innerHTML = '<p style="padding:20px; color:#6C757D;">No hay conversaciones en el historial.</p>';
-                return;
-            }
-            list.innerHTML = historial.map(session => `
-                <div class="card-item" id="history-item-${session.id}">
-                    <button class="btn-trash" onclick="eliminarItemHistorial(${session.id})" title="Eliminar conversación">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                    <h4>${escapeHtml(session.titulo || 'Conversación sin título')}</h4>
-                    <p style="font-size:0.85rem; color:#6C757D; margin-top:4px;">
-                        <i class="fa-regular fa-calendar"></i> ${escapeHtml(session.fecha || '')}
-                    </p>
-                </div>
-            `).join('');
-        }
+                    if (chats.length === 0) {
+                        container.innerHTML = '<p style="color:#6C757D;">No hay historial registrado.</p>';
+                        return;
+                    }
 
-        async function eliminarItemHistorial(id) {
-            if(!confirm("¿Deseas eliminar esta sesión del historial?")) return;
-            
-            try {
-                let res = await fetch(`/historial/eliminar/${id}`, { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                if (res.status === 404 || res.status === 405) {
-                    res = await fetch(`/historial/eliminar/${id}`, { 
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' }
+                    chats.forEach(c => {
+                        const card = document.createElement('div');
+                        card.className = 'card-item';
+                        card.innerHTML = `
+                            <button class="btn-trash" onclick="eliminarHistorial('${c.id}')" title="Eliminar historial">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            <h4>Conversación del ${escapeHtml(c.fecha || 'Sin fecha')}</h4>
+                            <p style="font-size:0.85rem; color:#555;">${escapeHtml(c.resumen || 'Sin resumen disponible')}</p>
+                        `;
+                        container.appendChild(card);
                     });
                 }
-
-                if (res.ok || res.status === 200 || res.status === 204) {
-                    const el = document.getElementById(`history-item-${id}`);
-                    if (el) {
-                        el.style.opacity = '0';
-                        setTimeout(() => el.remove(), 200);
-                    }
-                } else {
-                    alert(`No se pudo eliminar del historial. Código de respuesta: ${res.status}`);
-                }
             } catch (err) {
-                console.error("Error al eliminar del historial:", err);
-                alert("Error de conexión al intentar eliminar.");
+                console.error("Error cargando historial:", err);
+            }
+        }
+
+        async function eliminarHistorial(id) {
+            if (!confirm('¿Eliminar esta conversación?')) return;
+            try {
+                const res = await fetch(`/historial/eliminar/${id}`, { method: 'DELETE' });
+                if (res.ok) cargarHistorial();
+            } catch (e) {
+                console.error(e);
             }
         }
 
         async function enviarFeedback() {
             const score = document.getElementById('fb-score').value;
             const comment = document.getElementById('fb-comment').value.trim();
-            if(!comment) {
-                alert("Por favor escribe un comentario antes de enviar.");
+
+            if (!comment) {
+                alert('Por favor, escribe un comentario.');
                 return;
             }
 
             try {
-                const res = await fetch('/feedback/enviar', {
+                const res = await fetch('/feedback/guardar', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ score, comment })
                 });
 
-                if(res.ok) {
-                    alert("¡Gracias por tu opinión! Se ha enviado correctamente.");
+                if (res.ok) {
+                    alert('¡Gracias por tu opinión!');
                     document.getElementById('fb-comment').value = '';
+                } else {
+                    alert('Ocurrió un problema al enviar el feedback.');
                 }
             } catch (e) {
                 console.error(e);
+                alert('Error de conexión.');
             }
         }
 
+        // Inicializar examen por defecto
         actualizarExamenesDisponibles();
     </script>
 </body>
