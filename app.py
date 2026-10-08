@@ -97,33 +97,21 @@ with app.app_context():
 # -------------------------------------------------------------------
 
 def get_active_groq_models():
-    """Usa el modelo openai/gpt-oss-120b como prioridad principal."""
+    """Usa el modelo openai/gpt-oss-120b como prioridad principal con fallbacks de alta capacidad."""
     return ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "llama3-70b-8192"]
-
-    modelos_candidatos = []
-    try:
-        modelos_data = client.models.list().data
-        for m in modelos_data:
-            m_id = str(m.id).lower() if hasattr(m, 'id') else str(m).lower()
-            if not any(x in m_id for x in ["whisper", "guard", "vision"]):
-                modelos_candidatos.append(m.id if hasattr(m, 'id') else str(m))
-    except Exception:
-        pass
-
-    return modelos_candidatos if modelos_candidatos else ["llama3-8b-8192", "llama3-70b-8192"]
 
 
 def get_system_prompt(target_lang, native_lang, cefr_level, mode, rol_practica, examen_oficial, rubrica):
-    """Construye un Prompt de Sistema inmersivo y multilingüe."""
+    """Construye un Prompt de Sistema reforzado con restricciones estrictas de idioma."""
     
     idioma_objetivo = target_lang if target_lang else "Inglés"
     idioma_natal = native_lang if native_lang else "Español"
     
     prompt = f"""Eres Oralis, una IA experta en la enseñanza e interacción de idiomas.
 
-[CONFIGURACIÓN DE LA INTERACCIÓN]
-- Idioma Objetivo a practicar: {idioma_objetivo}
-- Idioma Natal / Preferencia de Traducción del usuario: {idioma_natal}
+[CONFIGURACIÓN ESTRICTA]
+- Idioma Objetivo a practicar: {idioma_objetivo.upper()}
+- Idioma Natal / Preferencia de Traducción del usuario: {idioma_natal.upper()}
 - Nivel CEFR: {cefr_level}
 - Modo Seleccionado: {mode}
 """
@@ -152,18 +140,17 @@ def get_system_prompt(target_lang, native_lang, cefr_level, mode, rol_practica, 
 """
 
     prompt += f"""
-[REGLAS DE IDIOMA Y FORMATO DE RESPUESTA]
-
+[REGLAS INQUEBRANTABLES DE IDIOMA]
 1. [RESPUESTA_PRINCIPAL]:
    - Redactada ÚNICA Y EXCLUSIVAMENTE en {idioma_objetivo.upper()}.
-   - NUNCA uses otro idioma en esta sección.
+   - NUNCA uses ningún otro idioma en esta sección (PROHIBIDO cambiar a francés, italiano u otro no solicitado).
 
 2. [TRADUCCION_INTEGRADA]:
-   - Traducción fiel de lo dicho en [RESPUESTA_PRINCIPAL] redactada en {idioma_natal.upper()}.
+   - Traducción fiel de lo dicho en [RESPUESTA_PRINCIPAL] redactada ÚNICAMENTE en {idioma_natal.upper()}.
    - (Si {idioma_objetivo.upper()} e {idioma_natal.upper()} son el mismo idioma, escribe simplemente: "N/A").
 
 3. [CORRECCION_Y_MEJORA]:
-   - Análisis lingüístico y sugerencias explicadas en {idioma_natal.upper()} sobre el último mensaje del usuario.
+   - Análisis lingüístico, retroalimentación y sugerencias pedagógicas explicadas ÚNICAMENTE en {idioma_natal.upper()} sobre el último mensaje del usuario.
    - Si no hubo fallos, felicítale de forma breve en {idioma_natal.upper()}.
 
 FORMATO OBLIGATORIO DE SALIDA:
@@ -172,10 +159,10 @@ FORMATO OBLIGATORIO DE SALIDA:
 (Diálogo o respuesta únicamente en {idioma_objetivo.upper()})
 
 [TRADUCCION_INTEGRADA]
-(Traducción explicada en {idioma_natal.upper()})
+(Traducción explicada únicamente en {idioma_natal.upper()})
 
 [CORRECCION_Y_MEJORA]
-(Explicaciones pedagógicas en {idioma_natal.upper()})
+(Explicaciones pedagógicas únicamente en {idioma_natal.upper()})
 """
     return prompt
 
@@ -215,7 +202,6 @@ def login_api():
         if user_exists:
             return jsonify({"status": "error", "message": "El correo ya está registrado."}), 400
 
-        # El primer usuario registrado se puede convertir opcionalmente en admin
         is_first_user = User.query.count() == 0
         hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
         new_user = User(nombre=nombre, email=email, password_hash=hashed_pw, is_admin=is_first_user)
@@ -300,7 +286,7 @@ def chat_stream():
                     model=model_candidate,
                     messages=messages,
                     stream=True,
-                    temperature=0.7
+                    temperature=0.5
                 )
                 for chunk in response:
                     if chunk.choices and chunk.choices[0].delta.content:
@@ -390,7 +376,7 @@ def eliminar_cuaderno(id):
 
 
 # -------------------------------------------------------------------
-# HISTORIAL DE CHATS
+# HISTORIAL DE CHATS (RUTAS UNIFICADAS / COMPATIBLES)
 # -------------------------------------------------------------------
 
 @app.route("/historial/listar", methods=["GET"])
@@ -408,16 +394,20 @@ def listar_historial():
     return jsonify(resumido)
 
 
-@app.route("/api/history/save", methods=["POST"])
+# Soporta tanto /api/history/save como /historial/guardar
+@app.route("/api/history/save", methods=["POST", "GET"])
+@app.route("/historial/guardar", methods=["POST", "GET"])
 @login_required
 def save_chat_manual():
-    data = request.json or {}
-    messages = data.get("messages", [])
+    data = request.get_json(silent=True) or {}
+    
+    # Toma los mensajes del cuerpo JSON o del historial almacenado en la sesión activa
+    messages = data.get("messages", []) or session.get("chat_history", [])
     target_lang = data.get("target_lang", "Inglés")
     mode = data.get("mode", "general")
 
     if not messages:
-        return jsonify({"success": False, "message": "No hay mensajes"}), 400
+        return jsonify({"success": False, "status": "error", "message": "No hay mensajes para guardar"}), 400
 
     try:
         titulo = f"Práctica {target_lang} - {datetime.utcnow().strftime('%d/%m/%Y %H:%M')}"
@@ -430,13 +420,14 @@ def save_chat_manual():
         )
         db.session.add(chat_session)
         db.session.commit()
-        return jsonify({"success": True, "id": chat_session.id})
+        return jsonify({"success": True, "status": "ok", "message": "Chat guardado con éxito", "id": chat_session.id})
     except Exception as e:
         db.session.rollback()
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "status": "error", "error": str(e)}), 500
 
 
-@app.route("/api/history/delete/<int:session_id>", methods=["DELETE"])
+@app.route("/api/history/delete/<int:session_id>", methods=["DELETE", "POST"])
+@app.route("/historial/eliminar/<int:session_id>", methods=["DELETE", "POST"])
 @login_required
 def delete_history_item(session_id):
     session_item = ChatHistory.query.filter_by(id=session_id, user_id=current_user.id).first()
@@ -446,7 +437,7 @@ def delete_history_item(session_id):
     try:
         db.session.delete(session_item)
         db.session.commit()
-        return jsonify({"success": True})
+        return jsonify({"success": True, "status": "ok"})
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
