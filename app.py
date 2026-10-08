@@ -97,9 +97,8 @@ with app.app_context():
 # -------------------------------------------------------------------
 
 def get_active_groq_models():
-    """Obtiene dinámicamente modelos válidos para chat o usa fallback."""
-    if not client:
-        return ["llama3-8b-8192", "llama3-70b-8192"]
+    """Usa el modelo openai/gpt-oss-120b como prioridad principal."""
+    return ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "llama3-70b-8192"]
 
     modelos_candidatos = []
     try:
