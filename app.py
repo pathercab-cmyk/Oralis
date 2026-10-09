@@ -241,7 +241,31 @@ def clear_chat():
 # -------------------------------------------------------------------
 # CHAT Y STREAMING CON GROQ (CON FALLBACK)
 # -------------------------------------------------------------------
-
+def registrar_chat_bd(user_id, target_lang, mode, user_message, full_response_text, history):
+    """Guarda automáticamente la interacción en la tabla chat_histories de la BD."""
+    try:
+        titulo = user_message[:40] + ("..." if len(user_message) > 40 else "")
+        if not titulo:
+            titulo = f"Práctica de {target_lang}"
+            
+        mensajes_completos = history + [
+            {"role": "user", "content": user_message},
+            {"role": "assistant", "content": full_response_text}
+        ]
+        
+        chat_entry = ChatHistory(
+            user_id=user_id,
+            titulo=f"[{target_lang}] {titulo}",
+            contenido=json.dumps(mensajes_completos, ensure_ascii=False),
+            idioma=target_lang,
+            modo=mode
+        )
+        db.session.add(chat_entry)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al guardar historial en la BD: {e}")
+        
 @app.route("/chat_stream", methods=["POST"])
 @login_required
 def chat_stream():
@@ -299,11 +323,22 @@ def chat_stream():
             except Exception:
                 continue
 
-        if success:
+      if success:
             history.append({"role": "user", "content": full_user_text})
             history.append({"role": "assistant", "content": full_response_text})
             session["chat_history"] = history[-20:]
             session.modified = True
+
+            # --- REGISTRO AUTOMÁTICO EN BASE DE DATOS ---
+            registrar_chat_bd(
+                user_id=current_user.id,
+                target_lang=target_lang,
+                mode=mode,
+                user_message=user_message or file_name,
+                full_response_text=full_response_text,
+                history=history
+            )
+            # ---------------------------------------------
         else:
             yield "[RESPUESTA_PRINCIPAL] No se pudo conectar con los servidores de IA de Groq en este momento."
 
