@@ -323,23 +323,21 @@ def chat_stream():
             except Exception:
                 continue
 
-        if success:
+       if success:
             history.append({"role": "user", "content": full_user_text})
             history.append({"role": "assistant", "content": full_response_text})
             session["chat_history"] = history[-20:]
             session.modified = True
 
+            # Guarda automáticamente en la base de datos PostgreSQL/SQLite
             registrar_chat_bd(
                 user_id=current_user.id,
                 target_lang=target_lang,
                 mode=mode,
-                user_message=user_message or file_name,
+                user_message=user_message or file_name or "Práctica de conversación",
                 full_response_text=full_response_text,
                 history=history
             )
-        else:
-            yield "[RESPUESTA_PRINCIPAL] No se pudo conectar con los servidores de IA de Groq en este momento."
-
     return Response(generate(), mimetype="text/plain; charset=utf-8")
 # -------------------------------------------------------------------
 # MI CUADERNO (PERSISTENCIA BD)
