@@ -670,33 +670,39 @@
             }
         }
 
-       async function cargarHistorial() {
+      async function cargarHistorial() {
     try {
         const res = await fetch('/historial/listar');
+        if (!res.ok) throw new Error("Error en la solicitud al servidor");
+
         const data = await res.json();
         const list = document.getElementById('historial-list');
 
         if (!data || data.length === 0) {
-            list.innerHTML = '<p style="padding:20px; color:#6C757D;">No tienes chats guardados en el historial aún.</p>';
+            list.innerHTML = '<p style="padding:20px; color:#6C757D; grid-column: 1/-1;">No tienes conversaciones guardadas en tu historial aún.</p>';
             return;
         }
 
         list.innerHTML = data.map(c => `
             <div class="card-item">
-                <span style="font-size:0.75rem; font-weight:bold; color:var(--primary-color); background:#EBF2EE; padding:3px 8px; border-radius:4px;">
-                    ${c.modo || 'Tutor'}
-                </span>
-                <h4 style="margin-top:8px;">${c.titulo}</h4>
-                <p style="font-size:0.85rem; color:#666; margin-top:4px;">
-                    <i class="fa-regular fa-clock"></i> Fecha: ${c.fecha}
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:0.75rem; font-weight:bold; color:var(--primary-color); background:#EBF2EE; padding:3px 8px; border-radius:4px;">
+                        ${c.modo || 'General'}
+                    </span>
+                    <span style="font-size:0.75rem; color:#888;">${c.idioma || ''}</span>
+                </div>
+                <h4 style="font-size:0.95rem; font-weight:600; color:var(--text-dark); margin-bottom:6px;">${c.titulo}</h4>
+                <p style="font-size:0.8rem; color:#666;">
+                    <i class="fa-regular fa-clock" style="margin-right:4px;"></i> ${c.fecha}
                 </p>
             </div>
         `).join('');
     } catch (err) {
-        console.error("Error cargando historial:", err);
+        console.error("Error al cargar el historial:", err);
+        document.getElementById('historial-list').innerHTML = 
+            '<p style="padding:20px; color:#DC3545; grid-column: 1/-1;">Ocurrió un error al cargar el historial. Intenta recargar la página.</p>';
     }
 }
-
         function renderizarHistorial(chats) {
             const container = document.getElementById('historial-list');
             container.innerHTML = '';
